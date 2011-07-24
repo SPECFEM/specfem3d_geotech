@@ -1,0 +1,9 @@
+/*! this program writes Ensight SOS file
+! example input file is self explanatory.
+! REVISION:
+!   HNG, Aug 17,2010
+! COMPILE:
+!   gfortran write_sos.f90 -o write_sos
+! USE:
+!   ./write_sos [input file]
+*/

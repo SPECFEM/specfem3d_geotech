@@ -1,0 +1,50 @@
+create vertex 0 0 0
+create vertex 50 0 0
+create vertex 50 0 6.1
+create vertex 42.7 0 6.1
+create vertex 18.3 0 18.3
+create vertex 0 0 18.3
+create curve vertex 1 vertex 2 
+create curve vertex 2 vertex 3 
+create curve vertex 3 vertex 4 
+create curve vertex 4 vertex 5 
+create curve vertex 5 vertex 6 
+create curve vertex 6 vertex 1 
+create surface curve 1 2 3 4 5 6 
+sweep surface 1    direction y  distance 20
+surface 8  size 2
+volume 1  size 2
+volume 1 scheme Sweep  source surface 8  target surface 1  rotate off
+volume 1 sweep smooth Auto
+volume 1 scheme Sweep  source surface 8  target surface 1  rotate off
+volume 1 sweep smooth Auto
+mesh volume 1
+delete mesh volume 1  propagate
+surface 8  size 2
+surface 8 scheme pave
+surface 8 scheme pave
+mesh surface 8
+volume 1  size 2
+volume 1 scheme Sweep  source surface 8  target surface 1  rotate off
+volume 1 sweep smooth Auto
+volume 1 scheme Sweep  source surface 8  target surface 1  rotate off
+volume 1 sweep smooth Auto
+mesh volume 1
+compress all
+block 1 volume 1  
+Sideset 1 surface 8  
+sideset 1 name 'front_ssbcux_ssbcuy_ssbcuz'
+Sideset 2 surface 1  
+sideset 2 name 'back_ssbcuy'
+Sideset 3 surface 2  
+sideset 3 name 'bottom_ssbcux_ssbcuy_ssbcuz'
+Sideset 4 surface 3  
+sideset 4 name 'right_ssbcux_ssbcuy_ssbcuz'
+Sideset 5 surface 7  
+sideset 5 name 'left_ssbcux_ssbcuy_ssbcuz'
+sideset 5 name 'left_ssbcux'
+sideset 4 name 'right_ssbcux'
+save as "validation1.cub" overwrite
+undo group begin
+set large exodus file off
+export mesh "validation1.e" overwrite

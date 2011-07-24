@@ -1,0 +1,19 @@
+#pre information
+preinfo: method='sem', ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, inp_path='../input', out_path='../output/'
+
+#mesh information
+mesh: xfile='validation1_coord_x', yfile='validation1_coord_y', zfile='validation1_coord_z', &
+confile='validation1_connectivity', idfile='validation1_material_id'
+
+#boundary conditions
+bc: uxfile='validation1_ssbcux', uyfile='validation1_ssbcuy', uzfile='validation1_ssbcuz'
+
+#material list
+material: matfile='validation1_material_list'
+
+#control parameters
+control: cg_tol=1e-8, cg_maxiter=5000, nl_tol=0.0005, nl_maxiter=3000, nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20
+
+#save data options
+save: disp=1, porep=1
+

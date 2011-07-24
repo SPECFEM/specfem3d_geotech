@@ -1,0 +1,9 @@
+# input file header for sem3dcaf
+'slope3d_new'
+# sos file path
+'/fasan/homnath/workspace/sem3dcaf/output'
+# number of processor
+8
+# processor name, and path to paraview executable in the processor (for each slice or only one if all processors are the same)
+'fasan.norsar.no', '/space/homnath/soft/paraview-3.7/bin/paraview', '/fasan/homnath/workspace/sem3dcaf/output'
+

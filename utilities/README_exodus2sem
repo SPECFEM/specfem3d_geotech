@@ -1,0 +1,57 @@
+/*This program converts the Binary (provided that ncdump command exists)
+or ASCII exodus file exported from the CUBIT to several mesh files required
+by the fem3d and sem3d_solid packages. Basic steps starting from the CUBIT:
+in CUBIT:
+- blocks defines only the material regions
+  -> actual material properties should not be defined within the CUBIT.
+  actual material properties can be listed later corresponding to each block 
+  (i.e., material region).
+- nodal boundary conditions must be defined using node set
+  -> each node set name must contain the corresponding BC names as defined in 
+  char *ns_bcname[] below
+  e.g., node set name can be front_nsbcux or front_nsbcux_nsbcuy etc.
+- surface boundary conditions must be defined using side set
+  -> each side set name must contain the corresponding BC names as defined in 
+  char *ss_bcname[] below
+  e.g., side set name can be front_ssbcux or front_ssbcux_ssbcuy etc.
+
+step1: export mesh file as exodus file say "mesh.e"
+step2: convert "mesh.e" to ASCII file using
+  >>ncdump mesh.e > mesh.txt
+step3: produce mesh and BC files
+  >>exodus2sem mesh.txt
+  OR
+  >>exodus2sem mesh.txt 1000.0
+
+There will be several output files:
+*_coord_? : total number of nodes followed by nodal coordinate ? (? -> x, y, z)
+*_connectivity : total number of elements followed by connectivity list
+*_material_id : total number of elements followed by material IDs
+*_??bcu? : node IDs which have u? = 0 as the boundary conditions (?? -> ns or ss, ? -> x, y, z) 
+------------------------------------------------------
+DEVELOPER:
+  Hom Nath Gharti
+  NORSAR
+  homnath_AT_norsar_DOT_no
+DEPENDENCY:
+  stringmanip.c: string manipulation routines
+COMPILE:
+  gcc exodus2sem.c -o exodus2sem
+USAGE: 
+  exodus2sem <inputfile> <OPTIONS>
+  Example: exodus2sem sloep3d_mest.txt
+  or
+  exodus2sem slope3d_mesh.e -fac=0.001 -bin=1
+OPTIONS:
+  -fac: use this option to multiply coordinates. this is importantn for unit 
+        conversion, e.g., to convert m to km use -fac=0.001
+  -bin: use this option if you want to convert exodus binary directly, provided
+        that the command ncdump is in the path. ncdump is a part of netCDF library
+        that can be downloaded freely from 
+        http://www.unidata.ucar.edu/downloads/netcdf/index.jsp. use -bin=1 for binary 
+        or -bin=0 for ascii file.
+HISTORY: 
+  HNG,Apr 23,2010;HNG,Apr 17,2010;HNG,Feb 08,2009
+TODO:
+  - add support to side sets,i.e., surface boundary conditions
+-------------------------------------------------------*/

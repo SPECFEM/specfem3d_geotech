@@ -1,0 +1,21 @@
+#pre information
+preinfo: method='sem', ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, inp_path='../input', out_path='../output/'
+
+#mesh information
+mesh: xfile='validation3_size2_sem_coord_x', yfile='validation3_size2_sem_coord_y', zfile='validation3_size2_sem_coord_z', &
+confile='validation3_size2_sem_connectivity', idfile='validation3_size2_sem_material_id'
+
+#boundary conditions
+bc: uxfile='validation3_size2_sem_ssbcux', uyfile='validation3_size2_sem_ssbcuy', uzfile='validation3_size2_sem_ssbcuz'
+
+#material list
+material: matfile='validation3_size2_sem_material_list'
+
+#water table
+water: wsfile='validation3_size2_sem_wsfile'
+
+#earthquake loading
+eqload: eqkx=0.1, eqky=0.0, eqkz=0.0
+
+#control parameters
+control: cg_tol=1e-8, cg_maxiter=5000, nl_tol=0.0005, nl_maxiter=3000, ntstep=9, sf=0.5 0.8 1.0 1.05 1.08 1.10 1.11 1.12 1.13

@@ -1,0 +1,15 @@
+#pre information
+preinfo: method='sem', ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, inp_path='../input', out_path='../output/'
+
+#mesh information
+mesh: xfile='example_coord_x', yfile='example_coord_y', zfile='example_coord_z', &
+confile='example_connectivity', idfile='example_material_id'
+
+#boundary conditions
+bc: uxfile='example_ssbcux', uyfile='example_ssbcuy', uzfile='example_ssbcuz'
+
+#material list
+material: matfile='example_material_list'
+
+#control parameters
+control: cg_tol=1e-8, cg_maxiter=5000, nl_tol=0.0005, nl_maxiter=2000, ntstep=12, sf=1.0 1.5 2.0 2.2 2.3 2.4 2.41 2.42 2.43 2.44 2.45 2.46

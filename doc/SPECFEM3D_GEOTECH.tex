@@ -1,0 +1,669 @@
+%% Do not edit unless you really know what you are doing.
+\documentclass[12pt,a4paper]{report}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{geometry}
+\geometry{verbose,a4paper,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+\usepackage{float,textcomp,amsmath,paralist,calc}
+\usepackage{natbib}
+
+\newcommand{\ap}{\textquotesingle}
+\newcommand{\sq}[1]{\textquotesingle{#1}\textquotesingle}
+\setlength\parindent{0pt}
+
+\newcommand{\frontmatter}{\cleardoublepage
+  \pagenumbering{roman}}
+\newcommand{\mainmatter}{\cleardoublepage
+  \pagenumbering{arabic}}
+\newcommand{\backmatter}{\cleardoublepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+%\renewcommand{\baselinestretch}{1.5}
+
+% hyperlinks to sections and references
+%\usepackage[pdftex,bookmarks=true,bookmarksnumbered=true,pdfpagemode=None,pdfstartview=FitH,pdfpagelayout=SinglePage,pdfborder={0 0 0}]{hyperref}
+\newcommand{\tsup}[1]{\textsuperscript{#1}}
+\newenvironment{desclist}[1]
+{\begin{list}{}
+{\renewcommand\makelabel[1]{{##1}\hfill}
+\settowidth\labelwidth{\makelabel{#1}}
+\setlength\leftmargin{\labelwidth+\labelsep}}}
+{\end{list}}
+
+\newenvironment{adescription}[1]
+{\begin{list}{}
+{\renewcommand\makelabel[1]{\texttt{##1}\hfill}
+\settowidth\labelwidth{\makelabel{#1}}
+\setlength\leftmargin{\labelwidth+\labelsep}}}
+{\end{list}}
+
+% Package name and version
+\def\pack{SPECFEM3D\_GEOTECH}
+\def\packver{\pack\ 1.0 Beta}
+
+\begin{document}
+%\thispagestyle{empty}\textbf{}%
+%\begin{figure}[H]
+%\noindent \includegraphics[width=0.75\paperwidth]{figures/specfem_3d_sesame-cover.pdf}
+%\end{figure}
+
+\thispagestyle{empty} % no page number
+\title{\textbf{\packver \\
+User Manual}}
+
+
+\author{Hom Nath Gharti, NORSAR, Norway \\
+Dimitri Komatitsch, University of Toulouse, France \\
+Volker Oye, NORSAR, Norway \\
+Roland Martin, University of Toulouse, France \\
+Jeroen Tromp, Princeton University, USA}
+
+\maketitle
+
+\frontmatter
+\addcontentsline{toc}{chapter}{Licensing}
+\chapter*{Licensing}
+%
+%\packver\ \\
+%Copyright 2010-2011 Hom Nath Gharti\\
+%
+%This file is part of \packver.\\
+%
+\packver\ is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.\\
+
+\packver\ is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.\\
+
+You should have received a copy of the GNU General Public License
+along with \linebreak\packver.  If not, see <\texttt{http://www.gnu.org/licenses/}>.\\
+
+\clearpage
+
+\addcontentsline{toc}{chapter}{Acknowledgments}
+\chapter*{Acknowledgments}
+This work was funded in part by the Research Council of Norway,
+and supported by industry partners BP, Statoil, and Total. Some of the routines were imported and modified from the ``Programming the finite element method''~\citep{smith2004} and the original ``SPECFEM3D'' package~\citep[e.g.,][]{komatitsch1998,komatitsch1999,peter2011}.
+\clearpage
+
+\tableofcontents
+\clearpage
+
+\mainmatter
+\chapter{Introduction}
+\section{Background}
+
+\pack\ is a free and open-source command-driven software for 3D slope stability analysis~\citep[For more detail see][]{gharti2011} based on the spectral-element method~\citep[e.g.,][]{patera1984,canuto1988,seriani1994,faccioli1997,komatitsch1998,komatitsch1999,peter2011}. The software can run on a single processor as well as multi-core machines or large clusters. It is written mainly in FORTRAN 90, and parallelized using
+MPI~\citep{gropp1994,pacheco1997} based on domain decomposition. For the domain decomposition, an open-source graph partitioning library SCOTCH~\citep{pellegrini1996} is used. The element-by-element preconditioned conjugate-gradient method~\citep[e.g.,][]{hughes1983,law1986,king1987,barragy1988} is implemented to solve the linear equations. For elastoplastic failure, 
+Mohr-coulomb failure criterion is used with viscoplastic strain method~ \citep{zienkiewicz1974}.\\ 
+
+This program does not automatically determine the factor of safety of the slope stability. Simulation can be performed for a series of safety factors. After plotting the safety factor vs maximum displacement curve, one can determine the factor of safety of the given slope. Although, the software is optimized for slope stability analysis, other relevant simulations of static problems in solid (geo)mechanics can also be performed with this software.\\
+
+The software currently does not include the inbuilt mesher. Existing tools such as Gmsh~\citep{geuzaine2009}, CUBIT~\citep{cubit2011}, TrueGrid~\citep{truegrid2006}, etc. can be used for the hexahedral meshing, and the resulting mesh file can be converted to the input files required by the \pack. Output data can be visualized and processed using an open-source visualization application ParaView (\texttt{www.paraview.org}).  
+
+\section{Status summary}
+\begin{desclist}{Pseudo-static earthquake loading}                             
+\item[Gravity loading]                 : Yes
+\item[Surface loading]                 : Yes (point load, uniformly distributed load, linearly distributed load) [Experimental]
+\item[Water table]                     : Yes [Experimental]
+\item[Pseudo-static earthquake loading]   : Yes [Experimental]
+\item[Automatic factor of safety]      : No
+\end{desclist}
+
+\section*{Revision}
+
+HNG, Jul 12, 2011; HNG, May 20, 2011; HNG, Jan 17, 2011
+
+
+\chapter{Getting started}
+\section{Package structure}
+Original \pack\ package comes in a single compressed file \linebreak\texttt{\pack.tar.gz}, which can be extracted using \texttt{tar} command:\\
+
+\texttt{tar -zxvf \pack.tar.gz}\\
+
+Or\\
+
+using, for example, \texttt{7-zip (www.7-zip.org)} in WINDOWS. The package has a following structure.\\
+
+
+ 
+\texttt{\pack/}
+\begin{adescription}{~~partition/}
+\item[~~COPYING]               : License.
+\item[~~README]                : brief description of the package.
+\item[~~bin/]                  : all object files and executables are stored in this folder.
+\item[~~doc/]                   : documentation (including this file) of the \pack\ package.
+\item[~~input/]                : contains input files.
+\item[~~partition/]            : contains partition files for parallel processing.
+\item[~~output/]               : default output folder. All output files are stored in this folder unless the different output path is defined in the main input file.
+\item[~~src/]                  : contains all source files.
+\end{adescription}  
+   
+\section{Prerequisites}
+\begin{itemize}[-]
+  \item \underline{GNU make utility}. The make utility is necessary to build the software using Makefile. This utility is usually installed by default in most of the LINUX systems. In WINDOWS, one can use Cygwin (\texttt{www.cygwin.com}) or MinGW (\texttt{www.mingw.org}) to install the make utility. 
+  \item \underline{A recent FORTRAN compiler}. The software is written mainly in FORTRAN 90, but it also uses a few FORTRAN 2003 features (e.g., streaming IO). These features are already available in most of the FORTRAN compilers, e.g., gfortran version >= 4.2 (\texttt{gcc.gnu.org/wiki/GFortran}) and g95 (\texttt{www.g95.org}).
+\end{itemize}
+  Additionally, following libraries are necessary for parallel processing:
+\begin{itemize}[-]
+  \item \underline{A recent MPI library}. It should be built with same FORTRAN compiler which will be used to compile the software. Please see \texttt{www.open-mpi.org} or \linebreak\texttt{www.mcs.anl.gov/research/projects/mpich2} for detail on how to install MPI library and how to run MPI programs.
+  \item \underline{SCOTCH graph partitioning library}. This library should be compiled with same\linebreak FORTRAN compiler which will be used to compile the software. Please see\linebreak \texttt{www.labri.fr/perso/pelegrin/scotch} for detail on how to install SCOTCH. Version 5.1.7 was successfully tested with \pack.
+\end{itemize}
+
+\section{Compile}
+\subsubsection{Serial program}
+\begin{itemize}[-]
+  \item Go to \texttt{src/} folder
+  \item Open \texttt{Makefile} and edit if necessary. Check the compiler and compiler flags defined in the variables \sq{FC} and \sq{FFLAGS}, respectively. Please note that the compiler flags may be different depending on the compiler.  
+	  
+  \item To build the serial program, type\\
+	  \texttt{make semgeotech}
+  \item To clean, type\\
+	  \texttt{make clean}
+\end{itemize}
+
+\subsubsection{Parallel program}
+\begin{itemize}[-]
+  \item Go to \texttt{src/} folder
+  \item Open \texttt{Makefile} and edit if necessary. Check the compiler and compiler flags defined in the variables \sq{FC} and \sq{FFLAGS}, respectively. Please note that the compiler flags may be different depending on the compiler. An appropriate MPI fortran compiler, e.g., \texttt{mpif90} should be defined in \sq{FC}. Additionally, check the MPI library and SCOTCH library defined in the variables \sq{LIBMPI} and \sq{LIBSCOTCH}, respectively. The SCOTCH library is necessary only for the mesh partitioning.
+	  
+  \item To build the parallel program, type\\
+	  \texttt{make psemgeotech}  
+	 
+  \item To build mesh partitioning program, type\\
+	  \texttt{make partmesh}
+	  
+  \item To build all programs, i.e., serial program, parallel program, and mesh partitioning program at once, type\\
+	  \texttt{make all}
+	  
+  \item To clean, type\\
+	  \texttt{make clean}
+\end{itemize}
+{\emph{Note: serial program can be compiled with the same MPI fortran compiler used for the parallel program, but the other way around is not always true.}}
+
+\section{Run}
+\subsubsection{Serial run}
+\begin{itemize}[-]
+\item To run serial program, type \\
+	  \texttt{../bin/semgeotech} \emph{input\_file\_name}
+	  
+	  Example:
+	  
+	  \texttt{../bin/semgeotech ../input/validation1.sem}
+	  
+\end{itemize}
+
+\subsubsection{Parallel run} 
+\begin{itemize}[-]
+\item To partition the mesh, type \\
+	  \texttt{../bin/partmesh} \emph{input\_file\_name}
+	  
+	  Example:
+	  
+	  \texttt{../bin/partmesh ../input/validation1.psem}
+	  
+\item To run parallel program, type \\
+	  \texttt{mpirun -n} \emph{number\_of\_nodes} \texttt{../bin/psemgeotech} \emph{input\_file\_name} \\
+	  
+	  OR
+	  
+	  \texttt{mpirun -n} \emph{number\_of\_nodes} \texttt{-{}-hostfile} \emph{host\_file} \texttt{../bin/psemgeotech} \emph{input\_file\_name}
+	  
+	  Example:
+	  
+	  \texttt{mpirun -n 8 ../bin/psemgeotech ../input/validation1.psem}
+\end{itemize}
+
+{\emph{Note: see Chapter~\ref{chap:input} for detail on input and input files. Try to run one or more examples included in} \texttt{input/}.
+
+\chapter{Input}
+\label{chap:input}
+\section{Main input file}
+
+Main input file structure is motivated by the ``E3D''~\citep{larsen1995} software package. The main input file consists of legitimate input lines defined in the specified formats. Any number of blank lines or comment lines can be placed for user friendly input structure. The blank lines contain no or only white-space characters, and the comment lines contain "\#" as the first character. \\
+
+Each legitimate input line consists of a line type, and list of arguments and corresponding values. All argument-value pair are separated by comma (,). If necessary, any legitimate input line can be continued to next line using FORTRAN 90 continuation  character "\&" as an absolute last character of a line to be continued. Repetition of same line type is not allowed.\\
+
+Legitimate input lines have the format\\
+{\it{line\_type}} $arg_1=val_1$, $arg_2=val_2$, ......., $arg_n=val_n$\\
+
+Example:\\
+\texttt{preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+inp\_path=\sq{../input}, part\_path=\sq{../partition}, out\_path=\sq{../output/}}\\
+
+All legitimate input lines should be written in lower case. Line type and argument-value pairs must be separated by space. Each argument-value pair must be separated by comma(,) and space/s. No space/s are recommended before line type and in between argument name and "=" or "=" and argument value. If argument value is a string, the FORTRAN 90 string (i.e., enclosed within the single quotes) should be used, for example, \texttt{inp\_path=\sq{../input}}. If the argument value is a vector (i.e., multi-valued), a list of values separated by space (no comma!) shoud be used, e.g, \texttt{srf=1.0 1.2 1.3 1.4}.
+
+\subsection{Line types}
+
+Only the following line types are permitted.
+\begin{adescription}{traction:} 
+\item[preinfo:]  preliminary information of the simulation
+\item[mesh:]     mesh information
+\item[bc:]      boundary conditions information
+\item[traction:] traction information [optional]
+\item[material:] material properties
+\item[eqload:]   pseudo-static earthquake loading [optional]
+\item[water:]    water table information [optional]
+\item[control:]  control of the simulation
+\item[save:]  options to save data
+\end{adescription}
+
+\subsection{Arguments}
+
+Only the following arguments under the specified line types are permitted.\\
+
+\texttt{\underline{preinfo:}}
+
+\begin{adescription}{nl\_maxiter} 
+  \item[nproc] : number of processors to be used for the parallel processing [integer > 1]. Only required for parallel processing.
+  \item[ngllx] : number of Gauss-Lobatto-Legendre (GLL) points along $x$-axis [integer > 1].
+  \item[nglly] : number of GLL points along $y$-axis [integer > 1].
+  \item[ngllz] : number of GLL points along $z$-axis [integer > 1]. \\\\
+  {\emph{Note: Although the program can use different values of}} \texttt{ngllx}, \texttt{nglly}, {\emph{and}} \texttt{ngllz}, {\emph{it is recommended to use same number of GLL points along all axes.}}
+  \item[inp\_path]	: input path where the input data are located [string, optional, default $\Rightarrow$ \texttt{\sq{../input}}].
+  \item[part\_path]	: partition path where the partitioned data will be or are located [string, optional, default $\Rightarrow$ \texttt{\sq{../partition}}]. Only required for parallel processing.
+  \item[out\_path]	: output path where the output data will be stored [string, optional, default $\Rightarrow$ \texttt{\sq{../output}}].\\
+\end{adescription}
+
+
+\texttt{\underline{mesh:}}
+\begin{adescription}{nl\_maxiter}
+  \item[xfile] : file name of $x$-coordinates [string].
+  \item[yfile] : file name of $y$-coordinates [string].
+  \item[zfile] : file name of $z$-coordinates [string].
+  \item[confile]: file name of mesh connectivity [string].
+  \item[idfile]: file name of element IDs [string].
+  \item[gfile]: file name of ghost interfaces, i.e., partition interfaces [string]. Only required for parallel processing.\\
+\end{adescription}
+
+\texttt{\underline{bc:}}
+\begin{adescription}{nl\_maxiter}
+  \item[uxfile]: file name of displacement boundary conditions along $x$-axis [string].
+  \item[uyfile]: file name of displacement boundary conditions along $y$-axis [string].
+  \item[uzfile]: file name of displacement boundary conditions along $z$-axis [string].\\
+\end{adescription}
+  
+\texttt{\underline{traction:}}
+\begin{adescription}{nl\_maxiter}
+  \item[trfile]: file name of traction specification [string].\\ 
+\end{adescription}
+
+\texttt{\underline{material:}}
+\begin{adescription}{nl\_maxiter}
+  \item[matfile]: file name of material list [string].
+  \item[ispart]: flag to indicate whether the material file is partitioned [integer, optional, 0 = No, 1 = Yes, default $\Rightarrow$ 1]. Only required for parallel processing.
+  \item[matpath]: path to material file [string, optional, default $\Rightarrow$ \texttt{\sq{../input}} for serial or unpartitioned material file in parallel and \texttt{\sq{../partition}} for partitioned material file in parallel].
+  \item[allelastic]: assume all entire domain as elastic [integer, optional, 0 = No, 1 = Yes, default $\Rightarrow$ 0].\\
+\end{adescription}
+
+\texttt{\underline{eqload:}}
+\begin{adescription}{nl\_maxiter}
+  \item[eqkx]: pseudo-static earthquake loading coefficient along $x$-axis [real, 0 <= \texttt{eqkx} <= 1.0, default $\Rightarrow$ 0.0].
+  \item[eqky]: pseudo-static earthquake loading coefficient along $y$-axis [real, 0 <= \texttt{eqky} <= 1.0, default $\Rightarrow$ 0.0].
+  \item[eqkz]: pseudo-static earthquake loading coefficient along $z$-axis [real, 0 <= \texttt{eqkz} <= 1.0, default $\Rightarrow$ 0.0].
+  \\\\
+  {\emph{Note: For the stability analysis purpose, these coefficients should be chosen carefully. For example, if the slope face is pointing towards the negative $x$-axis, value of}} \texttt{eqkx} {\emph{is taken negative.}} \\
+\end{adescription}
+  
+\texttt{\underline{water:}}
+\begin{adescription}{nl\_maxiter}
+  \item[wsfile]: file name of water surface file.\\
+\end{adescription}
+  
+\texttt{\underline{control:}}
+\begin{adescription}{nl\_maxiter}
+  \item[cg\_tol]: tolerance for conjugate gradient method [real].
+  \item[cg\_maxiter]: maximum iterations for conjugate gradient method [integer > 0].
+  \item[nl\_tol]: tolerance for nonlinear iterations [real].
+  \item[nl\_maxiter]: maximum iterations for nonlinear iterations [integer > 0].
+  \item[nsrf]: number of strength reducing factors to try [integer > 0, optional, default $\Rightarrow$ 1].
+  \item[srf]: values of strength reduction factors [real vector, optional, default $\Rightarrow$ 1.0]. Number of \texttt{srf}s must be equal to \texttt{nsrf}.
+  \item[phinu]: force $\phi-\nu$ (Friction angle - Poisson's ratio) inequality: $\sin\phi\geq 1-2\,\nu$ \citep[see][]{zheng2005} [integer, 0 = No, 1 = Yes, default $\Rightarrow$ 0]. Only for \underline{TESTING} purpose. \\
+\end{adescription}
+
+\texttt{\underline{save:}}
+\begin{adescription}{porep}
+  \item[disp]: displacement field [integer, 0 = No, 1 = Yes].
+  \item[porep]: pore water pressure [integer, 0 = No, 1 = Yes].\\
+\end{adescription}
+  
+\subsection{Examples of main input file}
+
+\subsubsection*{Serial input file:}
+
+
+\noindent{\texttt{\#-----------------------------------------------------------------\\
+\#pre information\\
+preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+\#mesh information \\
+mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
+zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
+idfile=\sq{validation1\_material\_id}\\\\
+\#boundary conditions\\
+bc: uxfile=\sq{validation1\_ssbcux}, uyfile=\sq{validation1\_ssbcuy}, \& \\
+uzfile=\sq{validation1\_ssbcuz}\\\\
+\#material list\\
+material: matfile=\sq{validation1\_material\_list}\\\\
+\#control parameters\\
+control: cg\_tol=1e-8, cg\_maxiter=5000, nl\_tol=0.0005, nl\_maxiter=3000, \& \\
+nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20\\
+\#-----------------------------------------------------------------}}\\\\
+
+\subsubsection*{Parallel input file:}
+
+\noindent{\texttt{\#-----------------------------------------------------------------\\
+\#pre information\\
+preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, \& \\
+ngnod=8, inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+\#mesh information \\
+mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
+zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
+idfile=\sq{validation1\_material\_id}, gfile=\sq{validation1\_ghost}\\\\
+\#boundary conditions\\
+bc: uxfile=\sq{validation1\_ssbcux}, uyfile=\sq{validation1\_ssbcuy}, \& \\
+uzfile=\sq{validation1\_ssbcuz}\\\\
+\#material list\\
+material: matfile=\sq{validation1\_material\_list}\\\\
+\#control parameters\\
+control: cg\_tol=1e-8, cg\_maxiter=5000, nl\_tol=0.0005, nl\_maxiter=3000, \& \\
+nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20\\
+\#-----------------------------------------------------------------\\}}
+
+
+There are only two additional informations, i.e., number of processors \texttt{\sq{nproc}} in line \texttt{\sq{preinfo}} and file name for ghost partition interfaces \texttt{\sq{gfile}} in line \texttt{\sq{mesh}} in parallel input file.
+
+\subsubsection*{Input file for a simple elastic simulation}
+
+\noindent{\texttt{\#-----------------------------------------------------------------\\
+\#pre information\\
+preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+\#mesh information \\
+mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
+zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
+idfile=\sq{validation1\_material\_id}\\\\
+\#boundary conditions\\
+bc: uxfile=\sq{validation1\_ssbcux}, uyfile=\sq{validation1\_ssbcuy}, \& \\
+uzfile=\sq{validation1\_ssbcuz}\\\\
+\#material list\\
+material: matfile=\sq{validation1\_material\_list}, allelastic=1\\\\
+\#control parameters\\
+control: cg\_tol=1e-8, cg\_maxiter=5000\\
+\#-----------------------------------------------------------------}}\\\\
+
+\section{Input files detail}
+
+\subsection{Coordinates files: \texttt{xfile, yfile, zfile}}
+Each of the coordinates files contains list of corresponding coordinates in following format:\\
+
+\emph{number of points \\
+coordinate of point  1\\
+coordinate of point  2\\
+coordinate of point  3\\
+..\\
+..\\
+..}\\
+
+Example:\\\\
+{\texttt{2354\\
+40.230394465164999\\
+40.759090909090901\\
+42.700000000000003\\
+40.957142857142898\\
+40.230394465164999\\
+40.759090909090901\\
+42.700000000000003\\
+40.957142857142898\\
+...\\
+...\\}}
+
+\subsection{Connectivity file: \texttt{confile}}
+
+The connectivity file contains the connectivity lists of elements in following format:\\
+
+\emph{number of elements\\
+$n_1$ $n_2$ $n_3$ $n_4$ $n_5$ $n_6$ $n_7$ $n_8$ of element 1\\
+$n_1$ $n_2$ $n_3$ $n_4$ $n_5$ $n_6$ $n_7$ $n_8$ of element 2\\
+$n_1$ $n_2$ $n_3$ $n_4$ $n_5$ $n_6$ $n_7$ $n_8$ of element 3\\
+$n_1$ $n_2$ $n_3$ $n_4$ $n_5$ $n_6$ $n_7$ $n_8$ of element 4\\
+..\\
+..}\\
+
+Note: local node numbering follows the EXODUS II convention.\\
+
+Example:\\\\
+1800\\
+\texttt{1 2 3 4 5 6 7 8 \\
+9 10 2 1 11 12 6 5 \\
+9 1 4 13 11 5 8 14 \\
+15 16 10 9 17 18 12 11 \\
+15 9 13 19 17 11 14 20 \\
+21 22 16 15 23 24 18 17 \\
+21 15 19 25 23 17 20 26 \\
+27 28 22 21 29 30 24 23 \\
+27 21 25 31 29 23 26 32 \\
+33 34 28 27 35 36 30 29 \\
+33 27 31 37 35 29 32 38 \\
+34 33 39 40 36 35 41 42 \\
+33 37 43 39 35 38 44 41 \\
+...\\
+...\\}
+
+\subsection{Element IDs file: \texttt{idfile}}
+
+
+This file contains the IDs of elements. This ID will be used in the program mainly to identify the material regions. This file has a following format: \\
+
+\emph{number of elements\\
+ID of element 1\\
+ID of element 2\\
+ID of element 3\\
+ID of element 4\\
+...\\
+...}\\
+
+Example:\\
+
+\texttt{1800\\
+1\\
+1\\
+1\\
+1\\
+1\\
+1\\
+1\\
+1\\
+1\\
+1\\
+...\\
+...\\}
+
+\subsection{Ghost partition interfaces file: \texttt{gfile}}
+
+
+This file will be generated automatically by a program \texttt{partmesh}.\\
+
+
+\subsection{Traction file: \texttt{trfile}}
+
+This file contains the traction information on the model in the format as\\
+
+\emph{traction type} (integer, 0 = point, 1 = uniformly distributed, 2 = linearly distributed)\\
+if \emph{traction type} = 0\\
+  \emph{$q_x$ $q_y$ $q_z$} (load vector in kN)\\
+if \emph{traction type} = 1\\
+  \emph{$q_x$ $q_y$ $q_z$} (load vector in kN/m\tsup{2})\\
+if \emph{traction type} = 2\\
+  \emph{relevant-axis $x_1$ $x_2$ $q_{x1}$ $q_{y1}$ $q_{z1}$ $q_{x2}$ $q_{y2}$ $q_{z2}$}\\  
+\emph{number of entities} (points for point load or faces for distributed load)\\
+\emph{elementID entityID \\
+elementID entityID \\
+elementID entityID \\
+...\\
+...\\}
+
+This can be repeated as many times as many tractions.\\
+
+The \emph{relevant-axis} denotes the axis along which the load is varying, and it is represented by an integer as 1 = $x$-axis, 2 = $y$-axis, and 3 = $z$-axis. The variables $x_1$ and $x_2$ denote the coordinates (only the \emph{relevant-axis}) of two points between which the linearly distributed load is applied. Similarly, $q_{x1}$, $q_{y1}$ and $q_{z1}$, and $q_{x2}$, $q_{y2}$ and $q_{z2}$ denote the load vectors in kN/m\tsup{2} at the point 1 and 2, respectively.\\
+
+Example:\\
+Following data specify the two tractions: a uniformly distributed traction and a linearly distributed traction.\\\\
+
+\texttt{1\\
+0.0 0.0 -167.751\\
+363\\
+56 1\\
+57 1\\
+58 1\\
+59 1\\
+60 1\\
+61 1\\
+62 1\\
+...\\
+...\\
+2\\
+3 7.3 24.4 51.8379 0.0 -159.5407 0.0 0.0 0.0\\
+594\\
+38 1\\
+39 1\\
+40 1\\
+41 1\\
+42 1\\
+43 1\\
+44 1\\
+45 1\\
+46 1\\
+47 1\\
+48 1\\
+49 1\\
+50 1\\
+51 1\\
+52 1\\
+53 1\\
+...\\
+...}\\
+
+\subsection{Water surface file: \texttt{wsfile}}
+
+This file contains the water table information on the model in the format as
+
+\emph{number of water surfaces}\\
+\emph{water surface type} (integer, 0 = horizontal surface, 1 = inclined surface, 2 = meshed surface)\\
+if \emph{wstype}=0 (can be reconstructed by sweeping a horizontal line)\\
+  \emph{relevant-axis $x_1$ $x_2$ $z$}\\
+if \emph{wstype}=1 (can be reconstructed by sweeping a inclined line)\\
+  \emph{relevant-axis $x_1$ $x_2$ $z_1$ $z_2$}\\
+if \emph{wstype}=2 (meshed surface attached to the model)\\
+  \emph{number of faces\\
+  elelemet ID, face ID\\
+  elelemet ID, face ID\\
+  elelemet ID, face ID\\
+  ...           ...\\
+  ...           ...}\\
+  
+The \emph{relevant-axis} denotes the axis along which the line is defined, and it is taken as 1 = $x$-axis, 2 = $y$-axis, and 3 = $z$-axis. The variables $x_1$ and $x_2$ denote the coordinates (only \emph{relevant-axis}) of point 1 and 2 that define the line. Similarly, $z$ denotes a $z$-coordinate of a horizontal water surface, and $z_1$ and $z_2$ denote the $z$-coordinates of the two points (that define the line) on the water surface.\\
+  
+
+Example:\\
+Following data specify the two water surfaces: a horizontal surface and an inclined surface.\\\\
+\texttt{2\\
+0\\
+1 42.7 50.0 6.1\\
+1\\
+1 0.0 42.7 12.2 6.1}\\
+
+\chapter{Output and Visualization}
+
+\section{Output files}
+
+\subsection{Summary file}
+
+This file is self explanatory and it contains the summary of the result including control parameters, maximum displacement at each step, and elapsed time. The file is written in ASCII format and its name follows the convention \emph{input\_file\_name\_header}\texttt{\_summary} for serial run and \emph{input\_file\_name\_header}\texttt{\_summary\_proc}\emph{processor\_ID} for parallel run.
+
+\subsection{Mesh files}
+
+This file contains the mesh information of the model including coordinates, connectivity, element types etc. in EnSight Gold binary format~\citep[see][]{ensight2008}. The file name follows the format \emph{input\_file\_name\_header}\texttt{\_summary} for serial run and \emph{input\_file\_name\_header}\texttt{\_summary\_proc}\emph{processor\_ID} for parallel run.
+
+\subsection{Displacement field file}
+
+This file contains the nodal displacement field in the model written in EnSight Gold binary format. The file name follows the format \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{.dis} for serial run and \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{\_proc}\emph{processor\_ID}\texttt{.dis} for parallel run.
+
+\subsection{Pore pressure file}
+
+This file contains the hydrostatic pore pressure field in the model written in EnSight Gold binary format. The file name follows the format \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{.por} for serial run and \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{\_proc}\emph{processor\_ID}\texttt{.por} for parallel run.
+
+\subsection{CASE file}
+
+This is an EnSight Gold CASE file written in ASCII format. This file contain the information on the mesh files, other files, time steps etc. The file name follows the format \emph{input\_file\_name\_header}\texttt{.case} for serial run and \emph{input\_file\_name\_header}{\_proc}\emph{processor\_ID}\texttt{.case} for parallel run.
+
+\subsection{SOS file}
+
+This is an EnSight Gold server-of-server file for parallel visualization. The \texttt{write\_sos.f90} program provided in the \texttt{/utilities/} may be used to generate this file. See Chapter~\ref{chap:utilities}, Section~\ref{sec:sos} for more detail.
+
+All above EnSight Gold files correspond to the model with spectral-element mesh. Additionally, the CASE file/s and mesh file/s are written for the original model. These file names follow the similar conventions and they have the tag \texttt{\sq{original}} in the file name headers.
+
+\section{Visualization}
+\subsection{Serial visualization}
+
+Requirement: ParaView version later than 3.7. Precompiled binaries available from ParaView web (\texttt{www.paraview.org}) may be installed directly or it can be build from the source. 
+
+\begin{itemize}
+\item open a session
+\item open paraview client \\
+\texttt{paraview}
+\item In ParaView client: $\Rightarrow$ File $\Rightarrow$ Open\\
+   select appropriate serial CASE file (.case file)\\
+   see ParaView wiki \texttt{paraview.org/Wiki/ParaView} for more detail. 
+\end{itemize}
+   
+\subsection{Parallel visualization}
+
+Requirement: ParaView version later than 3.7. It should be built enabling MPI. An appropriate MPI library is necessary.
+
+\begin{itemize}
+\item open a session
+\item open paraview client \\
+\texttt{paraview}
+\item start ParaView server \\
+mpirun -np 8 pvserver -display :0
+\item In ParaView client: $\Rightarrow$ File $\Rightarrow$ Connect and connect to the appropriate server
+\item In ParaView client: $\Rightarrow$ Open\\
+   select appropriate SOS file (.sos file)\\
+   see ParaView wiki (\texttt{paraview.org/Wiki/ParaView} for more detail. 
+\end{itemize}
+
+\emph{Note: Each CASE file obtained from the parallel processing can also be visualized in a serial.}
+
+
+\chapter{Utilities}
+\label{chap:utilities}
+\section{Convert EXODUS mesh into SEM files}
+
+The program \texttt{exodus2sem.c} contained in the utilities directory can be used to convert the mesh file in EXODUS II format to input files required by the SPECFEM3D\_SLOPE.
+
+\subsubsection*{Compile}
+\texttt{gcc -o exodus2sem exodus2sem.c}
+\subsubsection*{Run}
+ \texttt{exodus2sem} {\emph{EXODUS\_mesh\_file}} {\emph{OPTIONS}}\\
+ For more detail, see \texttt{/utilities/README\_exodus2sem}.
+
+\section{Generate SOS file}
+\label{sec:sos}
+
+The program \texttt{write\_sos.f90} contained in the utilities directory can be used to write EnSight Gold server-of-server file (.sos file, see~\citep{ensight2008}) to visualize the multi-processors data in parallel. This file does not contain the actual data, but only the information on the data location and parallel processing. 
+\subsubsection*{Compile}
+\texttt{gfortran -o write\_sos write\_sos.f90}
+\subsubsection*{Run}
+\texttt{exodus2sem} {\it{input\_file}}\\
+
+For more detail, see \texttt{/utilities/README\_write\_sos}.
+
+\bibliographystyle{chicago}
+\bibliography{SPECFEM3D_GEOTECH}
+
+\end{document}
