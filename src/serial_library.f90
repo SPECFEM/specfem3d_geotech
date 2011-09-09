@@ -105,9 +105,9 @@ return
 end subroutine assemble_ghosts_nodal
 !===========================================
 
-! this subroutine counts the active ghost partitions for each node on the 
-! interfaces. 
-! logical flag representing whether the nodes in the interfaces are intact or 
+! this subroutine counts the active ghost partitions for each node on the
+! interfaces.
+! logical flag representing whether the nodes in the interfaces are intact or
 ! void has to be communicated across the processors
 subroutine count_active_nghosts(myid,ngpart,maxngnode,nndof,ngpart_node)
 use global,only:nnode
@@ -122,7 +122,7 @@ end subroutine count_active_nghosts
 !===========================================
 
 ! this subroutine distributes the excavation loads discarded by a processors due
-! to the special geoemtry partition. it will not distribute if the load is used 
+! to the special geoemtry partition. it will not distribute if the load is used
 ! within the partition
 subroutine distribute2ghosts(myid,gdof,ngpart,maxngnode,nndof,neq,ngpart_node, &
 array,array_g)

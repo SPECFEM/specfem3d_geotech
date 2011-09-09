@@ -81,14 +81,14 @@ do k=1,ngllz
       sum_shape = zero
 
       do i_gnod=1,ngnod
-        sum_shape = sum_shape + shape_hex8(i_gnod,i,j,k)        
+        sum_shape = sum_shape + shape_hex8(i_gnod,i,j,k)
       enddo
 
       ! sum of shape functions should be one
       if(abs(sum_shape-one) >  zerotol)then
         write(*,*)'ERROR: error shape functions!'
         stop
-      endif      
+      endif
     enddo
   enddo
 enddo
@@ -150,7 +150,7 @@ do k=1,ngllz
       !gamma = zetagll(k)
 
       xip = one + xigll(i)
-      xim = one - xigll(i)      
+      xim = one - xigll(i)
 
       dshape_hex8(1,1,igll) = - one_eighth*etam*zetam
       dshape_hex8(1,2,igll) = one_eighth*etam*zetam
@@ -185,18 +185,18 @@ enddo
 
 ! check the shape functions and their derivatives
 
-do i=1,ngll   
+do i=1,ngll
       sum_dshapexi = zero
       sum_dshapeeta = zero
       sum_dshapezeta = zero
 
-      do i_gnod=1,ngnod        
+      do i_gnod=1,ngnod
         sum_dshapexi = sum_dshapexi + dshape_hex8(1,i_gnod,i)
         sum_dshapeeta = sum_dshapeeta + dshape_hex8(2,i_gnod,i)
         sum_dshapezeta = sum_dshapezeta + dshape_hex8(3,i_gnod,i)
       enddo
-      
-      ! sum of derivative of shape functions should be zero     
+
+      ! sum of derivative of shape functions should be zero
       if(abs(sum_dshapexi) >  zerotol)then
         write(*,*)'ERROR: derivative xi shape functions!'
         stop
@@ -257,10 +257,10 @@ do j=1,nglly
   etam = one - etagll(j)
   do i=1,ngllx
     igll=igll+1
-    
+
     xip = one + xigll(i)
-    xim = one - xigll(i)        
- 
+    xim = one - xigll(i)
+
     ! corner nodes
     !shape_quad4(1,igll) = one_fourth*xim*etam
     !shape_quad4(2,igll) = one_fourth*xip*etam
@@ -271,26 +271,26 @@ do j=1,nglly
     dshape_quad4(1,2,igll) = one_fourth*etam
     dshape_quad4(1,3,igll) = one_fourth*etap
     dshape_quad4(1,4,igll) = -one_fourth*etap
-    
-    dshape_quad4(2,1,igll) = -one_fourth*xim    
-    dshape_quad4(2,2,igll) = -one_fourth*xip    
-    dshape_quad4(2,3,igll) = one_fourth*xip    
+
+    dshape_quad4(2,1,igll) = -one_fourth*xim
+    dshape_quad4(2,2,igll) = -one_fourth*xip
+    dshape_quad4(2,3,igll) = one_fourth*xip
     dshape_quad4(2,4,igll) = one_fourth*xim
 
     enddo
   enddo
-  
-  ! check the shape functions and their derivatives
-  do i=1,ngll   
-    sum_dshapexi = zero
-    sum_dshapeeta = zero        
 
-    do i_gnod=1,ngnod2d        
+  ! check the shape functions and their derivatives
+  do i=1,ngll
+    sum_dshapexi = zero
+    sum_dshapeeta = zero
+
+    do i_gnod=1,ngnod2d
       sum_dshapexi = sum_dshapexi + dshape_quad4(1,i_gnod,i)
       sum_dshapeeta = sum_dshapeeta + dshape_quad4(2,i_gnod,i)
     enddo
-    
-    ! sum of derivative of shape functions should be zero     
+
+    ! sum of derivative of shape functions should be zero
     if(abs(sum_dshapexi) >  zerotol)then
       write(*,*)'ERROR: derivative xi shape functions!'
       stop

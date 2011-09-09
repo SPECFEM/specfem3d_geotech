@@ -50,7 +50,7 @@ if(ismpi)then
 else
   ptail=""
 endif
-   
+
 ! reading main input information
 if(myid==1)write(*,'(a)',advance='no')'reading main input file...'
 preinfo_stat=-1
@@ -120,8 +120,8 @@ do
   read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
   if (ios/=0)exit
   ! check for blank and comment line
-  if (isblank(line) .or. iscomment(line,'#'))cycle 
-   
+  if (isblank(line) .or. iscomment(line,'#'))cycle
+
   ! look for line continuation
   tag=trim(line)
   call last_char(line,tmp_char,ind)
@@ -129,7 +129,7 @@ do
     slen=len(line)
     tag=trim(line(1:ind-1))
     read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
-    tag=trim(tag)//trim(line)         
+    tag=trim(tag)//trim(line)
   endif
   call first_token(tag,token)
 
@@ -158,7 +158,7 @@ do
       ngllx=get_integer('ngllx',args,narg);
       nglly=get_integer('nglly',args,narg);
       ngllz=get_integer('ngllz',args,narg);
-      ngll=ngllx*nglly*ngllz ! total GLL points 
+      ngll=ngllx*nglly*ngllz ! total GLL points
     endif
     nenod=get_integer('nenod',args,narg);
     ! number of elemental degrees of freedom
@@ -187,8 +187,8 @@ do
     slen=len_trim(out_path)
     if(out_path(slen:slen)/='/')out_path=trim(out_path)//'/'
 
-    preinfo_stat=1      
-    cycle      
+    preinfo_stat=1
+    cycle
   endif
   ! read mesh information
   if (trim(token)=='mesh:')then
@@ -201,14 +201,14 @@ do
     coordfile(2)=get_string('yfile',args,narg)
     coordfile(3)=get_string('zfile',args,narg)
     confile=get_string('confile',args,narg)
-    idfile=get_string('idfile',args,narg)    
-    if(ismpi)gfile=get_string('gfile',args,narg)   
-    !nmat=get_integer('nmat',args,narg)  
-   
-    mesh_stat=1      
-    cycle      
+    idfile=get_string('idfile',args,narg)
+    if(ismpi)gfile=get_string('gfile',args,narg)
+    !nmat=get_integer('nmat',args,narg)
+
+    mesh_stat=1
+    cycle
   endif
-  
+
   ! read bc information
   if (trim(token)=='bc:')then
     if(bc_stat==1)then
@@ -221,9 +221,9 @@ do
     uzfile=get_string('uzfile',args,narg)
 
     bc_stat=1
-    cycle      
+    cycle
   endif
-  
+
   ! read initial stress information
   if (trim(token)=='stress0:')then
     if(stress0_stat==1)then
@@ -243,9 +243,9 @@ do
     call seek_integer('usek0',ival,args,narg,istat)
     if(istat==0)usek0=.true.
     stress0_stat=1
-    cycle      
+    cycle
   endif
-  
+
   ! read traction information
   if (trim(token)=='traction:')then
     if(traction_stat==1)then
@@ -257,9 +257,9 @@ do
     traction_stat=1
     istraction=.true.
     !print*,trfile
-    cycle      
+    cycle
   endif
-  
+
   ! read material list
   if (trim(token)=='material:')then
     if(material_stat==1)then
@@ -278,7 +278,7 @@ do
     if(mat_path(slen:slen)/='/')mat_path=trim(mat_path)//'/'
     matfile=get_string('matfile',args,narg)
     call seek_integer('allelastic',iselastic,args,narg,istat)
-    if(istat==0 .and. iselastic==1)allelastic=.true.    
+    if(istat==0 .and. iselastic==1)allelastic=.true.
     !print*,matfile
     !mat_count=mat_count+1
     !id=get_integer('id',args,narg)
@@ -287,12 +287,12 @@ do
     !nu(id)=get_real('nu',args,narg)
     !phi(id)=get_real('phi',args,narg)
     !coh(id)=get_real('coh',args,narg)
-    !psi(id)=get_real('psi',args,narg)                
-                
+    !psi(id)=get_real('psi',args,narg)
+
     material_stat=1
-    cycle      
+    cycle
   endif
-  
+
   ! read earthquake loading information
   if (trim(token)=='eqload:')then
     if(eqload_stat==1)then
@@ -305,9 +305,9 @@ do
     eqkz=get_real('eqkz',args,narg)
     eqload_stat=1
     iseqload=.true.
-    cycle      
+    cycle
   endif
-  
+
   ! read water surface information
   if (trim(token)=='water:')then
     if(water_stat==1)then
@@ -318,7 +318,7 @@ do
     wsfile=get_string('wsfile',args,narg)
     water_stat=1
     iswater=.true.
-    cycle      
+    cycle
   endif
 
   ! read control information
@@ -327,7 +327,7 @@ do
       write(errtag,*)'ERROR: copy of line type control: not permitted!'
       return
     endif
-    call split_string(tag,',',args,narg)    
+    call split_string(tag,',',args,narg)
     !cg_tol=get_real('cg_tol',args,narg)
     !cg_maxiter=get_integer('cg_maxiter',args,narg)
     !nl_tol=get_real('nl_tol',args,narg)
@@ -366,7 +366,7 @@ do
       if(istat==0)nexcavid=ivect
       deallocate(ivect)
       nexcavid_all=sum(nexcavid)
-      allocate(excavid(nexcavid_all))    
+      allocate(excavid(nexcavid_all))
       excavid=get_integer_vect('excavid',nexcavid_all,args,narg)
     endif
     if(nsrf>1 .and. nexcav>1)then
@@ -374,15 +374,15 @@ do
       return
     endif
     !---------------------------
-     
+
     call seek_integer('ninc',ival,args,narg,istat)
     if(istat==0)ninc=ival
     call seek_integer('phinu',ival,args,narg,istat)
     if(istat==0.and.ival==1)phinu=.true.
     control_stat=1
-    cycle      
+    cycle
   endif
-  
+
   ! read save options
   if (trim(token)=='save:')then
     if(save_stat==1)then
@@ -390,12 +390,12 @@ do
       return
     endif
     save_stat=-1
-    call split_string(tag,',',args,narg)    
+    call split_string(tag,',',args,narg)
     call seek_integer('disp',issave,args,narg,istat)
     if(istat==0 .and. issave==1)savedata%disp=.true.
     call seek_integer('stress',issave,args,narg,istat)
     if(istat==0 .and. issave==1)savedata%stress=.true.
-    call seek_integer('porep',issave,args,narg,istat)    
+    call seek_integer('porep',issave,args,narg,istat)
     if(istat==0 .and. issave==1)savedata%porep=.true.
     call seek_integer('psigma',issave,args,narg,istat)
     if(istat==0 .and. issave==1)savedata%psigma=.true.
@@ -404,16 +404,16 @@ do
     call seek_integer('scf',issave,args,narg,istat)
     if(istat==0 .and. issave==1)savedata%scf=.true.
     call seek_integer('vmeps',issave,args,narg,istat)
-    if(istat==0 .and. issave==1)savedata%vmeps=.true.     
-                
+    if(istat==0 .and. issave==1)savedata%vmeps=.true.
+
     save_stat=1
-    cycle      
+    cycle
   endif
-  
+
   write(errtag,'(a)')'ERROR: invalid line type: "'//trim(token)//'"!'
   return
-  
- 
+
+
 enddo ! do
 if(.not.iswater)savedata%porep=.false.
 ! check for material list
@@ -487,11 +487,11 @@ do i=1,ndim
   endif
   if(ismpi)then
     do i_node=1,nnode
-      read(11,*)inode,g_coord(i,inode)    
+      read(11,*)inode,g_coord(i,inode)
     enddo
   else
     do i_node=1,nnode
-      read(11,*)g_coord(i,i_node)    
+      read(11,*)g_coord(i,i_node)
     enddo
   endif
 enddo
@@ -579,7 +579,7 @@ enddo
 if(minval(mat_id)<1 .or. maxval(mat_id)>nmat)then
   write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined material regions!'
   return
-endif 
+endif
 water=.false.
 if(iswater)then
   read(11,*,iostat=ios)nwmat

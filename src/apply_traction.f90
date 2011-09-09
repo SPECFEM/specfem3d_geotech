@@ -134,17 +134,17 @@ do i_face=1,6 ! there are 6 faces in a hexahedron
     face(i_face)%gnod(1)=face(i_face)%nod(1)
     face(i_face)%gnod(2)=face(i_face)%nod(ngllx)
     face(i_face)%gnod(3)=face(i_face)%nod(ngllzx)
-    face(i_face)%gnod(4)=face(i_face)%nod(ngllzx-ngllx+1)  
+    face(i_face)%gnod(4)=face(i_face)%nod(ngllzx-ngllx+1)
   elseif(i_face==2 .or. i_face==4)then ! YZ plane
     face(i_face)%gnod(1)=face(i_face)%nod(1)
     face(i_face)%gnod(2)=face(i_face)%nod(nglly)
     face(i_face)%gnod(3)=face(i_face)%nod(ngllyz)
-    face(i_face)%gnod(4)=face(i_face)%nod(ngllyz-nglly+1)  
+    face(i_face)%gnod(4)=face(i_face)%nod(ngllyz-nglly+1)
   elseif(i_face==5 .or. i_face==6)then ! XY plane
     face(i_face)%gnod(1)=face(i_face)%nod(1)
     face(i_face)%gnod(2)=face(i_face)%nod(ngllx)
     face(i_face)%gnod(3)=face(i_face)%nod(ngllxy)
-    face(i_face)%gnod(4)=face(i_face)%nod(ngllxy-ngllx+1)  
+    face(i_face)%gnod(4)=face(i_face)%nod(ngllxy-ngllx+1)
   else
     write(errtag,'(a)')'ERROR: wrong face ID for traction!'
     return
@@ -188,23 +188,23 @@ traction: do ! i_trac=1,ntrac
   if(ios/=0)exit traction
   count_trac=count_trac+1
   trac_stat=.false.
-  
+
   if(tractype==0)then ! point loading
     read(11,*)q ! vector
     read(11,*)nface ! number of points
     do i_face=1,nface
-      
+
       read(11,*)ielmt,inode
       ngdof=gdof(:,g_num(gnod(inode),ielmt))
-      load(ngdof)=load(ngdof)+q      
+      load(ngdof)=load(ngdof)+q
     enddo
     trac_stat=.true.
   elseif(tractype==1)then ! uniform loading
     !print*,tractype
     read(11,*)q ! vector
     read(11,*)nface
-    do i_face=1,nface      
-      read(11,*)ielmt,iface      
+    do i_face=1,nface
+      read(11,*)ielmt,iface
       if(iface==1 .or. iface==3)then
         nfgll=ngllzx
         lagrange_gll(1:nfgll,1:nfgll)=lagrange_gll_zx
@@ -224,15 +224,15 @@ traction: do ! i_trac=1,ntrac
         write(errtag,'(a)')'ERROR: wrong face ID for traction!'
         exit traction
       endif
-      nfdof=nfgll*ndim      
-            
+      nfdof=nfgll*ndim
+
       num=g_num(:,ielmt)
       coord=g_coord(:,num(face(iface)%gnod)) !transpose(g_coord(:,num(face(iface)%gnod)))
       fgdof(1:nfdof)=reshape(gdof(:,g_num(face(iface)%nod,ielmt)),(/nfdof/)) !g=g_g(:,ielmt)
 
       ftracload=zero
       ! compute numerical integration
-      do i_gll=1,nfgll        
+      do i_gll=1,nfgll
         ! compute d(area)
         dx_dxi=matmul(coord,dshape_quad4(1,:,i_gll))
         dx_deta=matmul(coord,dshape_quad4(2,:,i_gll))
@@ -242,12 +242,12 @@ traction: do ! i_trac=1,ntrac
         face_normal(1)=dx_dxi(2)*dx_deta(3)-dx_deta(2)*dx_dxi(3)
         face_normal(2)=dx_deta(1)*dx_dxi(3)-dx_dxi(1)*dx_deta(3)
         face_normal(3)=dx_dxi(1)*dx_deta(2)-dx_deta(1)*dx_dxi(2)
-        
+
         detjac=sqrt(dot_product(face_normal,face_normal))
         face_normal=fsign(iface)*face_normal/detjac
         !print*,face_normal
-        !stop      
-        
+        !stop
+
         ! TODO:for constant q this can be computed only once!!
         ftracload(1:nfdof:3)=ftracload(1:nfdof:3)+ &
         q(1)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll) ! *face_normal(1) !only in X direction
@@ -256,7 +256,7 @@ traction: do ! i_trac=1,ntrac
         ftracload(3:nfdof:3)=ftracload(3:nfdof:3)+ &
         q(3)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll) ! *face_normal(3) !only in Z direction
       enddo
-      load(fgdof(1:nfdof))=load(fgdof(1:nfdof))+ftracload(1:nfdof)     
+      load(fgdof(1:nfdof))=load(fgdof(1:nfdof))+ftracload(1:nfdof)
     enddo
     trac_stat=.true.
   elseif(tractype==2)then ! linearly distributed loading
@@ -285,7 +285,7 @@ traction: do ! i_trac=1,ntrac
         exit traction
       endif
       nfdof=nfgll*ndim
-            
+
       num=g_num(:,ielmt)
       coord=g_coord(:,num(face(iface)%gnod)) !coord=transpose(g_coord(:,num(face(iface)%gnod)))
       fgdof(1:nfdof)=reshape(gdof(:,g_num(face(iface)%nod,ielmt)),(/nfdof/)) !g=g_g(:,ielmt)
@@ -294,21 +294,21 @@ traction: do ! i_trac=1,ntrac
       do i_gll=1,nfgll
         x=g_coord(iaxis,num(face(iface)%nod(i_gll)))
         q=q1+dq_dx*(x-x1) ! vector of nodal values
-        
+
         ! compute two vectors dx_dxi and dx_deta
         dx_dxi=matmul(coord,dshape_quad4(1,:,i_gll))
         dx_deta=matmul(coord,dshape_quad4(2,:,i_gll))
-        
+
         ! Normal = (dx_sxi x dx_deta)
         face_normal(1)=dx_dxi(2)*dx_deta(3)-dx_deta(2)*dx_dxi(3)
         face_normal(2)=dx_deta(1)*dx_dxi(3)-dx_dxi(1)*dx_deta(3)
         face_normal(3)=dx_dxi(1)*dx_deta(2)-dx_deta(1)*dx_dxi(2)
-        
+
         detjac=sqrt(dot_product(face_normal,face_normal))
         face_normal=fsign(iface)*face_normal/detjac
         !print*,face_normal
-        !stop      
-        
+        !stop
+
         ftracload(1:nfdof:3)=ftracload(1:nfdof:3)+ &
         q(1)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll) ! *face_normal(1) !only in X direction
         ftracload(2:nfdof:3)=ftracload(2:nfdof:3)+ &
@@ -318,12 +318,12 @@ traction: do ! i_trac=1,ntrac
      enddo
      load(fgdof(1:nfdof))=load(fgdof(1:nfdof))+ftracload(1:nfdof)
    enddo
-   trac_stat=.true. 
+   trac_stat=.true.
   else
     write(errtag,'(a)')'ERROR: traction type ',tractype,' not supported!'
     exit traction
-  endif  
-    
+  endif
+
 enddo traction
 close(11)
 
@@ -340,7 +340,7 @@ enddo
 if(.not.trac_stat)then
   write(errtag,'(a)')'ERROR: all tractions cannot be read!'
   return
-endif  
+endif
 
 errcode=0
 

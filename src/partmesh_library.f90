@@ -49,7 +49,7 @@ integer,intent(in) :: nelmnts !integer(long)
 integer,intent(in) :: nnodes
 integer,intent(in) :: nsize !integer(long)
 integer,intent(in) :: sup_neighbour !integer(long)
-integer,dimension(0:esize*nelmnts-1),intent(in) :: elmnts    
+integer,dimension(0:esize*nelmnts-1),intent(in) :: elmnts
 
 integer,dimension(0:nelmnts) :: xadj
 integer,dimension(0:sup_neighbour*nelmnts-1) :: adjncy
@@ -110,7 +110,7 @@ do j = 0, nnodes-1
             end do
             if ( .not.is_neighbour ) then
                 adjncy(nodes_elmnts(k+j*nsize)*sup_neighbour+xadj(nodes_elmnts(k+j*nsize))) = nodes_elmnts(l+j*nsize)
-                
+
                 xadj(nodes_elmnts(k+j*nsize)) = xadj(nodes_elmnts(k+j*nsize)) + 1
                 if (xadj(nodes_elmnts(k+j*nsize))>sup_neighbour) stop 'ERROR : too much neighbours per element, modify the mesh.'
 
@@ -267,12 +267,12 @@ character(len=20) :: format_str,format_str1
 character(len=80) :: out_fname
 
 integer,dimension(npart) :: mpart_icount,mpart_nelmt
-integer :: bc_nelmt ! number of BC elements 
+integer :: bc_nelmt ! number of BC elements
 integer,dimension(:,:),allocatable :: bc_elmt ! fist row = element ID, second row = face ID
 integer :: i_elmt,i_part,ipart,istat
 
 type master_partition
-integer,dimension(:),allocatable :: iloc ! index location of element in the partition 
+integer,dimension(:),allocatable :: iloc ! index location of element in the partition
 end type master_partition
 type(master_partition),dimension(npart) :: mpart
 
@@ -305,7 +305,7 @@ mpart_icount=0
 ! partition BC
 do i_elmt=1,bc_nelmt
 ipart=part(bc_elmt(1,i_elmt)) ! partion
-mpart_icount(ipart)=mpart_icount(ipart)+1  
+mpart_icount(ipart)=mpart_icount(ipart)+1
 mpart(ipart)%iloc(mpart_icount(ipart))=i_elmt
 enddo
 
@@ -317,7 +317,7 @@ format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')
 
 ! format string for element ID and face ID
 write(format_str1,*)ceiling(log10(real(maxval(bc_elmt(1,:)))+1.))
-format_str1='(i'//trim(adjustl(format_str1))//'i2)' ! i2 is sufficient for face id or node id 
+format_str1='(i'//trim(adjustl(format_str1))//'i2)' ! i2 is sufficient for face id or node id
 
 ! write BCs in each partition
 do i_part=1,npart
@@ -355,7 +355,7 @@ character(len=80) :: out_fname
 
 
 integer,dimension(npart) :: mpart_icount,mpart_nelmt
-integer :: tr_nelmt ! number of traction elements 
+integer :: tr_nelmt ! number of traction elements
 integer,dimension(:,:),allocatable :: tr_elmt ! fist row = element ID, second row = entity ID
 integer :: ios,i_elmt,i_part,itrac,ipart,istat,ntrac,tractype
 
@@ -364,7 +364,7 @@ real(kind=kreal) :: q0(3),q1(3),x1,x2
 logical :: ispart(npart)
 
 type master_partition
-integer,dimension(:),allocatable :: iloc ! index location of element in the partition 
+integer,dimension(:),allocatable :: iloc ! index location of element in the partition
 end type master_partition
 type(master_partition),dimension(npart) :: mpart
 
@@ -377,7 +377,7 @@ endif
 !read(16,*)ntrac
 itrac=0
 do ! itrac=1,ntrac
-read(16,*,iostat=ios)tractype  
+read(16,*,iostat=ios)tractype
 if(ios/=0)exit
 itrac=itrac+1
 if(tractype==0)then ! point loading
@@ -417,7 +417,7 @@ mpart_icount=0
 ! partition BC
 do i_elmt=1,tr_nelmt
   ipart=part(tr_elmt(1,i_elmt)) ! partion
-  mpart_icount(ipart)=mpart_icount(ipart)+1  
+  mpart_icount(ipart)=mpart_icount(ipart)+1
   mpart(ipart)%iloc(mpart_icount(ipart))=i_elmt
 enddo
 
@@ -429,10 +429,10 @@ format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')
 
 ! format string for element ID and face ID
 write(format_str1,*)ceiling(log10(real(maxval(tr_elmt(1,:)))+1.))
-format_str1='(i'//trim(adjustl(format_str1))//'i2)' ! i2 is sufficient for face id or node id 
-  
+format_str1='(i'//trim(adjustl(format_str1))//'i2)' ! i2 is sufficient for face id or node id
+
 ! write BCs in each partition
-do i_part=1,npart    
+do i_part=1,npart
   ! open output file
   write(out_fname, fmt=format_str)trim(out_path)//trim(trfile)//'_proc',i_part-1
   if(itrac==1)then
@@ -462,7 +462,7 @@ deallocate(tr_elmt)
 ! deallocate derived type variables
 do i_part=1,npart
   deallocate(mpart(i_part)%iloc)
-enddo  
+enddo
 enddo ! itrac
 close(16)
 
@@ -478,12 +478,12 @@ subroutine find_interface(nelmt,nnode,part,connect,npart)
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
 !TODO
 ! - some optimization is possible
-! - after finding interfacial elements we can only store/process the information 
+! - after finding interfacial elements we can only store/process the information
 !   only for those elements
 implicit none
 integer,intent(in) :: nelmt,nnode
 integer,dimension(nelmt),intent(in) :: part ! numbering starts from 1 only in this routine
-integer,dimension(esize,nelmt),intent(in) :: connect    
+integer,dimension(esize,nelmt),intent(in) :: connect
 integer,intent(in) :: npart
 
 integer :: i,icount,istat,j
@@ -492,7 +492,7 @@ logical,dimension(:,:),allocatable :: node_part
 allocate(node_part(nnode,npart))
 allocate(node_npart(nnode))
 
-node_part=.false.  
+node_part=.false.
 do i=1,nelmt
 node_part(connect(:,i),part(i))=.true.
 enddo
@@ -500,7 +500,7 @@ enddo
 ! determine the number of partitions for all nodes
 node_npart=0
 allocate(node(nnode))
-do i=1,nnode 
+do i=1,nnode
 node_npart(i)=count(node_part(i,:))
 allocate(node(i)%part(node_npart(i)))
 icount=0
@@ -510,12 +510,12 @@ do j=1,npart
     node(i)%part(icount)=j
   endif
 enddo
-enddo 
+enddo
 !print*,'hello:',maxval(node_part)
 !stop
 deallocate(node_part)
 
-! count the number of elements in the interface  
+! count the number of elements in the interface
 nelmt_interface=0
 do i=1,nelmt
 if(maxval(node_npart(connect(:,i)))>1)nelmt_interface=nelmt_interface+1
@@ -553,15 +553,15 @@ subroutine detect_ghost(out_phead,nelmt,nnode,npart,max_neighbour,glob2loc_elmt)
 !TODO
 ! - why there is error for 2 partitions? See the explanation in max_nelmt in the code below
 ! - some optimization is possible
-! - after finding interfacial elements we can only store/process the information 
+! - after finding interfacial elements we can only store/process the information
 !   only for those elements
 implicit none
-integer,parameter :: nenode=8,nedge=12,nface=6 ! number of nodes, edges, and faces per element 
+integer,parameter :: nenode=8,nedge=12,nface=6 ! number of nodes, edges, and faces per element
 integer,parameter :: nnode_face=4,nnode_edge=2 ! number of nodes per face and per edge
 
 integer,intent(in) :: nelmt,nnode
 !integer,dimension(nelmt),intent(in) :: part ! numbering starts from 1 only in this routine
-!integer,dimension(esize,nelmt),intent(in) :: connect    
+!integer,dimension(esize,nelmt),intent(in) :: connect
 integer,intent(in) :: npart,max_neighbour
 integer,dimension(:),intent(in) :: glob2loc_elmt
 
@@ -572,10 +572,10 @@ integer :: icount !,nelmt_interface
 integer,dimension(6,4) :: node_face ! local node numbers in each face
 integer,dimension(6,4) :: edge_face ! local edge numbers in each face
 integer,dimension(12,2) :: node_edge ! local node numbers in each edge
-integer :: ielmt,inode,ipart,jelmt,ie,je  
+integer :: ielmt,inode,ipart,jelmt,ie,je
 character(len=256),intent(in) :: out_phead
 character(len=20) :: format_str
-character(len=80) :: out_fname  
+character(len=80) :: out_fname
 
 integer :: istat
 integer,dimension(:),allocatable :: list_gpart
@@ -594,7 +594,7 @@ integer :: ncom,ie_interface,je_interface
 integer,allocatable :: gelmt(:),ginterface(:),gadjid(:),adj_iface(:),adj_iedge(:),adj_inode(:)
 integer :: adj_nface,adj_nedge,adj_nnode,ia
 
-! ghost partition  
+! ghost partition
 type ghost_partition
 integer :: nelmt
 !integer,dimension(4) :: gorder,morder
@@ -602,7 +602,7 @@ integer,dimension(:),pointer :: melmt,ecomp,meid ! master element,entity type,ma
 integer,dimension(:),pointer :: gelmt,geid ! ghost element,ghost element's entity id
 end type ghost_partition
 
-! master partition  
+! master partition
 type partition
 integer :: ielmt,nelmt
 integer,dimension(:),pointer :: elmt
@@ -618,7 +618,7 @@ type(partition),dimension(npart) :: mpart ! master partition
 !end type nodes
 !type(nodes),dimension(:),allocatable :: node
 
-! local node numbering in each face CUBIT/EXODUS convention  
+! local node numbering in each face CUBIT/EXODUS convention
 node_face(1,:)=(/1,2,6,5/)
 node_face(2,:)=(/2,3,7,6/)
 node_face(3,:)=(/4,3,7,8/)
@@ -649,16 +649,16 @@ edge_face(5,1)=1; edge_face(5,2)=2; edge_face(5,3)=3; edge_face(5,4)=4;
 edge_face(6,1)=9; edge_face(6,2)=10; edge_face(6,3)=11; edge_face(6,4)=12;
 
 !  allocate(node_part(nnode,npart))
-!  
-!  node_part=.false.  
+!
+!  node_part=.false.
 !  do i=1,nelmt
 !    node_part(connect(:,i),part(i))=.true.
 !  enddo
-!  
+!
 !  ! determine the number of partitions for all nodes
 !  node_npart=0
 !  allocate(node(nnode))
-!  do i=1,nnode 
+!  do i=1,nnode
 !    node_npart(i)=count(node_part(i,:))
 !    allocate(node(i)%part(node_npart(i)))
 !    icount=0
@@ -668,8 +668,8 @@ edge_face(6,1)=9; edge_face(6,2)=10; edge_face(6,3)=11; edge_face(6,4)=12;
 !        node(i)%part(icount)=j
 !      endif
 !    enddo
-!  enddo 
-  
+!  enddo
+
 !  deallocate(node_part)
 !  !print*,minval(node_npart),maxval(node_npart)
 !  !stop
@@ -682,7 +682,7 @@ edge_face(6,1)=9; edge_face(6,2)=10; edge_face(6,3)=11; edge_face(6,4)=12;
 !  !  enddo
 !  !enddo
 
-!  ! count the number of elements in the interface  
+!  ! count the number of elements in the interface
 !  nelmt_interface=0
 !  do i=1,nelmt
 !    if(maxval(node_npart(connect(:,i)))>1)nelmt_interface=nelmt_interface+1
@@ -711,16 +711,16 @@ adj_id1(nelmt_interface,max_neighbour),adj_id2(nelmt_interface,max_neighbour),st
 if(istat/=0)then
   print*,'ERROR: insufficient memory!'
   stop
-endif  
+endif
 !adj_elmt=0
 indadj=0 ! adjacency indicator, an element value = 2 indicates the adjacency
 adj_nelmt=0; adj_elmt=0
 adj_ind=0; adj_id1=0; adj_id2=0
-do i=1,nelmt_interface-1   
-  !ielmt=elmt_interface(i) 
-  do j=i+1,nelmt_interface          
+do i=1,nelmt_interface-1
+  !ielmt=elmt_interface(i)
+  do j=i+1,nelmt_interface
     !jelmt=elmt_interface(j)
-    
+
     ! sorting 2 array using the rank as index we can use very small array instead of indadj(nnode)
     ! test
     ! connect_adj(1:nenode)=connect_interface(:,i);
@@ -728,14 +728,14 @@ do i=1,nelmt_interface-1
     ! print*,connect_adj
     ! stop
     ! test
-    
+
     ! we are only interested in the part of i and j
     indadj(connect_interface(:,i))=0
-    indadj(connect_interface(:,j))=0      
+    indadj(connect_interface(:,j))=0
     indadj(connect_interface(:,i))=indadj(connect_interface(:,i))+1
     indadj(connect_interface(:,j))=indadj(connect_interface(:,j))+1
-    ncom=sum(indadj(connect_interface(:,i)))-nenode ! number of common nodes 
-          
+    ncom=sum(indadj(connect_interface(:,i)))-nenode ! number of common nodes
+
     if(ncom==0)then
       ! no common node
       cycle
@@ -745,15 +745,15 @@ do i=1,nelmt_interface-1
       !adj_elmt(j,i)=1
       !adj1(i,j)=get_nodeid(indadj(connect_interface(:,i))==2)
       !adj2(i,j)=get_nodeid(indadj(connect_interface(:,j))==2)
-      
+
       adj_nelmt(i)=adj_nelmt(i)+1
-      
+
       adj_id1(i,adj_nelmt(i))=get_nodeid(indadj(connect_interface(:,i))==2)
       adj_id2(i,adj_nelmt(i))=get_nodeid(indadj(connect_interface(:,j))==2)
-      
+
       adj_ind(i,adj_nelmt(i))=1
       adj_elmt(i,adj_nelmt(i))=j
-      
+
       adj_nelmt(j)=adj_nelmt(j)+1
       adj_ind(j,adj_nelmt(j))=1
       adj_elmt(j,adj_nelmt(j))=i
@@ -763,15 +763,15 @@ do i=1,nelmt_interface-1
       !adj_elmt(j,i)=2
       !adj1(i,j)=get_edgeid(indadj(connect_interface(:,i))==2,node_edge)
       !adj2(i,j)=get_edgeid(indadj(connect_interface(:,j))==2,node_edge)
-      
+
       adj_nelmt(i)=adj_nelmt(i)+1
-      
+
       adj_id1(i,adj_nelmt(i))=get_edgeid(indadj(connect_interface(:,i))==2,node_edge)
       adj_id2(i,adj_nelmt(i))=get_edgeid(indadj(connect_interface(:,j))==2,node_edge)
-      
+
       adj_ind(i,adj_nelmt(i))=2
       adj_elmt(i,adj_nelmt(i))=j
-      
+
       adj_nelmt(j)=adj_nelmt(j)+1
       adj_ind(j,adj_nelmt(j))=2
       adj_elmt(j,adj_nelmt(j))=i
@@ -779,27 +779,27 @@ do i=1,nelmt_interface-1
       ! common face
       !adj_elmt(i,j)=4
       !adj_elmt(j,i)=4
-      !adj1(i,j)=get_faceid(indadj(connect_interface(:,i))==2,node_face)        
+      !adj1(i,j)=get_faceid(indadj(connect_interface(:,i))==2,node_face)
       !adj2(i,j)=get_faceid(indadj(connect_interface(:,j))==2,node_face)
-      
+
       adj_nelmt(i)=adj_nelmt(i)+1
-      
-      adj_id1(i,adj_nelmt(i))=get_faceid(indadj(connect_interface(:,i))==2,node_face)        
+
+      adj_id1(i,adj_nelmt(i))=get_faceid(indadj(connect_interface(:,i))==2,node_face)
       adj_id2(i,adj_nelmt(i))=get_faceid(indadj(connect_interface(:,j))==2,node_face)
-      
+
       adj_ind(i,adj_nelmt(i))=4
       adj_elmt(i,adj_nelmt(i))=j
-      
+
       adj_nelmt(j)=adj_nelmt(j)+1
-      adj_ind(j,adj_nelmt(j))=4 
-      adj_elmt(j,adj_nelmt(j))=i         
+      adj_ind(j,adj_nelmt(j))=4
+      adj_elmt(j,adj_nelmt(j))=i
     else
       write(*,*)'ERROR: wrong number of common nodes!',ncom
       stop
-    endif      
+    endif
   enddo
   !print*,i,nelmt_interface
-enddo 
+enddo
 write(*,*)'complete!'
 
 allocate(mpart_gpart(npart,npart))
@@ -807,7 +807,7 @@ mpart_gpart=.false.
 do i=1,nelmt_interface
   !ielmt=elmt_interface(i)
   do j=1,nenode
-    inode=connect_interface(j,i)    
+    inode=connect_interface(j,i)
     do k=1,node_npart(inode)
       mpart_gpart(part_interface(i),node(inode)%part(k))=.true.
     enddo
@@ -829,15 +829,15 @@ do i_part=1,npart
   nghost(i_part)=mpart(i_part)%ngpart
 enddo
 max_ngpart=maxval(mpart(1:npart)%ngpart) ! maximum number of ghost partitions
-  
+
 deallocate(mpart_gpart) ! mpart_gpart seems that this can be utilized for efficiency later, but I don't know how to.
 ! count interfacial elements of each partition
-mpart(1:npart)%nelmt=0  
+mpart(1:npart)%nelmt=0
 !mpart(1:npart)%ngpart=0
 do i=1,nelmt_interface
   !ielmt=elmt_interface(i)
   ipart=part_interface(i)
-  ! count elements   
+  ! count elements
   mpart(ipart)%nelmt=mpart(ipart)%nelmt+1
 enddo
 
@@ -852,7 +852,7 @@ allocate(gelmt(max_nelmt),ginterface(max_nelmt),gadjid(max_nelmt))
 allocate(adj_iface(max_nelmt),adj_iedge(max_nelmt),adj_inode(max_nelmt))
 
 ! allocate type variable gpart
-do i_part=1,npart    
+do i_part=1,npart
   allocate(mpart(i_part)%elmt(mpart(i_part)%nelmt))
   allocate(mpart(i_part)%eid_interface(mpart(i_part)%nelmt))
 enddo
@@ -874,10 +874,10 @@ if(.not.all(mpart(1:npart)%ielmt==mpart(1:npart)%nelmt))then
 endif
 
 ! allocate type variable gpart
-do i_part=1,npart    
+do i_part=1,npart
   allocate(mpart(i_part)%gpart(mpart(i_part)%ngpart))
   allocate(mpart(i_part)%gpartid(mpart(i_part)%ngpart))
-  mpart(i_part)%gpartid=0    
+  mpart(i_part)%gpartid=0
   do j_part=1,mpart(i_part)%ngpart
     ! obviously max_nelmt is a waste of memory. there should be some other ways,
     ! but this should not be a problem, because this routine can be run after deallocating
@@ -891,7 +891,7 @@ do i_part=1,npart
     allocate(mpart(i_part)%gpart(j_part)%meid(max_nelmt))
     allocate(mpart(i_part)%gpart(j_part)%geid(max_nelmt))
     mpart(i_part)%gpart(j_part)%nelmt=0
-  enddo  
+  enddo
 enddo
 !print*,max_nelmt
 allocate(list_gpart(max_ngpart),stat=istat)
@@ -906,7 +906,7 @@ format_str='(a,a,i'//trim(adjustl(format_str))//',a,i'//trim(adjustl(format_str)
 !write(*,*)' '
 allocate(eadjid(nelmt_interface))
 !inorder=(/1,2,3,4/) ! default local node ordering
-mpart(1:npart)%igpart=0 ! counter for unique gpart  
+mpart(1:npart)%igpart=0 ! counter for unique gpart
 !ipart=0
 ! find neighbouring entities lying on the different partition
 ipart_loop: do i_part=1,npart-1
@@ -917,13 +917,13 @@ ipart_loop: do i_part=1,npart-1
     do i=1,mpart(i_part)%nelmt
       ielmt=mpart(i_part)%elmt(i)
       ie_interface=mpart(i_part)%eid_interface(i)
-      elmt_face=.false.; elmt_edge=.false.; elmt_node=.false. 
-      
+      elmt_face=.false.; elmt_edge=.false.; elmt_node=.false.
+
       !print*,adj_elmt(ie_interface,
       ngelmt=mpart(j_part)%nelmt
       gelmt(1:ngelmt)=mpart(j_part)%elmt(:)
       ginterface(1:ngelmt)=mpart(j_part)%eid_interface(:)
-      
+
       gadjid=0
       !print*,size(adjid),ie_interface,minval(ginterface(1:ngelmt)),maxval(ginterface(1:ngelmt))
       eadjid=0 ! elemental adjacency indicators
@@ -960,8 +960,8 @@ ipart_loop: do i_part=1,npart-1
       ! list jpart elements
       ! print*,'hi',adj_nface,adj_nedge,adj_nnode
       ! print*,'hi'
-      
-      ! we check in the order face, edge, and node to exclude redundant sharing (low level repeating) 
+
+      ! we check in the order face, edge, and node to exclude redundant sharing (low level repeating)
       ! check for face/s
       do ia=1,adj_nface
         je_interface=ginterface(adj_iface(ia))
@@ -986,20 +986,20 @@ ipart_loop: do i_part=1,npart-1
         !elmt_face(ie)=.true.
         !elmt_edge(abs(edge_face(ie,:)))=.true.
         !elmt_node(node_face(ie,:))=.true.
-        
-        ! ielmt is the ghost of jelmt                
+
+        ! ielmt is the ghost of jelmt
         call set_partition(j_part,i_part,jelmt,ielmt,ecomp,je,ie) !,jnorder,inorder)
         elmt_face(ie)=.true.
         elmt_edge(abs(edge_face(ie,:)))=.true.
         elmt_node(node_face(ie,:))=.true.
       enddo
-      
+
       ! chek for edge/s
       do ia=1,adj_nedge
         je_interface=ginterface(adj_iedge(ia))
         jelmt=gelmt(adj_iedge(ia))
         ecomp=2
-        if(ie_interface<je_interface)then          
+        if(ie_interface<je_interface)then
           !ecomp=adj_elmt(ie_interface,je_interface)
           ind=find(adj_elmt(ie_interface,:)==je_interface)
           ie=adj_id1(ie_interface,ind) !adj1(ie_interface,je_interface)
@@ -1018,15 +1018,15 @@ ipart_loop: do i_part=1,npart-1
         !elmt_face(ie)=.true.
         !elmt_edge(abs(edge_face(ie,:)))=.true.
         !elmt_node(node_face(ie,:))=.true.
-        
-        ! ielmt is the ghost of jelmt                
+
+        ! ielmt is the ghost of jelmt
         call set_partition(j_part,i_part,jelmt,ielmt,ecomp,je,ie) !,jnorder,inorder)
         elmt_edge(ie)=.true.
         elmt_node(node_edge(ie,:))=.true.
       enddo
-      
+
       ! check for node/s
-      do ia=1,adj_nnode  
+      do ia=1,adj_nnode
         je_interface=ginterface(adj_inode(ia))
         jelmt=gelmt(adj_inode(ia))
         ecomp=1
@@ -1046,8 +1046,8 @@ ipart_loop: do i_part=1,npart-1
         endif
         if(elmt_node(ie))cycle
         call set_partition(i_part,j_part,ielmt,jelmt,ecomp,ie,je) !,inorder,jnorder)
-                  
-        ! ielmt is the ghost of jelmt                
+
+        ! ielmt is the ghost of jelmt
         call set_partition(j_part,i_part,jelmt,ielmt,ecomp,je,ie) !,jnorder,inorder)
         elmt_node(ie)=.true.
       enddo
@@ -1056,10 +1056,10 @@ ipart_loop: do i_part=1,npart-1
     !print*,mpart(i_part)%nelmt,mpart(j_part)%nelmt
     !stop
   enddo jpart_loop ! j_part
-enddo ipart_loop ! i_part  
+enddo ipart_loop ! i_part
 !print*,'total',ipart
 if(.not.all(mpart(1:npart)%igpart==mpart(1:npart)%ngpart))then
-  print*,'ERROR: total number of ghost partitions mismatched!'    
+  print*,'ERROR: total number of ghost partitions mismatched!'
   print*,'Total number of ghost partitions'
   print*,mpart(1:npart)%ngpart
   print*,'Counted number of ghost partitions'
@@ -1075,10 +1075,10 @@ write(*,'(a)',advance='no')' saving ghost files...'
 
 ! write master and ghost partitions
 write(format_str,*)ceiling(log10(real(npart)+1.))
-format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'  
+format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
 
 ! write interfaces in each partition
-do i_part=1,npart    
+do i_part=1,npart
 
   ! open output file
   write(out_fname, fmt=format_str)trim(out_phead)//'ghost_proc',i_part-1
@@ -1101,35 +1101,35 @@ do i_part=1,npart
       stop
     endif
     write(16,*)'ghost partition ',j_part,' , my index there'
-    write(16,*)mpart(i_part)%gpartid(j_part)-1,myindex(1)   
-    write(16,*)'number of ghost elements in this ghost partition'     
+    write(16,*)mpart(i_part)%gpartid(j_part)-1,myindex(1)
+    write(16,*)'number of ghost elements in this ghost partition'
     !ngelmt=mpart(i_part)%gpart(j_part)%nelmt
     write(16,*)mpart(i_part)%gpart(j_part)%nelmt !,sum(mpart(i_part)%gpart(j_part)%ecomp(1:ngelmt))
     do i=1,mpart(i_part)%gpart(j_part)%nelmt
-      ecomp=mpart(i_part)%gpart(j_part)%ecomp(i)        
+      ecomp=mpart(i_part)%gpart(j_part)%ecomp(i)
       write(16,*)glob2loc_elmt(mpart(i_part)%gpart(j_part)%melmt(i)),mpart(i_part)%gpart(j_part)%ecomp(i), &
         mpart(i_part)%gpart(j_part)%meid(i) !,mpart(i_part)%gpart(j_part)%morder(1:ecomp), &
         !glob2loc_elmt(mpart(i_part)%gpart(j_part)%gelmt(i)), &
         !mpart(i_part)%gpart(j_part)%geid(i),mpart(i_part)%gpart(j_part)%gorder(1:ecomp)
-    enddo      
+    enddo
   enddo
   close(16)
 
 enddo
-write(*,*)' complete!' 
+write(*,*)' complete!'
 
 ! deallocate type variable gpart
-do i_part=1,npart       
+do i_part=1,npart
   do j_part=1,mpart(i_part)%ngpart
     deallocate(mpart(i_part)%gpart(j_part)%melmt)
     deallocate(mpart(i_part)%gpart(j_part)%gelmt)
     deallocate(mpart(i_part)%gpart(j_part)%ecomp)
     deallocate(mpart(i_part)%gpart(j_part)%meid)
     deallocate(mpart(i_part)%gpart(j_part)%geid)
-    
-  enddo  
+
+  enddo
 enddo
-do i_part=1,npart    
+do i_part=1,npart
   deallocate(mpart(i_part)%gpart)
   deallocate(mpart(i_part)%gpartid)
   deallocate(mpart(i_part)%elmt)
@@ -1137,7 +1137,7 @@ do i_part=1,npart
 enddo
 !deallocate(mpart)
 !=======================================================
-  
+
 contains
 !--------------------------------------------------
 ! this function finds the node ID of a true node in isnode
@@ -1152,7 +1152,7 @@ do i=1,nlen
     ind=i
     return
   endif
-enddo  
+enddo
 end function find
 !--------------------------------------------------
 
@@ -1168,7 +1168,7 @@ do i=1,nenode
   endif
 enddo
 write(*,*)'ERROR: no common node for node ID!'
-stop   
+stop
 end function get_nodeid
 !--------------------------------------------------
 
@@ -1186,9 +1186,9 @@ do i=1,nedge
   endif
 enddo
 write(*,*)'ERROR: no common node for edge ID!'
-stop   
+stop
 end function get_edgeid
-!-------------------------------------------------- 
+!--------------------------------------------------
 ! this function finds the face ID according to node_face of a set of true nodes in isnode
 function get_faceid(isnode,node_face) result(id)
 implicit none
@@ -1203,9 +1203,9 @@ do i=1,nface
   endif
 enddo
 write(*,*)'ERROR: no common node for face ID!'
-stop   
+stop
 end function get_faceid
-!--------------------------------------------------   
+!--------------------------------------------------
 
 ! this subroutine set all the members of each master-ghost partition pair
 subroutine set_partition(master,ghost,melmt,gelmt,ecomp,meid,geid) !,morder,gorder)
@@ -1219,26 +1219,26 @@ integer,intent(in) :: melmt,gelmt,ecomp,meid,geid
 if (mpart(master)%igpart==0)then ! first time count
   mpart(master)%igpart=1
   ind_gpart(1)=1
-  mpart(master)%gpartid(1)=ghost        
+  mpart(master)%gpartid(1)=ghost
 else ! already counted
-  list_gpart=-1    
-  list_gpart(1:mpart(master)%igpart)=mpart(master)%gpartid(1:mpart(master)%igpart) ! list of existing ghost partitions        
+  list_gpart=-1
+  list_gpart(1:mpart(master)%igpart)=mpart(master)%gpartid(1:mpart(master)%igpart) ! list of existing ghost partitions
   ind_gpart=maxloc(list_gpart,logical(list_gpart==ghost,1)) ! search if this ghost partion is already in the list and find the index
-  
-  if(ind_gpart(1)==0)then ! not found, i.e., this is a new gpart         
+
+  if(ind_gpart(1)==0)then ! not found, i.e., this is a new gpart
     mpart(master)%igpart=mpart(master)%igpart+1
     ind_gpart(1)=mpart(master)%igpart
-    mpart(master)%gpartid(ind_gpart(1))=ghost                
+    mpart(master)%gpartid(ind_gpart(1))=ghost
   endif
 endif
 
 ! count ghost elements in the ghost partition
-  
+
 !if(master==1 .and. ghost==2 )print*,'first0 nelmt: ',mpart(master)%gpart(ind_gpart(1))%nelmt,ind_gpart(1), &
 !mpart(master)%gpartid(ind_gpart(1))
 !print*,'hi0',mpart(master)%gpart(ind_gpart(1))%nelmt
 !stop
-mpart(master)%gpart(ind_gpart(1))%nelmt=mpart(master)%gpart(ind_gpart(1))%nelmt+1         
+mpart(master)%gpart(ind_gpart(1))%nelmt=mpart(master)%gpart(ind_gpart(1))%nelmt+1
 ind=mpart(master)%gpart(ind_gpart(1))%nelmt
 !if(master==1 .and. ghost==2 )print*,'first1 nelmt: ',mpart(master)%gpart(ind_gpart(1))%nelmt,ind_gpart(1), &
 !mpart(master)%gpartid(ind_gpart(1))
@@ -1253,7 +1253,7 @@ mpart(master)%gpart(ind_gpart(1))%geid(ind)=geid
 !mpart(master)%gpart(ind_gpart(1))%morder=morder
 !mpart(master)%gpart(ind_gpart(1))%gorder=gorder
 end subroutine set_partition
-!--------------------------------------------------  
+!--------------------------------------------------
 
 end subroutine detect_ghost
 !=======================================================
@@ -1264,7 +1264,7 @@ end subroutine detect_ghost
 ! 1/ first element, 2/ second element, 3/ number of common nodes, 4/ first node,
 ! 5/ second node, if relevant.
 
-! interface ignores acoustic and elastic elements 
+! interface ignores acoustic and elastic elements
 
 ! Elements with undefined material are considered as elastic elements.
 !--------------------------------------------------
@@ -1282,7 +1282,7 @@ integer,intent(out) :: ninterfaces
 
 integer,intent(in) :: npart
 
-! local parameters  
+! local parameters
 integer :: num_part,num_part_bis,el,el_adj,num_interface, &
 num_edge,ncommon_nodes,num_node, num_node_bis
 integer :: i,j
@@ -1308,8 +1308,8 @@ num_edge = 0
 do num_part = 0, npart-1
     do num_part_bis = num_part+1, npart-1
       do el = 0, nelmnts-1
-          if ( part(el) == num_part ) then                
-            ! looks at all neighbor elements 
+          if ( part(el) == num_part ) then
+            ! looks at all neighbor elements
             do el_adj = xadj(el), xadj(el+1)-1
                 ! adds element if neighbor element lies in next partition
                 if ( part(adjncy(el_adj)) == num_part_bis ) then
@@ -1340,7 +1340,7 @@ do num_part = 0, npart-1
       do el = 0, nelmnts-1
           if ( part(el) == num_part ) then
             do el_adj = xadj(el), xadj(el+1)-1
-                ! adds element if in adjacent partition                    
+                ! adds element if in adjacent partition
                 if ( part(adjncy(el_adj)) == num_part_bis ) then
                   tab_interfaces(tab_size_interfaces(num_interface)*7+num_edge*7+0) = el
                   tab_interfaces(tab_size_interfaces(num_interface)*7+num_edge*7+1) = adjncy(el_adj)
@@ -1402,7 +1402,7 @@ real(kind=kreal),dimension(1:nb_materials),intent(in) :: cs_material !double pre
 
 
 
-! local parameters  
+! local parameters
 integer :: num_part,num_part_bis,el,el_adj,num_interface, &
 num_edge,ncommon_nodes,num_node,num_node_bis
 integer :: i,j
@@ -1438,7 +1438,7 @@ do num_part = 0, npart-1
             else
                 is_acoustic_el = .false.
             end if
-            ! looks at all neighbor elements 
+            ! looks at all neighbor elements
             do el_adj = xadj(el), xadj(el+1)-1
                 ! determines whether neighbor element is acoustic or not
                 if(num_material(adjncy(el_adj)+1) > 0) then
@@ -1632,7 +1632,7 @@ end subroutine Write_glob2loc_nodes_database
 !--------------------------------------------------
 subroutine write_material_properties_database(out_path,matfile, &
 count_def_mat,count_undef_mat,mat_domain,mat_prop, &
-undef_mat_domain,undef_mat_prop,nwmat,waterid,iproc,npart) 
+undef_mat_domain,undef_mat_prop,nwmat,waterid,iproc,npart)
 
 integer,intent(in) :: count_def_mat,count_undef_mat,iproc,npart
 integer,dimension(count_def_mat) :: mat_domain
@@ -1659,12 +1659,12 @@ if( istat /= 0 ) then
   stop
 endif
 
-write(16,*)'# material properties (domain,id,gamma,ym,nu,phi,coh,psi)'   
-write(16,*)  count_def_mat !,count_undef_mat 
+write(16,*)'# material properties (domain,id,gamma,ym,nu,phi,coh,psi)'
+write(16,*)  count_def_mat !,count_undef_mat
 do i = 1, count_def_mat
   ! database material definition
   !
-  ! format:  #rho  #vp  #vs  #Q_flag  #anisotropy_flag #domain_id     
+  ! format:  #rho  #vp  #vs  #Q_flag  #anisotropy_flag #domain_id
   !
   ! (note that this order of the properties is different than the input in nummaterial_velocity_file)
   !
@@ -1679,8 +1679,8 @@ end do
 ! write water properties if any
 write(16,*)nwmat
 do i=1,nwmat
-  !print*,nwmat,i,waterid(i)      
-  write(16,*)waterid(i) 
+  !print*,nwmat,i,waterid(i)
+  write(16,*)waterid(i)
 enddo
 close(16)
 
@@ -1695,10 +1695,10 @@ subroutine write_boundaries_database(out_path,uxfile,uyfile,uzfile,iproc, nelmnt
                       ibelm_xmin, ibelm_xmax, ibelm_ymin, &
                       ibelm_ymax, ibelm_bottom, ibelm_top, &
                       nodes_ibelm_xmin, nodes_ibelm_xmax, nodes_ibelm_ymin, &
-                      nodes_ibelm_ymax, nodes_ibelm_bottom, nodes_ibelm_top, & 
+                      nodes_ibelm_ymax, nodes_ibelm_bottom, nodes_ibelm_top, &
                       glob2loc_elmnts, glob2loc_nodes_npart, &
                       glob2loc_nodes_parts, glob2loc_nodes, part,npart )
-    
+
 integer,intent(in) :: iproc,npart
 integer,intent(in) :: nelmnts !integer(long)
 integer,intent(in) :: nspec2D_xmin,nspec2D_xmax,nspec2D_ymin, nspec2D_ymax,nspec2D_bottom,nspec2D_top
@@ -1707,21 +1707,21 @@ integer,dimension(nspec2D_xmax),intent(in) :: ibelm_xmax
 integer,dimension(nspec2D_ymin),intent(in) :: ibelm_ymin
 integer,dimension(nspec2D_ymax),intent(in) :: ibelm_ymax
 integer,dimension(nspec2D_bottom),intent(in) :: ibelm_bottom
-integer,dimension(nspec2D_top),intent(in) :: ibelm_top 
+integer,dimension(nspec2D_top),intent(in) :: ibelm_top
 
 integer,dimension(nspec2D_xmin),intent(in) :: nodes_ibelm_xmin
 integer,dimension(nspec2D_xmax),intent(in) :: nodes_ibelm_xmax
 integer,dimension(nspec2D_ymin),intent(in) :: nodes_ibelm_ymin
 integer,dimension(4,nspec2D_ymax),intent(in) :: nodes_ibelm_ymax
 integer,dimension(4,nspec2D_bottom),intent(in) :: nodes_ibelm_bottom
-integer,dimension(4,nspec2D_top),intent(in) :: nodes_ibelm_top    
+integer,dimension(4,nspec2D_top),intent(in) :: nodes_ibelm_top
 integer,dimension(:),pointer :: glob2loc_elmnts
 integer,dimension(:),pointer :: glob2loc_nodes_npart
 integer,dimension(:),pointer :: glob2loc_nodes_parts
 integer,dimension(:),pointer :: glob2loc_nodes
 integer,dimension(1:nelmnts) :: part
 
-! local parameters  
+! local parameters
 integer :: i
 integer :: loc_node1,loc_node2,loc_node3,loc_node4
 integer :: loc_nspec2D_xmin,loc_nspec2D_xmax,loc_nspec2D_ymin, &
@@ -1747,7 +1747,7 @@ endif
 
 ! counts number of elements for boundary at xmin, xmax, ymin, ymax, bottom, top in this partition
 loc_nspec2D_xmin = 0
-do i=1,nspec2D_xmin  
+do i=1,nspec2D_xmin
     if(part(ibelm_xmin(i)) == iproc) then
       loc_nspec2D_xmin = loc_nspec2D_xmin + 1
     end if
@@ -1757,11 +1757,11 @@ write(16,*)loc_nspec2D_xmin
 ! outputs element index and element node indices
 ! note: assumes that element indices in ibelm_* arrays are in the range from 1 to nspec
 !          (this is assigned by CUBIT, if this changes the following indexing must be changed as well)
-!          while glob2loc_elmnts(.) is shifted from 0 to nspec-1  thus 
+!          while glob2loc_elmnts(.) is shifted from 0 to nspec-1  thus
 !          we need to have the arg of glob2loc_elmnts start at 0 ==> glob2loc_nodes(ibelm_** -1 )
-do i=1,nspec2D_xmin  
+do i=1,nspec2D_xmin
     if(part(ibelm_xmin(i)) == iproc) then
-      write(16,*) glob2loc_elmnts(ibelm_xmin(i)-1)+1, nodes_ibelm_xmin(i)  
+      write(16,*) glob2loc_elmnts(ibelm_xmin(i)-1)+1, nodes_ibelm_xmin(i)
     end if
 end do
 close(16)
@@ -1776,16 +1776,16 @@ if( istat /= 0 ) then
 endif
 
 loc_nspec2D_xmax = 0
-do i=1,nspec2D_xmax  
+do i=1,nspec2D_xmax
     if(part(ibelm_xmax(i)) == iproc) then
       loc_nspec2D_xmax = loc_nspec2D_xmax + 1
     end if
 end do
 write(16,*)loc_nspec2D_xmax
 
-do i=1,nspec2D_xmax     
-    if(part(ibelm_xmax(i)) == iproc) then         
-      write(16,*) glob2loc_elmnts(ibelm_xmax(i)-1)+1, nodes_ibelm_xmax(i)  
+do i=1,nspec2D_xmax
+    if(part(ibelm_xmax(i)) == iproc) then
+      write(16,*) glob2loc_elmnts(ibelm_xmax(i)-1)+1, nodes_ibelm_xmax(i)
     end if
 end do
 close(16)
@@ -1799,19 +1799,19 @@ if( istat /= 0 ) then
   stop
 endif
 loc_nspec2D_ymin = 0
-do i=1,nspec2D_ymin  
+do i=1,nspec2D_ymin
     if(part(ibelm_ymin(i)) == iproc) then
       loc_nspec2D_ymin = loc_nspec2D_ymin + 1
     end if
 end do
-write(16,*)loc_nspec2D_ymin   
+write(16,*)loc_nspec2D_ymin
 
-do i=1,nspec2D_ymin     
-    if(part(ibelm_ymin(i)) == iproc) then          
-      write(16,*) glob2loc_elmnts(ibelm_ymin(i)-1)+1, nodes_ibelm_ymin(i)  
+do i=1,nspec2D_ymin
+    if(part(ibelm_ymin(i)) == iproc) then
+      write(16,*) glob2loc_elmnts(ibelm_ymin(i)-1)+1, nodes_ibelm_ymin(i)
     end if
 end do
-close(16)   
+close(16)
 
 end subroutine write_boundaries_database
 !===========================================
@@ -1878,7 +1878,7 @@ endif
     end do
     write(16,*)nspec
     write(17,*)nspec
-    
+
     !write(out_fname, fmt=format_str)trim(out_phead)//'elmt_proc',iproc
     ! open(unit=19,file=trim(out_fname),&
     !   status='unknown', action='write', form='formatted', iostat = istat)
@@ -1902,7 +1902,7 @@ endif
             end do
 
           end do
-          
+
           ! format:
           ! # ispec_local # material_index_1 # material_index_2 # corner_id1 # corner_id2 # ... # corner_id8
           !write(16,*) glob2loc_elmnts(i)+1, matid(1,i+1), matid(2,i+1),(loc_nodes(k)+1, k=0,ngnod-1)
@@ -1953,7 +1953,7 @@ integer :: istat
 !character(len=80) :: prname
 character(len=256) :: out_phead
 character(len=20) :: format_str
-character(len=80) :: out_fname    
+character(len=80) :: out_fname
 
 write(format_str,*)ceiling(log10(real(npart)+1.))
 format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
@@ -1973,14 +1973,14 @@ num_interface = 0
 ! counts number of interfaces to neighbouring partitions
     my_interfaces(:) = 0
     my_nb_interfaces(:) = 0
-  
+
     ! double loops over all partitions
-    do i = 0, npart-1       
+    do i = 0, npart-1
       do j = i+1, npart-1
           ! only counts if specified partition (iproc) appears and interface elements increment
           if ( (tab_size_interfaces(num_interface) < tab_size_interfaces(num_interface+1)) .and. &
               (i == iproc .or. j == iproc) ) then
-            ! sets flag  
+            ! sets flag
             my_interfaces(num_interface) = 1
             ! sets number of elements on interface
             my_nb_interfaces(num_interface) = tab_size_interfaces(num_interface+1) - tab_size_interfaces(num_interface)
@@ -2004,7 +2004,7 @@ num_interface = 0
             else
               write(16,*) i, my_nb_interfaces(num_interface)
             end if
-            
+
             count_faces = 0
             do k = tab_size_interfaces(num_interface), tab_size_interfaces(num_interface+1)-1
               !print*,'hello',i,iproc
@@ -2018,7 +2018,7 @@ num_interface = 0
                   !print*,tab_interfaces(k*7+1),size(glob2loc_elmnts)
                   !stop
                   local_elmnt = glob2loc_elmnts(tab_interfaces(k*7+1))+1
-                  
+
               end if
 
 !!$                  if ( tab_interfaces(k*7+2) == 1 ) then
@@ -2109,7 +2109,7 @@ num_interface = 0
                   print *, "error in write_interfaces_database!", tab_interfaces(k*7+2), iproc
               end select
             end do
-      
+
             ! outputs infos
             !print*,'  partition MPI interface:',iproc,num_interface
             !print*,'    element faces: ',count_faces
@@ -2126,14 +2126,14 @@ end subroutine write_interfaces_database
 !=======================================================
 
 !--------------------------------------------------
-! Write elements on surface boundaries (and their four nodes on boundaries) 
+! Write elements on surface boundaries (and their four nodes on boundaries)
 ! pertaining to iproc partition in the corresponding Database
 !--------------------------------------------------
-subroutine write_moho_surface_database(IIN_database, iproc, nelmnts, & 
+subroutine write_moho_surface_database(IIN_database, iproc, nelmnts, &
                       glob2loc_elmnts, glob2loc_nodes_npart, &
                       glob2loc_nodes_parts, glob2loc_nodes, part, &
                       nspec2D_moho,ibelm_moho,nodes_ibelm_moho)
-    
+
 integer,intent(in) :: IIN_database
 integer,intent(in) :: iproc
 integer,intent(in) :: nelmnts !integer(long)
@@ -2151,7 +2151,7 @@ integer,dimension(4,nspec2D_moho),intent(in) :: nodes_ibelm_moho
 integer :: i,j
 integer :: loc_node1,loc_node2,loc_node3,loc_node4
 integer :: loc_nspec2D_moho
-  
+
 ! counts number of elements for moho surface in this partition
 ! optional moho
 loc_nspec2D_moho = 0
@@ -2169,11 +2169,11 @@ write(IIN_database,*) 7, loc_nspec2D_moho
 ! outputs element index and element node indices
 ! note: assumes that element indices in ibelm_* arrays are in the range from 1 to nspec
 !          (this is assigned by CUBIT, if this changes the following indexing must be changed as well)
-!          while glob2loc_elmnts(.) is shifted from 0 to nspec-1  thus 
+!          while glob2loc_elmnts(.) is shifted from 0 to nspec-1  thus
 !          we need to have the arg of glob2loc_elmnts start at 0 ==> glob2loc_nodes(ibelm_** -1 )
 
 ! optional moho
-do i=1,nspec2D_moho    
+do i=1,nspec2D_moho
     if(part(ibelm_moho(i)) == iproc) then
       do j = glob2loc_nodes_npart(nodes_ibelm_moho(1,i)-1), glob2loc_nodes_npart(nodes_ibelm_moho(1,i))-1
           if (glob2loc_nodes_parts(j) == iproc ) then
@@ -2195,7 +2195,7 @@ do i=1,nspec2D_moho
             loc_node4 = glob2loc_nodes(j)+1
           end if
       end do
-      write(IIN_database,*) glob2loc_elmnts(ibelm_moho(i)-1)+1, loc_node1, loc_node2, loc_node3, loc_node4  
+      write(IIN_database,*) glob2loc_elmnts(ibelm_moho(i)-1)+1, loc_node1, loc_node2, loc_node3, loc_node4
     end if
 
 end do
@@ -2204,13 +2204,13 @@ end subroutine write_moho_surface_database
 
 
 !--------------------------------------------------
-! loading : sets weights for acoustic/elastic elements to account for different 
+! loading : sets weights for acoustic/elastic elements to account for different
 !               expensive calculations in specfem simulations
 !--------------------------------------------------
 
 subroutine acoustic_elastic_load (elmnts_load,nelmnts,nb_materials,num_material,mat_prop)
 !
-! note: 
+! note:
 !   acoustic material = domainID 1  (stored in mat_prop(6,..) )
 !   elastic material    = domainID 2
 !
@@ -2222,12 +2222,12 @@ integer,intent(in) :: nb_materials
 ! load weights
 integer,dimension(1:nelmnts),intent(out) :: elmnts_load
 
-! materials  
+! materials
 integer,dimension(1:nelmnts),intent(in) :: num_material
 real(kind=kreal),dimension(6,nb_materials),intent(in) :: mat_prop !double precision
 
 ! local parameters
-logical,dimension(nb_materials) :: is_acoustic,is_elastic    
+logical,dimension(nb_materials) :: is_acoustic,is_elastic
 integer :: i,el
 
 ! sets acoustic/elastic flags for materials
@@ -2291,7 +2291,7 @@ integer,dimension(:),allocatable :: xadj
 integer,dimension(:),allocatable :: adjncy
 integer,dimension(:),allocatable :: nnodes_elmnts
 integer,dimension(:),allocatable :: nodes_elmnts
-integer :: max_neighbour        
+integer :: max_neighbour
 
 integer :: i,iface
 integer :: el,el_adj
@@ -2381,11 +2381,11 @@ implicit none
 integer,intent(in) :: nelmnts !integer(long)
 
 ! number of (global) nodes, number or processes
-integer,intent(in) :: nnodes,nproc 
+integer,intent(in) :: nnodes,nproc
 
 ! maximum number of neighours and max number of elements-that-contain-the-same-node
 integer,intent(in) :: sup_neighbour,nsize !integer(long)
-    
+
 ! partition index on each element
 integer,dimension(0:nelmnts-1) :: part
 
@@ -2409,7 +2409,7 @@ integer,dimension(:),allocatable :: xadj
 integer,dimension(:),allocatable :: adjncy
 integer,dimension(:),allocatable :: nnodes_elmnts
 integer,dimension(:),allocatable :: nodes_elmnts
-integer :: max_neighbour        
+integer :: max_neighbour
 
 integer :: i,j,iface,inode,ispec2D,counter
 integer :: el,el_adj
@@ -2420,14 +2420,14 @@ allocate( is_moho(0:nelmnts-1)) ! element ids start from 0
 allocate( node_is_moho(0:nnodes-1) ) ! node ids start from 0
 is_moho(:) = .false.
 node_is_moho(:) = .false.
-    
+
 ! sets moho flags for known elements
 do ispec2D = 1, nspec2D_moho
   ! note: assumes that element indices in ibelm_* arrays are in the range from 1 to nspec
   el = ibelm_moho(ispec2D) - 1
-  is_moho(el) = .true.  
-  
-  ! sets node flags      
+  is_moho(el) = .true.
+
+  ! sets node flags
   do j=1,4
     ! note: assumes that node indices in nodes_ibelm_* arrays are in the range from 1 to nodes
     inode = nodes_ibelm_moho(j,ispec2D) - 1
@@ -2435,18 +2435,18 @@ do ispec2D = 1, nspec2D_moho
   enddo
 enddo
 
-! checks if element has moho surface 
+! checks if element has moho surface
 do el = 0, nelmnts-1
   if( is_moho(el) ) cycle
-  
-  ! loops over all element corners         
-  counter = 0   
+
+  ! loops over all element corners
+  counter = 0
   do i=0,esize-1
     ! note: assumes that node indices in elmnts array are in the range from 0 to nodes-1
     inode = elmnts(el*esize+i)
-    if( node_is_moho(inode) ) counter = counter + 1  
+    if( node_is_moho(inode) ) counter = counter + 1
   enddo
-  
+
   ! sets flag if it has a surface
   if( counter == 4 ) is_moho(el) = .true.
 enddo
@@ -2587,7 +2587,7 @@ integer,intent(in) :: n ! size of the vectors
 integer,dimension(n),intent(in) :: x1,x2 ! data vectors to compare
 logical :: flag
 integer :: i
-flag=.true. 
+flag=.true.
 do i = 1,n
 if(x1(i)/=x2(i))then
   flag=.false.

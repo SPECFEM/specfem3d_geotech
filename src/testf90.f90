@@ -5,15 +5,15 @@ character(len=250) :: prog
 integer :: i,ios
 
 ! ghost partitions
-type derived_type  
-  integer,dimension(:),allocatable :: acomp 
+type derived_type
+  integer,dimension(:),allocatable :: acomp
 end type derived_type
 type(derived_type),dimension(:),allocatable :: derived
 
 call get_command_argument(0, prog)
 !----input and initialisation----
-if (command_argument_count() <= 0) then  
-  write(*,*)'ERROR: no input file!'    
+if (command_argument_count() <= 0) then
+  write(*,*)'ERROR: no input file!'
 endif
 
 allocate(derived(10))

@@ -41,7 +41,7 @@ character(len=250) :: errtag ! error message
 integer :: errcode
 logical :: isopen ! flag to check whether the file is opened
 
-myid=1; nproc=1; 
+myid=1; nproc=1;
 errtag=""; errcode=-1
 
 call start_process(ismpi,myid,nproc,stdout)
@@ -49,8 +49,8 @@ call start_process(ismpi,myid,nproc,stdout)
 
 call get_command_argument(0, prog)
 !----input and initialisation----
-if (command_argument_count() <= 0) then  
-  call error_stop('ERROR: no input file!',stdout,myid)    
+if (command_argument_count() <= 0) then
+  call error_stop('ERROR: no input file!',stdout,myid)
 endif
 
 call get_command_argument(1, arg1)
@@ -62,14 +62,14 @@ if(trim(arg1)==('--help'))then
     write(stdout,'(a)')'    --version     : Display version information.'
   endif
   !call sync_process
-  call close_process()  
-elseif(trim(arg1)==('--version'))then  
+  call close_process()
+elseif(trim(arg1)==('--version'))then
   if(myid==1)then
     write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.0 Beta'
     write(stdout,'(a)')'This is free software; see the source for copying '
     write(stdout,'(a)')'conditions.  There is NO warranty; not even for '
     write(stdout,'(a)')'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.'
-  endif 
+  endif
   !call sync_process
   call close_process()
 endif
@@ -94,8 +94,8 @@ write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',min_nnod
 endif
 
 if (trim(method)/='sem')then
-  write(errtag,'(a)')'ERROR: wrong input for sem3d!' 
-  call error_stop(errtag,stdout,myid)  
+  write(errtag,'(a)')'ERROR: wrong input for sem3d!'
+  call error_stop(errtag,stdout,myid)
 endif
 
 call parse_file(inp_fname,path,file_head,ext)
@@ -121,7 +121,7 @@ geo_file=trim(file_head)//'_original'//trim(ptail)//'.geo'
 
 open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
-  write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'  
+  write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
   call error_stop(errtag,stdout,myid)
 endif
 
@@ -166,14 +166,14 @@ ngllxy=ngllx*nglly
 
 ! geometrical nodes (corner nodes) in EXODUS/CUBIT order
 ! bottom nodes
-gnod(1)=1;      
+gnod(1)=1;
 gnod(2)=ngllx
-gnod(3)=ngllxy; 
+gnod(3)=ngllxy;
 gnod(4)=gnod(3)-ngllx+1
 ! top nodes
-gnod(5)=(ngllz-1)*ngllxy+1; 
+gnod(5)=(ngllz-1)*ngllxy+1;
 gnod(6)=gnod(5)+ngllx-1
-gnod(7)=ngll;               
+gnod(7)=ngll;
 gnod(8)=gnod(7)-ngllx+1
 
 ! map sequential node numbering to exodus/cubit order for 8-noded hexahedra
@@ -210,7 +210,7 @@ endif
 if(savedata%stress)then
   write(11,'(a,i10,a,a,a,a,/)')'tensor symm per node: ',ts,' ','stress',' ',   &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.sig'
-endif  
+endif
 if(savedata%psigma)then
   write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','principal_stress',' ', &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.psig'
@@ -291,7 +291,7 @@ do i_elmt=1,nelmt
         node_hex8(7)=node_hex8(5)+ngllx
         node_hex8(8)=node_hex8(7)+1
         ! map to exodus/cubit numbering and write
-        write(funit)g_num(node_hex8(map2exodus),i_elmt) 
+        write(funit)g_num(node_hex8(map2exodus),i_elmt)
       enddo
     enddo
   enddo
@@ -324,7 +324,7 @@ telap=cpu_tend-cpu_tstart
 max_telap=maxscal(telap)
 mean_telap=sumscal(telap)/real(nproc,kreal)
 
-write(format_str,*)ceiling(log10(real(max_telap)+1.))+5 ! 1 . and 4 decimals 
+write(format_str,*)ceiling(log10(real(max_telap)+1.))+5 ! 1 . and 4 decimals
 format_str='(3(f'//trim(adjustl(format_str))//'.4,1X))'
 open(10,file=trim(sum_file),status='old',position='append',action='write')
 write(10,*)'ELAPSED TIME, MAX ELAPSED TIME, MEAN ELAPSED TIME'

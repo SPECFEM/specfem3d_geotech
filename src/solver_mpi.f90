@@ -37,9 +37,9 @@ errcode=-1
 
 !---PCG solver
 kp=zero
-if(maxval(abs(u_g)).gt.zero)then 
-  do i_elmt=1,nelmt     
-    egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,i_elmt)),(/nedof/)) 
+if(maxval(abs(u_g)).gt.zero)then
+  do i_elmt=1,nelmt
+    egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,i_elmt)),(/nedof/))
     km=k(:,:,i_elmt)
     kp(egdof)=kp(egdof)+matmul(km,u_g(egdof))
   end do
@@ -55,28 +55,28 @@ p=z
 pcg: do cg_iter=1,cg_maxiter
   call assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,p,p_g) !,gdof)
   kp=zero
-  do i_elmt=1,nelmt       
+  do i_elmt=1,nelmt
     egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,i_elmt)),(/nedof/))
-    km=k(:,:,i_elmt)   
+    km=k(:,:,i_elmt)
     kp(egdof)=kp(egdof)+matmul(km,p_g(egdof))
   end do
   kp(0)=zero
-  
+
   rz=dot_product_par(r,z_g)
   alpha=rz/dot_product_par(p_g,kp)
   u_g=u_g+alpha*p_g
-  
+
   if(abs(alpha)*maxvec(abs(p_g))/maxvec(abs(u_g)).le.cg_tol)then
     errcode=0
     return
   endif
   !if(myid==1)print*,abs(alpha)*maxvec(abs(p_g))/maxvec(abs(u_g))
-  r=r-alpha*kp  
+  r=r-alpha*kp
   z=dprecon_g*r
   call assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,z,z_g) !,gdof)
   beta=dot_product_par(r,z_g)/rz
   p=z+beta*p
-  !if(myid==1)write(*,'(i3,f25.18,f25.18,f25.18)')cg_iter,alpha,beta,rz  
+  !if(myid==1)write(*,'(i3,f25.18,f25.18,f25.18)')cg_iter,alpha,beta,rz
 end do pcg
 write(errtag,'(a)')'ERROR: PCG solver doesn''t converge!'
 return

@@ -45,13 +45,13 @@ function iminscal(scal) result(gmin)
 !
 ! this finds a summation of a scalar across the processors
 !
-implicit none 
-integer,intent(in)::scal 
+implicit none
+integer,intent(in)::scal
 integer :: gmin
 integer :: ierr
-  
+
 gmin=scal
- 
+
 return
 end function iminscal
 !=======================================================
@@ -60,13 +60,13 @@ function fminscal(scal) result(gmin)
 !
 ! this finds a summation of a scalar across the processors
 !
-implicit none 
-real(kind=kreal),intent(in)::scal 
+implicit none
+real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gmin
 integer :: ierr
-  
+
 gmin=scal
- 
+
 return
 end function fminscal
 !=======================================================
@@ -75,13 +75,13 @@ function imaxscal(scal) result(gmax)
 !
 ! this finds a summation of a scalar across the processors
 !
-implicit none 
-integer,intent(in)::scal 
+implicit none
+integer,intent(in)::scal
 integer :: gmax
 integer :: ierr
-  
+
 gmax=scal
- 
+
 return
 end function imaxscal
 !=======================================================
@@ -90,13 +90,13 @@ function fmaxscal(scal) result(gmax)
 !
 ! this finds a summation of a scalar across the processors
 !
-implicit none 
-real(kind=kreal),intent(in)::scal 
+implicit none
+real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gmax
 integer :: ierr
-  
+
 gmax=scal
- 
+
 return
 end function fmaxscal
 !=======================================================
@@ -161,13 +161,13 @@ function isumscal(scal) result(gsum)
 !
 ! this finds a summation of a scalar across the processors
 !
-implicit none 
-integer,intent(in)::scal 
+implicit none
+integer,intent(in)::scal
 integer :: gsum
 integer :: ierr
-  
+
 gsum=scal
- 
+
 return
 end function isumscal
 !=======================================================
@@ -176,13 +176,13 @@ function fsumscal(scal) result(gsum)
 !
 ! this finds a summation of a scalar across the processors
 !
-implicit none 
-real(kind=kreal),intent(in)::scal 
+implicit none
+real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gsum
 integer :: ierr
-  
+
 gsum=scal
- 
+
 return
 end function fsumscal
 !=======================================================
@@ -192,15 +192,15 @@ function dot_product_par(vec1,vec2) result(gdot)
 ! this finds dot product of two vectors across the processors
 !
 implicit none
-real(kind=kreal),intent(in)::vec1(:),vec2(:) 
+real(kind=kreal),intent(in)::vec1(:),vec2(:)
 real(kind=kreal) :: ldot,gdot
 integer :: ierr
- 
+
 ! find local dot
 ldot=dot_product(vec1,vec2)
 
-gdot=ldot 
-  
+gdot=ldot
+
 return
 end function dot_product_par
 !=======================================================

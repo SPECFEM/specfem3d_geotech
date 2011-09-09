@@ -92,7 +92,7 @@ write(12,'(a,/)')'type:  master_server gold'
 
 write(12,'(a)')'SERVERS'
 write(12,'(a,i2,/)')'number of servers:    ',nproc
-    
+
 ! loop over output slices
 do i_proc=1,nproc
   ! original data
@@ -101,21 +101,21 @@ do i_proc=1,nproc
   write(11,'(a)')'executable: '//trim(server_exec(i_proc))
   write(11,'(a)')'#login id: '
   write(11,'(a)')'data_path: '//trim(data_path(i_proc))
-  
-  ! new data  
+
+  ! new data
   write(12,'(a,i2)')'#Server ',i_proc
   write(12,'(a)')'machine id: '//trim(server_name(i_proc))
   write(12,'(a)')'executable: '//trim(server_exec(i_proc))
   write(12,'(a)')'#login id: '
   write(12,'(a)')'data_path: '//trim(data_path(i_proc))
-  
+
   ! file header
   write(case_head,fmt=format_str)trim(file_head)//'_proc',i_proc
-  
-  write(11,'(a,/)')'casefile: '//trim(case_head)//'_original.case'  
-  
+
+  write(11,'(a,/)')'casefile: '//trim(case_head)//'_original.case'
+
   write(12,'(a,/)')'casefile: '//trim(case_head)//'.case'
-  
+
 enddo
 close(11)
 close(12)

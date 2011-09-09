@@ -7,7 +7,7 @@ interface
 ! this subroutine computes B matrix
 subroutine compute_bmat(bmat,deriv)
  use set_precision
- implicit none 
+ implicit none
  real(kind=kreal),intent(in)::deriv(:,:)
  real(kind=kreal),intent(out)::bmat(:,:)
 end subroutine compute_bmat
@@ -15,10 +15,10 @@ end subroutine compute_bmat
 ! this subroutine computes C matrix (elasticity matrix)
 subroutine compute_cmat(cmat,e,v)
  use set_precision
- implicit none 
+ implicit none
  real(kind=kreal),intent(in)::e,v
  real(kind=kreal),intent(out)::cmat(:,:)
-end subroutine compute_cmat 
+end subroutine compute_cmat
 end interface
 
 contains
@@ -53,8 +53,8 @@ endif
 
 ! compute stiffness matrices
 storkm=zero; dprecon=zero
-!----element stiffness integration, storage and preconditioner---- 
-do i_elmt=1,nelmt  
+!----element stiffness integration, storage and preconditioner----
+do i_elmt=1,nelmt
   call compute_cmat(cmat,ym(mat_id(i_elmt)),nu(mat_id(i_elmt)))
   num=g_num(:,i_elmt)
   coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
@@ -64,27 +64,27 @@ do i_elmt=1,nelmt
   do i=1,ngll
     !call shape_function(fun,gll_points(i))
     ! compute Jacobian at GLL point using 20 noded element
-    !call shape_derivative(der,gll_points(:,i)) 
-    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord) 
-    detjac=determinant(jac) 
+    !call shape_derivative(der,gll_points(:,i))
+    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord)
+    detjac=determinant(jac)
     call invert(jac)
-    
+
     deriv=matmul(jac,dlagrange_gll(:,i,:)) ! use der for gll
-    call compute_bmat(bmat,deriv) !!! gll bmat matrix          
+    call compute_bmat(bmat,deriv) !!! gll bmat matrix
     km=km+matmul(matmul(transpose(bmat),cmat),bmat)*detjac*gll_weights(i)
     eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
     !eld(2:nedof-1:3)=eld(2:nedof-1:3)+fun(:)*detjac*weights(i)
-  end do ! i=1,ngll  
+  end do ! i=1,ngll
   storkm(:,:,i_elmt)=km
   do k=1,nedof
     dprecon(egdof(k))=dprecon(egdof(k))+km(k,k)
-  end do  
-  
+  end do
+
   if(.not.present(extload))cycle
   ! compute body loads
   ! gravity load and add to extload
   if(gravity)extload(egdof)=extload(egdof)-eld*gam(mat_id(i_elmt))
-  if(pseudoeq)then  
+  if(pseudoeq)then
     ! compute pseudostatic earthquake loads and add to extload
     eqload(1:nedof:3)=eqkx*eld(3:nedof:3)
     eqload(2:nedof:3)=eqky*eld(3:nedof:3)

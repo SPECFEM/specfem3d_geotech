@@ -46,13 +46,13 @@ function iminscal(scal) result(gmin)
 !
 ! this finds a global minimum of a scalar across the processors
 !
-implicit none 
-integer,intent(in)::scal 
+implicit none
+integer,intent(in)::scal
 integer :: gmin
 integer :: ierr
-  
+
 call MPI_ALLREDUCE(scal,gmin,1,MPI_INTEGER,MPI_MIN,MPI_COMM_WORLD,ierr)
- 
+
 return
 end function iminscal
 !=======================================================
@@ -61,13 +61,13 @@ function fminscal(scal) result(gmin)
 !
 ! this finds a global minimum of a scalar across the processors
 !
-implicit none 
-real(kind=kreal),intent(in)::scal 
+implicit none
+real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gmin
 integer :: ierr
-  
+
 call MPI_ALLREDUCE(scal,gmin,1,MPI_KREAL,MPI_MIN,MPI_COMM_WORLD,ierr)
- 
+
 return
 end function fminscal
 !=======================================================
@@ -76,13 +76,13 @@ function imaxscal(scal) result(gmax)
 !
 ! this finds a global maximum of a scalar across the processors
 !
-implicit none 
-integer,intent(in)::scal 
+implicit none
+integer,intent(in)::scal
 integer :: gmax
 integer :: ierr
-  
+
 call MPI_ALLREDUCE(scal,gmax,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,ierr)
- 
+
 return
 end function imaxscal
 !=======================================================
@@ -91,13 +91,13 @@ function fmaxscal(scal) result(gmax)
 !
 ! this finds a global maximum of a scalar across the processors
 !
-implicit none 
-real(kind=kreal),intent(in)::scal 
+implicit none
+real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gmax
 integer :: ierr
-  
+
 call MPI_ALLREDUCE(scal,gmax,1,MPI_KREAL,MPI_MAX,MPI_COMM_WORLD,ierr)
- 
+
 return
 end function fmaxscal
 !=======================================================
@@ -162,13 +162,13 @@ function isumscal(scal) result(gsum)
 !
 ! this finds a global summation of a scalar across the processors
 !
-implicit none 
-integer,intent(in)::scal 
+implicit none
+integer,intent(in)::scal
 integer :: gsum
 integer :: ierr
-  
+
 call MPI_ALLREDUCE(scal,gsum,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,ierr)
- 
+
 return
 end function isumscal
 !=======================================================
@@ -177,13 +177,13 @@ function fsumscal(scal) result(gsum)
 !
 ! this finds a global summation of a scalar across the processors
 !
-implicit none 
-real(kind=kreal),intent(in)::scal 
+implicit none
+real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gsum
 integer :: ierr
-  
+
 call MPI_ALLREDUCE(scal,gsum,1,MPI_KREAL,MPI_SUM,MPI_COMM_WORLD,ierr)
- 
+
 return
 end function fsumscal
 !=======================================================
@@ -193,14 +193,14 @@ function dot_product_par(vec1,vec2) result(gdot)
 ! this finds global dot product of two vectors across the processors
 !
 implicit none
-real(kind=kreal),intent(in)::vec1(:),vec2(:) 
+real(kind=kreal),intent(in)::vec1(:),vec2(:)
 real(kind=kreal) :: ldot,gdot
 integer :: ierr
- 
+
 ! find local dot
 ldot=dot_product(vec1,vec2)
-call MPI_ALLREDUCE(ldot,gdot,1,MPI_KREAL,MPI_SUM,MPI_COMM_WORLD,ierr) 
-  
+call MPI_ALLREDUCE(ldot,gdot,1,MPI_KREAL,MPI_SUM,MPI_COMM_WORLD,ierr)
+
 return
 end function dot_product_par
 !=======================================================

@@ -169,7 +169,7 @@ integer,dimension(100) :: ind
 slen=len_trim(str)
 tmp_str=trim(str)
 
-! find and count indices of all delimeters 
+! find and count indices of all delimeters
 narg=0
 do i=1,slen
   if(tmp_str(i:i)==delm)then
@@ -192,19 +192,19 @@ end subroutine split_string
 !=====================================================
 
 ! get string value from string list which contain a character '=' that separates
-! variable name and variable vlue 
+! variable name and variable vlue
 character(len=80) function get_string(vname,slist,nvar)
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*) :: slist
 integer,intent(in) :: nvar
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 do i=1,nvar
   call split_string(slist(i),'=',args,narg)
   if (narg/=2)cycle
   if (vname==trim(adjustl(args(1))))then
-     read(args(2),*)get_string     
+     read(args(2),*)get_string
      return
   endif
 enddo
@@ -221,7 +221,7 @@ character(len=*),intent(in) :: vname
 character(len=*),intent(out) :: strval
 character(len=*),dimension(*) :: slist
 integer,intent(in) :: nvar
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 strval=''
@@ -249,7 +249,7 @@ character(len=80),dimension(n) :: get_string_vect
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 do i=1,nvar
@@ -272,7 +272,7 @@ integer function get_integer(vname,slist,nvar)
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 do i=1,nvar
@@ -296,7 +296,7 @@ character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
 integer,intent(out) :: ival,istat
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,narg
 ival=0
 istat=-1
@@ -325,13 +325,13 @@ integer,dimension(n) :: get_integer_vect
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,ios,narg
 
 do i=1,nvar
   call split_string(slist(i),'=',args,narg)
   if (narg/=2)cycle
-  if (vname==trim(adjustl(args(1))))then     
+  if (vname==trim(adjustl(args(1))))then
      read(args(2),*,iostat=ios)get_integer_vect(1:n)
      if(ios/=0)exit
      return
@@ -353,18 +353,18 @@ character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
 integer,intent(out) :: istat
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,ios,narg
 ivect=0
 istat=-1
 do i=1,nvar
   !print*,'hi',index(slist(1),vname,.true.)
   call split_string(slist(i),'=',args,narg)
-  if (narg/=2)cycle  
-  if (vname==trim(adjustl(args(1))))then  
+  if (narg/=2)cycle
+  if (vname==trim(adjustl(args(1))))then
      read(args(2),*,iostat=ios)ivect(1:n)
      if(ios/=0)exit
-     istat=0   
+     istat=0
      return
   endif
 enddo
@@ -379,7 +379,7 @@ real(kind=kreal) function get_real(vname,slist,nvar)
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 do i=1,nvar
@@ -404,7 +404,7 @@ character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
 integer,intent(out) :: istat
 real(kind=kreal),intent(out) :: rval
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,narg
 rval=0_kreal
 istat=-1
@@ -428,7 +428,7 @@ double precision function get_double(vname,slist,nvar)
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 do i=1,nvar
@@ -454,16 +454,16 @@ real(kind=kreal),dimension(n) :: get_real_vect
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,ios,narg
 
 do i=1,nvar
   !print*,'hi',index(slist(1),vname,.true.)
   call split_string(slist(i),'=',args,narg)
-  if (narg/=2)cycle  
-  if (vname==trim(adjustl(args(1))))then  
+  if (narg/=2)cycle
+  if (vname==trim(adjustl(args(1))))then
      read(args(2),*,iostat=ios)get_real_vect(1:n)
-     if(ios/=0)exit     
+     if(ios/=0)exit
      return
   endif
 enddo
@@ -483,18 +483,18 @@ character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
 integer,intent(out) :: istat
-character(len=80),dimension(2) :: args 
+character(len=80),dimension(2) :: args
 integer :: i,ios,narg
 rvect=0.0_kreal
 istat=-1
 do i=1,nvar
   !print*,'hi',index(slist(1),vname,.true.)
   call split_string(slist(i),'=',args,narg)
-  if (narg/=2)cycle  
-  if (vname==trim(adjustl(args(1))))then  
+  if (narg/=2)cycle
+  if (vname==trim(adjustl(args(1))))then
      read(args(2),*,iostat=ios)rvect(1:n)
      if(ios/=0)exit
-     istat=0   
+     istat=0
      return
   endif
 enddo
@@ -505,7 +505,7 @@ return
 end subroutine seek_real_vect
 !=====================================================
 
-! get format string for intger 
+! get format string for intger
 character(len=80) function form4int(n)
 integer,intent(in) :: n
 
@@ -536,16 +536,16 @@ slen = len_trim(s)
 
 do i=1,slen
   c = s(i:i)
-  if(c /= ' ')then 
+  if(c /= ' ')then
     itemp = iachar(c)
     if(.not.(65 <= itemp .and. itemp <= 90))then
       if(.not.(97 <= itemp .and. itemp <= 122))then
         return
       endif
     endif
-  endif 
-enddo 
-ind = .true. 
+  endif
+enddo
+ind = .true.
 end function isalphabet
 !=====================================================
 

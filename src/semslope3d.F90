@@ -37,7 +37,7 @@ character(len=20),intent(in) :: ptail,format_str
 integer :: funit,i,ios,istat,j,k,neq
 integer :: i_elmt,i_node,i_inc,i_srf,ielmt,igdof,imat,inode
 !real(kind=kreal),parameter :: two_third=two/r3
-real(kind=kreal) :: detjac,dq1,dq2,dq3,dsbar,dt,f,fmax,h1,h2,lode_theta,sf,sigm 
+real(kind=kreal) :: detjac,dq1,dq2,dq3,dsbar,dt,f,fmax,h1,h2,lode_theta,sf,sigm
 
 real(kind=kreal) :: uerr,umax,uxmax
 integer :: cg_iter,cg_tot,nl_iter,nl_tot
@@ -88,7 +88,7 @@ integer :: tot_nelmt,max_nelmt,min_nelmt,tot_nnode,max_nnode,min_nnode
 integer :: tot_neq,max_neq,min_neq
 integer :: ngpart,maxngnode
 ! number of active ghost partitions for a node
-integer,allocatable :: ngpart_node(:) 
+integer,allocatable :: ngpart_node(:)
 character(len=250) :: errtag ! error message
 integer :: errcode
 logical :: isopen ! flag to check whether the file is opened
@@ -147,7 +147,7 @@ lagrange_gll,dlagrange_gll)
 ! this removes the repeated use of reshape later but it has larger size than gdof!!!
 allocate(gdof_elmt(nedof,nelmt))
 gdof_elmt=0
-do i_elmt=1,nelmt 
+do i_elmt=1,nelmt
   gdof_elmt(:,i_elmt)=reshape(gdof(:,g_num(:,i_elmt)),(/nedof/)) !g=g_g(:,i_elmt)
 enddo
 !-------------------------------
@@ -180,7 +180,7 @@ if(myid==1)write(stdout,*)'complete!'
 ! apply traction boundary conditions
 if(istraction)then
   if(myid==1)write(*,'(a)',advance='no')'applying traction...'
-  call apply_traction(ismpi,myid,nproc,gnod,gdof,neq,extload,errcode,errtag)  
+  call apply_traction(ismpi,myid,nproc,gnod,gdof,neq,extload,errcode,errtag)
   if(errcode/=0)call error_stop(errtag,stdout,myid)
   if(myid==1)write(*,*)'complete!'
 endif
@@ -189,16 +189,16 @@ endif
 ! compute water pressure
 if(iswater)then
   if(myid==1)write(stdout,'(a)',advance='no')'computing water pressure...'
-  allocate(wpressure(nnode),submerged_node(nnode))  
+  allocate(wpressure(nnode),submerged_node(nnode))
   call compute_pressure(ismpi,myid,nproc,wpressure,submerged_node,errcode,errtag)
   if(errcode/=0)call error_stop(errtag,stdout,myid)
   ! write pore pressure file
-  
+
   ! open Ensight Gold data file to store data
-  out_fname=trim(out_path)//trim(file_head)//trim(ptail)//'.por'    
-  npart=1;  
+  out_fname=trim(out_path)//trim(file_head)//trim(ptail)//'.por'
+  npart=1;
   destag='Pore pressure'
-  call write_ensight_pernode(out_fname,destag,npart,1,nnode,real(wpressure))  
+  call write_ensight_pernode(out_fname,destag,npart,1,nnode,real(wpressure))
   if(myid==1)write(stdout,*)'complete!'
 endif
 !-------------------------------
@@ -258,21 +258,21 @@ endif
 ! strength reduction (factor of safety) loop
 srf_loop: do i_srf=1,nsrf
   if(myid==1)write(stdout,'(/,a,f7.4)')'SRF:',srf(i_srf)
-  
+
    ! initialize
   nodalu=zero; vmeps=zero
   stress_local=zero; scf=inftol
-  
+
   ! strength reduction
   call strength_reduction(srf(i_srf),phinu,nmat,coh,nu,phi,psi,cohf,nuf,phif,  &
   psif,istat)
-  
+
   ! compute minimum pseudo-time step for viscoplasticity
   dt=dt_viscoplas(nmat,nuf,phif,ym)
-  
+
   ! recompute stiffness if either of nu and ym has changed
-  if(istat==1)then    
-    ! in future this should be changed so that only the elements with changed 
+  if(istat==1)then
+    ! in future this should be changed so that only the elements with changed
     ! material properties are involved
     dprecon=zero
     call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nuf,ym,  &
@@ -282,46 +282,46 @@ srf_loop: do i_srf=1,nsrf
     call assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,dprecon,dprecon)
     dprecon(1:)=one/dprecon(1:); dprecon(0)=zero
   endif
-  
+
   !print*,nsrf,srf(i_srf),nuf,phif,dt
   !print*,sin(phif*deg2rad),one-two*nuf
- 
+
   ! find global dt
-  dt=minscal(dt) 
-  
+  dt=minscal(dt)
+
   cg_tot=0; nl_tot=0
   ! load incremental loop
   !if(myid==1)write(stdout,'(a,i10)')' total load increments:',ninc
   !extload=extload/ninc
-  !load_increment: do i_inc=1,ninc  
-  
-  bodyload=zero; evpt=zero  
+  !load_increment: do i_inc=1,ninc
+
+  bodyload=zero; evpt=zero
   x=zero; oldx=zero
-  
+
   !print*,maxval(abs(bodyload)),maxval(abs(extload)),maxval(abs(dprecon))
-  
+
   ! plastic iteration loop
-  plastic: do nl_iter=1,nl_maxiter  
+  plastic: do nl_iter=1,nl_maxiter
     fmax=zero
-    
-    load=extload+bodyload    
-    load(0)=zero      
-    
+
+    load=extload+bodyload
+    load(0)=zero
+
     ! pcg solver
     !x=zero
     call pcg_solver(myid,ngpart,maxngnode,neq,nelmt,storkm,x,load,dprecon, &
     gdof_elmt,cg_iter,errcode,errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myid)
-    cg_tot=cg_tot+cg_iter    
+    cg_tot=cg_tot+cg_iter
     x(0)=zero
-    
-    if(allelastic)then      
+
+    if(allelastic)then
       call elastic_stress(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,   &
-      dlagrange_gll,x,stress_local)           
-            
+      dlagrange_gll,x,stress_local)
+
       exit plastic
     endif
-    
+
     ! check plastic convergence
     uerr=maxvec(abs(x-oldx))/maxvec(abs(x))
     oldx=x
@@ -330,27 +330,27 @@ srf_loop: do i_srf=1,nsrf
     ! compute stress and check failure
     do i_elmt=1,nelmt
       ielmt=i_elmt
-      imat=mat_id(ielmt)      
-   
+      imat=mat_id(ielmt)
+
       call compute_cmat(cmat,ym(imat),nuf(imat))
       num=g_num(:,ielmt)
       coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
-      egdof=gdof_elmt(:,ielmt) 
+      egdof=gdof_elmt(:,ielmt)
       !reshape(gdof(:,g_num(:,ielmt)),(/nedof/)) !g=g_g(:,i_elmt)
-      eld=x(egdof)  
-     
+      eld=x(egdof)
+
       bload=zero
-      do i=1,ngll ! loop over integration points        
-        jac=matmul(dshape_hex8(:,:,i),coord)        
+      do i=1,ngll ! loop over integration points
+        jac=matmul(dshape_hex8(:,:,i),coord)
         detjac=determinant(jac)
         call invert(jac)
 
-        deriv=matmul(jac,dlagrange_gll(:,i,:)) 
+        deriv=matmul(jac,dlagrange_gll(:,i,:))
         call compute_bmat(bmat,deriv)
         eps=matmul(bmat,eld)
         eps=eps-evpt(:,i,ielmt)
         sigma=matmul(cmat,eps)
-        
+
         ! compute effective stress
         effsigma=sigma+stress_local(:,i,ielmt)
         if(iswater)then
@@ -358,23 +358,23 @@ srf_loop: do i_srf=1,nsrf
              ! water pressure is compressive (negative)
             effsigma(1:3)=effsigma(1:3)+wpressure(num(i))
           endif
-        endif           
-        
+        endif
+
         !effsigma=effsigma+stress_local(:,i,ielmt)
         call stress_invariant(effsigma,sigm,dsbar,lode_theta)
         ! check whether yield is violated
         call mohcouf(phif(imat),cohf(imat),sigm,dsbar,lode_theta,f)
         if(f>fmax)fmax=f
-        
+
         if(f>=zero)then !.or.(nl_isconv.or.nl_iter==nl_maxiter))then
           call mohcouq(psif(imat),dsbar,lode_theta,dq1,dq2,dq3)
-          call formm(effsigma,m1,m2,m3)          
-          flow=f*(m1*dq1+m2*dq2+m3*dq3) 
-          
+          call formm(effsigma,m1,m2,m3)
+          flow=f*(m1*dq1+m2*dq2+m3*dq3)
+
           erate=matmul(flow,effsigma)
           evp=erate*dt
           evpt(:,i,ielmt)=evpt(:,i,ielmt)+evp
-          devp=matmul(cmat,evp)          
+          devp=matmul(cmat,evp)
           ! if not converged we need body load for next iteration
           if(.not.nl_isconv .and. nl_iter/=nl_maxiter)then
             !devp(1:3)=devp(1:3)-wpressure(num(i))
@@ -395,10 +395,10 @@ srf_loop: do i_srf=1,nsrf
           !if(sf<scf(num(i)))scf(num(i))=sf
         endif
       end do ! i_gll
-      
+
       if(nl_isconv .or. nl_iter==nl_maxiter)cycle
       ! compute total body load vector
-      bodyload(egdof)=bodyload(egdof)+bload      
+      bodyload(egdof)=bodyload(egdof)+bload
     end do ! i_elmt
     bodyload(0)=zero
     fmax=maxscal(fmax)
@@ -411,13 +411,13 @@ srf_loop: do i_srf=1,nsrf
   end do plastic ! plastic iteration
   ! check if the plastic iteration did not converge
   if(nl_iter>=nl_maxiter .and. .not.nl_isconv)then
-    write(stdout,*)'WARNING: nonconvergence in nonlinear iterations!' 
-    write(stdout,*)'desired tolerance:',nl_tol,' achieved tolerance:',uerr  
+    write(stdout,*)'WARNING: nonconvergence in nonlinear iterations!'
+    write(stdout,*)'desired tolerance:',nl_tol,' achieved tolerance:',uerr
   endif
-  
+
   nl_tot=nl_tot+nl_iter
   !if(myid==1)print*,cg_tot,nl_tot
-  ! nodal displacement  
+  ! nodal displacement
   do i=1,nndof
     do j=1,nnode
       if(gdof(i,j)/=0)then
@@ -426,26 +426,26 @@ srf_loop: do i_srf=1,nsrf
     enddo
   enddo
   !enddo load_increment ! load increment loop
-  
+
   ! write summary
   uxmax=maxvec(abs(reshape(nodalu,(/nndof*nnode/))))
   umax=maxvec(sqrt(nodalu(1,:)*nodalu(1,:)+ &
   nodalu(2,:)*nodalu(2,:)+nodalu(3,:)*nodalu(3,:)))
-  open(10,file=trim(sum_file),status='old',position='append',action='write')  
+  open(10,file=trim(sum_file),status='old',position='append',action='write')
   write(10,*)srf(i_srf),cg_tot,nl_tot,uxmax,umax,fmax
   close(10)
-  
+
   ! compute average effective strain
   do i_node=1,nnode
     inode=i_node
     vmeps(inode)=vmeps(inode)/real(node_valency(inode),kreal)
-  enddo  
+  enddo
 
   ! compute stress_global
-  stress_global=zero  
+  stress_global=zero
   do i_elmt=1,nelmt
     ielmt=i_elmt
-    num=g_num(:,ielmt)    
+    num=g_num(:,ielmt)
     stress_global(:,num)=stress_global(:,num)+stress_local(:,:,ielmt)
   enddo
 
@@ -453,14 +453,14 @@ srf_loop: do i_srf=1,nsrf
   do i_node=1,nnode
     inode=i_node
     stress_global(:,inode)=stress_global(:,inode)/real(node_valency(inode),kreal)
-  enddo  
-  
+  enddo
+
   call save_data(ptail,format_str,i_srf,nnode,nelmt,g_num, &
-  nodalu,scf,vmeps,stress_global)  
-  
+  nodalu,scf,vmeps,stress_global)
+
   if(nl_iter==nl_maxiter)exit
-  
-enddo srf_loop ! i_srf safety factor loop 
+
+enddo srf_loop ! i_srf safety factor loop
 deallocate(mat_id,gam,ym,coh,nu,phi,psi,srf)
 deallocate(g_coord,g_num)
 deallocate(load,bodyload,extload,oldx,x,dprecon,storkm,stat=istat)

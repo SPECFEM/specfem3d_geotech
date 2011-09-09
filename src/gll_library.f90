@@ -28,9 +28,9 @@ real(kind=kreal),dimension(ngllz) :: lagrange_z,lagrange_dz
 
 ! compute everything in indexed order
 
-! get gll points 
+! get gll points
 ! for alpha=beta=0, jacobi polynomial is legendre polynomial
-! for ngllx=nglly=ngllz=ngll, need to call only once 
+! for ngllx=nglly=ngllz=ngll, need to call only once
 call zwgljd(gllpx,gllwx,ngllx,jacobi_alpha,jacobi_beta)
 call zwgljd(gllpy,gllwy,nglly,jacobi_alpha,jacobi_beta)
 call zwgljd(gllpz,gllwz,ngllz,jacobi_alpha,jacobi_beta)
@@ -96,16 +96,16 @@ real(kind=kreal),dimension(nglly) :: gllpy,gllwy ! gll points and weights
 real(kind=kreal),dimension(ngllx) :: lagrange_x,lagrange_dx
 real(kind=kreal),dimension(nglly) :: lagrange_y,lagrange_dy
 
-! compute everything in indexed order 
+! compute everything in indexed order
 
 ! gll points and weights (source: http://mathworld.wolfram.com/lobattoquadrature.html)
 !gllp(1)=-1.0_kreal   ; gllw(1)=1.0_kreal/3.0_kreal
 !gllp(2)= 0.0_kreal   ; gllw(2)=4.0_kreal/3.0_kreal
 !gllp(3)= 1.0_kreal   ; gllw(3)=gllw(1)
 
-! get gll points 
+! get gll points
 ! for alpha=beta=0, jacobi polynomial is legendre polynomial
-! for ngllx=nglly=ngllz=ngll, need to call only once 
+! for ngllx=nglly=ngllz=ngll, need to call only once
 call zwgljd(gllpx,gllwx,ngllx,jacobi_alpha,jacobi_beta)
 call zwgljd(gllpy,gllwy,nglly,jacobi_alpha,jacobi_beta)
 
@@ -115,7 +115,7 @@ do j=1,nglly
     n=n+1
     ! integration points
     gll_points2d(1,n)=gllpx(i)
-    gll_points2d(2,n)=gllpy(j)      
+    gll_points2d(2,n)=gllpy(j)
 
     ! integration weights
     gll_weights2d(n)=gllwx(i)*gllwy(j)
@@ -124,19 +124,19 @@ enddo
 
 do ii=1,ngll ! ngllx*nglly
   xi=gll_points2d(1,ii)
-  eta=gll_points2d(2,ii)  
+  eta=gll_points2d(2,ii)
 
   ! compute 1d lagrange polynomials
   call lagrange1d(ngllx,xi,lagrange_x,lagrange_dx)
   call lagrange1d(nglly,eta,lagrange_y,lagrange_dy)
-  
-  n=0  
+
+  n=0
   do j=1,nglly
     do i=1,ngllx
       n=n+1
       lagrange_gll2d(ii,n)=lagrange_x(i)*lagrange_y(j)
       dlagrange_gll2d(1,ii,n)=lagrange_dx(i)*lagrange_y(j)
-      dlagrange_gll2d(2,ii,n)=lagrange_x(i)*lagrange_dy(j)        
+      dlagrange_gll2d(2,ii,n)=lagrange_x(i)*lagrange_dy(j)
     enddo
   enddo
 enddo
@@ -167,41 +167,41 @@ real(kind=kreal),dimension(ngllx) :: lagrange_x,lagrange_dx
 !gllp(2)= 0.0_kreal   ; gllw(2)=4.0_kreal/3.0_kreal
 !gllp(3)= 1.0_kreal   ; gllw(3)=gllw(1)
 
-! get gll points 
+! get gll points
 ! for alpha=beta=0, jacobi polynomial is legendre polynomial
-! for ngllx=nglly=ngllz=ngll, need to call only once 
+! for ngllx=nglly=ngllz=ngll, need to call only once
 call zwgljd(gllpx,gllwx,ngllx,jacobi_alpha,jacobi_beta)
 
 n=0
 do i=1,ngllx
   n=n+1
   ! integration points
-  gll_points1d(1,n)=gllpx(i)      
+  gll_points1d(1,n)=gllpx(i)
 
   ! integration weights
   gll_weights1d(n)=gllwx(i)
 enddo
 
 do ii=1,ngll ! ngllx
-  xi=gll_points1d(1,ii)  
+  xi=gll_points1d(1,ii)
 
   ! compute 1d lagrange polynomials
   call lagrange1d(ngllx,xi,lagrange_x,lagrange_dx)
 
-  n=0    
+  n=0
   do i=1,ngllx
     n=n+1
     lagrange_gll1d(ii,n)=lagrange_x(i)
-    dlagrange_gll1d(1,ii,n)=lagrange_dx(i)           
-  enddo  
-enddo  
+    dlagrange_gll1d(1,ii,n)=lagrange_dx(i)
+  enddo
+enddo
 
 return
 end subroutine gll_quadrature1d
 !===========================================
 
 ! this subroutine computes the 1d lagrange interpolation functions and their
-! derivatives at a given point xi.  
+! derivatives at a given point xi.
 subroutine lagrange1d(nenod,xi,phi,dphi_dxi)
 implicit none
 integer,intent(in) :: nenod ! number of nodes in an 1d element
@@ -230,7 +230,7 @@ do i=1,nenod
       k=k+1
       term(k)=(xi-xii(j))/(xii(i)-xii(j))
       dterm(k)=1.0_kreal/(xii(i)-xii(j)) ! derivative of the term wrt xi
-      
+
       phi(i)=phi(i)*(xi-xii(j))/(xii(i)-xii(j))
     endif
   enddo
@@ -244,7 +244,7 @@ do i=1,nenod
         sum_term(j)=sum_term(j)*term(k)
       endif
     enddo
-  enddo 
+  enddo
   dphi_dxi(i)=0.0_kreal
   do j=1,nenod-1
     dphi_dxi(i)=dphi_dxi(i)+sum_term(j)
@@ -610,7 +610,7 @@ end function pnleg
 real(kind=kreal) function pnormj (n,alpha,beta) !double precision
 
 implicit none
- 
+
 real(kind=kreal) alpha,beta !double precision
 integer n
 
@@ -684,7 +684,7 @@ apb  = alpha+beta
 p    = zero
 pdm1 = zero
 
-if(np <= 0)then  
+if(np <= 0)then
   write(*,*)'ERROR: number of Gauss points < 1!'
   stop
 endif
@@ -759,13 +759,13 @@ n   = np-1
 nm1 = n-1
 pd  = zero
 
-if(np <= 1)then  
+if(np <= 1)then
   write(*,*)'ERROR: number of Gauss-Lobatto points < 2!'
   stop
 endif
 
 ! with spectral elements, use at least 3 points
-if(np < 3)then  
+if(np < 3)then
   write(*,*)'WARNING: number of Gauss-Lobatto points < 3!'
   !stop
 endif

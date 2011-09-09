@@ -39,7 +39,7 @@ enddo
 if(ielmt_void/=nelmt_void .or. ielmt_intact/=nelmt_intact)then
   write(*,'(/,a)')'ERROR: counted intact/void elements mismatch!'
   stop
-endif 
+endif
 
 ! find intact and void nodes
 isnode=.false.
@@ -50,7 +50,7 @@ return
 end subroutine intact_void_elmt
 !===========================================
 
-! this subroutine analyzes the excavation and determines the nodes 
+! this subroutine analyzes the excavation and determines the nodes
 ! in the intact and void regions
 subroutine intact_void_node(isnode,nnode_intact,nnode_void,node_intact,node_void,nmir)
 use global,only:nnode
@@ -80,7 +80,7 @@ return
 end subroutine intact_void_node
 !===========================================
 
-! this subroutine modifies the gdof array setting all the freedoms corresponding 
+! this subroutine modifies the gdof array setting all the freedoms corresponding
 ! to the dead nodes as fixed
 subroutine modify_gdof(gdof,nnode_void,node_void,neq)
 use global,only:nndof,nnode
@@ -115,7 +115,7 @@ integer,intent(in) :: nelmt_void
 integer,intent(in) :: gnum_void(ngll,nelmt_void)
 integer :: i_elmt,num(ngll)
 
-! correct node valency subtracting dead-element nodes  
+! correct node valency subtracting dead-element nodes
 do i_elmt=1,nelmt_void
   !ielmt=elmt_void(i_elmt)
   num=gnum_void(:,i_elmt)
@@ -125,7 +125,7 @@ return
 end subroutine correct_nvalency
 !===========================================
 
-! this subroutine computes the excavation loads. this load consists of both 
+! this subroutine computes the excavation loads. this load consists of both
 ! gravity and stress load
 subroutine excavation_load(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8, &
 lagrange_gll,dlagrange_gll,gll_weights,stress_local,extload)
@@ -148,33 +148,33 @@ integer :: egdof(nedof),num(nenod)
 integer :: i,i_elmt
 
 ! compute excavation load
-do i_elmt=1,nelmt  
+do i_elmt=1,nelmt
   bload=zero; eld=zero
   num=g_num(:,i_elmt)
   coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
   egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,ielmt)),(/nndof*nenod/))
-  
+
   do i=1,ngll
     !call shape_function(fun,gll_points(i))
     ! compute Jacobian at GLL point using 20 noded element
-    !call shape_derivative(der,gll_points(:,i)) 
-    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord) 
-    detjac=determinant(jac)      
-    call invert(jac)      
+    !call shape_derivative(der,gll_points(:,i))
+    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord)
+    detjac=determinant(jac)
+    call invert(jac)
     deriv=matmul(jac,dlagrange_gll(:,i,:)) ! use der for gll
     call compute_bmat(bmat,deriv) !!! gll bmat matrix
     sigma=stress_local(:,i,i_elmt)
     eload=MATMUL(sigma,bmat)
-    bload=bload+eload*detjac*gll_weights(i)    
-    eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)    
+    bload=bload+eload*detjac*gll_weights(i)
+    eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
   end do ! i=1,ngll
-  extload(egdof)=extload(egdof)+eld*gam(mat_id(i_elmt))+bload    
+  extload(egdof)=extload(egdof)+eld*gam(mat_id(i_elmt))+bload
 enddo
 extload(0)=zero
 return
 end subroutine excavation_load
 
-! this subroutine computes the excavation loads. this load consists of both 
+! this subroutine computes the excavation loads. this load consists of both
 ! gravity and stress load
 subroutine excavation_load_nodal(nelmt,neq,gnod,g_num,mat_id,dshape_hex8, &
 lagrange_gll,dlagrange_gll,gll_weights,stress_local,excavload)
@@ -198,32 +198,32 @@ integer :: i,i_elmt
 
 excavload=zero
 ! compute excavation load
-do i_elmt=1,nelmt  
+do i_elmt=1,nelmt
   bload=zero; eld=zero; tload=zero
   num=g_num(:,i_elmt)
   coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
   !egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,ielmt)),(/nndof*nenod/))
-  
+
   do i=1,ngll
     !call shape_function(fun,gll_points(i))
     ! compute Jacobian at GLL point using 20 noded element
-    !call shape_derivative(der,gll_points(:,i)) 
-    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord) 
-    detjac=determinant(jac)      
-    call invert(jac)      
+    !call shape_derivative(der,gll_points(:,i))
+    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord)
+    detjac=determinant(jac)
+    call invert(jac)
     deriv=matmul(jac,dlagrange_gll(:,i,:)) ! use der for gll
     call compute_bmat(bmat,deriv) !!! gll bmat matrix
     sigma=stress_local(:,i,i_elmt)
     eload=MATMUL(sigma,bmat)
-    bload=bload+eload*detjac*gll_weights(i)    
-    eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)    
+    bload=bload+eload*detjac*gll_weights(i)
+    eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
   end do ! i=1,ngll
   tload=eld*gam(mat_id(i_elmt))+bload
   !excavload(:,num)=excavload(:,num)+reshape(tload,(/nndof,ngll/))
   do i=1,nndof
     excavload(i,num)=excavload(i,num)+tload(i:nedof:nndof)
-  enddo  
-  !extload(egdof)=extload(egdof)+eld*gam(mat_id(i_elmt))+bload    
+  enddo
+  !extload(egdof)=extload(egdof)+eld*gam(mat_id(i_elmt))+bload
 enddo
 !extload(0)=zero
 return

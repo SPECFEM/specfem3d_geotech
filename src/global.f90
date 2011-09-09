@@ -48,7 +48,7 @@ integer,parameter :: nst=6 ! number of unique stress components
 
 character(len=150) :: file_head,inp_path,out_path,part_path
 ! displacement BC, ghost, traction, and water surface files
-character(len=150) :: uxfile,uyfile,uzfile,gfile,trfile,wsfile 
+character(len=150) :: uxfile,uyfile,uzfile,gfile,trfile,wsfile
 integer :: cg_maxiter,nl_maxiter,nexcav,ninc,nsrf,ntstep
 real(kind=kreal) :: cg_tol,nl_tol
 integer,allocatable :: excavid(:),nexcavid(:) ! Excavation ID (regions), nunber of excavation IDs (regions) in each stage
@@ -56,10 +56,10 @@ real(kind=kreal),allocatable :: srf(:) ! strength reduction factors
 
 ! initial stress
 logical :: isstress0,usek0 ! use k0 to compute horizontal stress also for
-! s0_type=0 
+! s0_type=0
 real(kind=kreal) :: s0_type ! initial stress type
 ! 0: by default compute by SEM,
-! 1: simple overburden pressure use s0+gamma*z 
+! 1: simple overburden pressure use s0+gamma*z
 !    only for horizontal and homogeneous, and
 ! 2: read from file
 real(kind=kreal) :: z_datum,s0_datum,epk0
@@ -70,7 +70,7 @@ real(kind=kreal) :: z_datum,s0_datum,epk0
 type savedata_options
   logical :: disp,stress,porep,psigma,maxtau,nsigma,scf,vmeps
 end type savedata_options
-type(savedata_options) :: savedata 
+type(savedata_options) :: savedata
 
 ! others
 character(len=1),parameter :: CR=achar(13) ! carriage return to overwrite

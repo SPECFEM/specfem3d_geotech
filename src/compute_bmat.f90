@@ -1,13 +1,13 @@
 ! This subroutine forms the strain-displacement matrix (bmat)
 ! in 2D (ih=3 or 4) or 3D (ih=6)
-! REFERENCE: 
-!  copied and modified from 
+! REFERENCE:
+!  copied and modified from
 !  Smith and Griffiths (2004): Programming the finite element method
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
 SUBROUTINE compute_bmat(bmat,deriv)
 use set_precision
- IMPLICIT NONE 
+ IMPLICIT NONE
  REAL(kind=kreal),INTENT(IN)::deriv(:,:)
  REAL(kind=kreal),INTENT(OUT)::bmat(:,:)
  INTEGER::k,l,m,n,ih,nod
@@ -46,8 +46,8 @@ use set_precision
      bmat(6,l)=z
    END DO
  CASE DEFAULT
-   WRITE(*,*)'ERROR: wrong dimension for "nst" in bmat matrix!'        
- END SELECT   
+   WRITE(*,*)'ERROR: wrong dimension for "nst" in bmat matrix!'
+ END SELECT
 RETURN
 END SUBROUTINE compute_bmat
 

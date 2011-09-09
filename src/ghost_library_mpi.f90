@@ -1,4 +1,4 @@
-! this module contains the routines to process parallel communications across 
+! this module contains the routines to process parallel communications across
 ! the ghost partitions
 ! TODO:
 !   - better to avoid using allocatable component of derived type variable which
@@ -33,7 +33,7 @@ use math_library_mpi, only : maxvec
 implicit none
 integer,intent(in) :: myid,nproc
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
-integer,intent(out) :: ngpart,maxngnode 
+integer,intent(out) :: ngpart,maxngnode
 integer :: istat
 
 integer,dimension(8) :: ign,jgn,kgn ! ith, jth, and kth GLL indices of node
@@ -64,14 +64,14 @@ mypart=myid-1 ! partition ID starts from 0
 ngll_vec=quick_sort((/ngllx,nglly,ngllz/),3)
 maxngll_face=ngll_vec(3)*ngll_vec(2)
 
-! local node numbering in each face CUBIT/EXODUS convention  
+! local node numbering in each face CUBIT/EXODUS convention
 node_face(1,:)=(/1,2,6,5/) ! front
 node_face(2,:)=(/2,3,7,6/) ! right
 node_face(3,:)=(/4,3,7,8/) ! back
 node_face(4,:)=(/1,4,8,5/) ! left
 node_face(5,:)=(/1,2,3,4/) ! bottom
 node_face(6,:)=(/5,6,7,8/) ! top
-  
+
 ! local node numbering in each edge CUBIT/EXODUS convention
 ! bottom edges
 node_edge(1,:)=(/1,2/);  node_edge(2,:)=(/2,3/)
@@ -128,7 +128,7 @@ gpart(1:ngpart)%mindex=-1
 
 do i_gpart=1,ngpart ! ghost partitions loop
   read(11,*) ! skip 1 line
-  read(11,*)gpartid,gpart(i_gpart)%mindex !gpart_mindex(i_gpart) 
+  read(11,*)gpartid,gpart(i_gpart)%mindex !gpart_mindex(i_gpart)
   gpartid=gpartid+1 ! index coarray starts from 1
 
   read(11,*) ! skip 1 line
@@ -138,11 +138,11 @@ do i_gpart=1,ngpart ! ghost partitions loop
   !print*,ngelmt,ngelmt*maxngll_face,'istat=',istat
   switch_node=.false.
   ncount=0
-  !call error_stop(errtag,stdout) 
+  !call error_stop(errtag,stdout)
   !if(this_image()==6)print*,'what0!',i_gpart,' of ',ngpart
   do i_elmt=1,ngelmt ! ghost elements loop
     read(11,*)melmt,etype,eid; !print*,'melmt',melmt,etype,eid
-    
+
     ! initialize
     ig0=-1; ig1=-1
     jg0=-1; jg1=-1
@@ -161,10 +161,10 @@ do i_gpart=1,ngpart ! ghost partitions loop
       jg0=minval(jgn(node_face(eid,:))); jg1=maxval(jgn(node_face(eid,:)))
       kg0=minval(kgn(node_face(eid,:))); kg1=maxval(kgn(node_face(eid,:)))
     else
-      write(errtag,*)'ERROR: wrong etype:',etype,' for ghost partition ',mpartid,'!'      
+      write(errtag,*)'ERROR: wrong etype:',etype,' for ghost partition ',mpartid,'!'
       call error_stop(errtag,stdout,myid)
-    endif    
-    
+    endif
+
     !print*,ig0,ig1,jg0,jg1,kg0,kg1
     !sync all
     !call error_stop(errtag,stdout)
@@ -181,8 +181,8 @@ do i_gpart=1,ngpart ! ghost partitions loop
         enddo
       enddo
     enddo
-  enddo ! do i_elmt 
-  
+  enddo ! do i_elmt
+
   gpart(i_gpart)%nnode=ncount
   gpart(i_gpart)%id=gpartid
   allocate(gpart(i_gpart)%node(ncount),gpart(i_gpart)%isnode(ncount))
@@ -198,8 +198,8 @@ do i_gpart=1,ngpart ! ghost partitions loop
   !  print*,itmp_array
   !  call error_stop(errtag,stdout)
   !endif
-  
-  gpart(i_gpart)%node=itmp_array(1:ncount) 
+
+  gpart(i_gpart)%node=itmp_array(1:ncount)
   !if (mypart==2 .and. i_gpart==1)then
   !  print*,gpart_nnode(1)
   !  print*,gpart_node(1,:)
@@ -207,10 +207,10 @@ do i_gpart=1,ngpart ! ghost partitions loop
   !  call error_stop(errtag,stdout)
   !endif
   !print*,'myid',myid,ncount,size(gpart(i_gpart)%order)
-  
+
   !order nodal array to match with ghost partitions
-  !extract coordinates  
-  allocate(xp(ncount),yp(ncount),zp(ncount))  
+  !extract coordinates
+  allocate(xp(ncount),yp(ncount),zp(ncount))
 
   xp=g_coord(1,itmp_array(1:ncount))
   yp=g_coord(2,itmp_array(1:ncount))
@@ -228,7 +228,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
   endif
 
   ! find ghost gdof
-  gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/)) 
+  gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
   !print*,gpart(i_gpart)%gdof
   !print*,'Total 0s:',myid,ncount,count(gpart(i_gpart)%gdof==0)
 
@@ -272,7 +272,7 @@ return
 end subroutine modify_ghost
 !=======================================================
 
-! this subroutine assembles the contributions of all ghost partitions 
+! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
 subroutine assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,array,array_g)
 !use math_library, only : maxscal_par
@@ -298,13 +298,13 @@ send_array=zero; recv_array=zero
 !do i_gpart=1,ngpart
 !  ncount=gpart(i_gpart)%nnode*nndof
   ! array to send
-!  send_array(1:ncount,i_gpart)=array(gpart(i_gpart)%gdof)  
+!  send_array(1:ncount,i_gpart)=array(gpart(i_gpart)%gdof)
 !enddo
 !call sync_process()
 do i_gpart=1,ngpart
   ncount=gpart(i_gpart)%nnode*nndof
   ! array to send
-  send_array(1:ncount,i_gpart)=array(gpart(i_gpart)%gdof)  
+  send_array(1:ncount,i_gpart)=array(gpart(i_gpart)%gdof)
   ! send
   call MPI_ISSEND(send_array(1,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%id-1,  &
   tag,MPI_COMM_WORLD,send_req(i_gpart),ierr)
@@ -315,7 +315,7 @@ enddo
 
 ! wait for receive-communications completion (recv)
 do i_gpart=1,ngpart
-  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)  
+  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)
 enddo
 
 ! adding contributions of all ghost neighbours
@@ -359,7 +359,7 @@ real(kind=kreal),dimension(nndof,maxngnode) :: garray
 integer,parameter :: tag=0
 integer, dimension(MPI_STATUS_SIZE) :: mpi_status
 integer,dimension(ngpart) :: send_req,recv_req
-!integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node 
+!integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node
 real(kind=kreal),parameter :: zero=0.0_kreal
 integer :: i,j,ierr,i_gpart,igdof,ignode,ncount,ngnode
 
@@ -370,7 +370,7 @@ do i_gpart=1,ngpart
   ncount=ngnode*nndof
   ! store array-to-send in a garray
   send_array(1:ncount,i_gpart)=reshape(array(:,gpart(i_gpart)%node),(/ncount/))
-  
+
   ! send
   call MPI_ISSEND(send_array(1,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%id-1,  &
   tag,MPI_COMM_WORLD,send_req(i_gpart),ierr)
@@ -381,7 +381,7 @@ enddo
 
 ! wait for receive-communications completion (recv)
 do i_gpart=1,ngpart
-  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)  
+  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)
 enddo
 
 ! adding contributions of all ghost neighbours
@@ -390,7 +390,7 @@ do i_gpart=1,ngpart
   ncount=ngnode*nndof
   array_g(:,gpart(i_gpart)%node)=array_g(:,gpart(i_gpart)%node)+ &
   reshape(recv_array(1:ncount,i_gpart),(/nndof,ngnode/))
-  !print*,recv_array(1:ncount,i_gpart)  
+  !print*,recv_array(1:ncount,i_gpart)
 enddo
 
 ! wait for send communications completion (send)
@@ -402,9 +402,9 @@ return
 end subroutine assemble_ghosts_nodal
 !=======================================================
 
-! this subroutine counts the active ghost partitions for each node on the 
-! interfaces. 
-! logical flag representing whether the nodes in the interfaces are intact or 
+! this subroutine counts the active ghost partitions for each node on the
+! interfaces.
+! logical flag representing whether the nodes in the interfaces are intact or
 ! void has to be communicated across the processors
 subroutine count_active_nghosts(myid,ngpart,maxngnode,nndof,ngpart_node)
 use mpi
@@ -425,10 +425,10 @@ ngpart_node=0
 lsend_array=.true.; lrecv_array=.true.
 do i_gpart=1,ngpart
   ngnode=gpart(i_gpart)%nnode
-  
+
   ! store array-to-send
   lsend_array(1:ngnode,i_gpart)=gpart(i_gpart)%isnode(1:ngnode)
-  
+
   ! send
   call MPI_ISSEND(lsend_array(1,i_gpart),ngnode,MPI_LOGICAL,gpart(i_gpart)%id-1,&
   tag,MPI_COMM_WORLD,send_req(i_gpart),ierr)
@@ -439,11 +439,11 @@ enddo
 
 ! wait for receive-communications completion (recv)
 do i_gpart=1,ngpart
-  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)  
+  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)
 enddo
 
 ! count active partitons along the interfaces
-do i_gpart=1,ngpart  
+do i_gpart=1,ngpart
   do i=1,gpart(i_gpart)%nnode
     ignode=gpart(i_gpart)%node(i)
     if(lrecv_array(i,i_gpart))ngpart_node(ignode)=ngpart_node(ignode)+1
@@ -461,7 +461,7 @@ end subroutine count_active_nghosts
 !=======================================================
 
 ! this subroutine distributes the excavation loads discarded by a processors due
-! to the special geoemtry partition. it will not distribute if the load is used 
+! to the special geoemtry partition. it will not distribute if the load is used
 ! within the partition
 subroutine distribute2ghosts(myid,gdof,ngpart,maxngnode,nndof,neq,ngpart_node, &
 array,array_g)
@@ -483,7 +483,7 @@ real(kind=kreal),dimension(nndof,maxngnode) :: garray
 integer,parameter :: tag=0
 integer, dimension(MPI_STATUS_SIZE) :: mpi_status
 integer,dimension(ngpart) :: send_req,recv_req
-!integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node 
+!integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node
 real(kind=kreal),parameter :: zero=0.0_kreal
 integer :: i,j,ierr,i_gpart,igdof,ignode,ncount,ngnode
 
@@ -520,7 +520,7 @@ do i_gpart=1,ngpart
   enddo
   !print*,'ID:',myid,minval(garray),maxval(garray)
   send_array(1:ncount,i_gpart)=reshape(garray(:,1:ngnode),(/ncount/))
-  
+
   ! send
   call MPI_ISSEND(send_array(1,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%id-1,  &
   tag,MPI_COMM_WORLD,send_req(i_gpart),ierr)
@@ -531,7 +531,7 @@ enddo
 
 ! wait for receive-communications completion (recv)
 do i_gpart=1,ngpart
-  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)  
+  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)
 enddo
 
 ! adding contributions of all ghost neighbours
@@ -540,7 +540,7 @@ do i_gpart=1,ngpart
   ncount=ngnode*nndof
   tarray(:,gpart(i_gpart)%node)=tarray(:,gpart(i_gpart)%node)+ &
   reshape(recv_array(1:ncount,i_gpart),(/nndof,ngnode/))
-  !print*,recv_array(1:ncount,i_gpart)  
+  !print*,recv_array(1:ncount,i_gpart)
 enddo
 
 ! wait for send communications completion (send)
@@ -576,7 +576,7 @@ return
 end subroutine free_ghost
 !===========================================
 
-! routines below are imported and modified from SPECFEM3D 
+! routines below are imported and modified from SPECFEM3D
 
 ! subroutines to sort MPI buffers to assemble between chunks
 subroutine sort_array_coord(ndim,npoint,x,y,z,ibool,nglob)
@@ -584,27 +584,27 @@ subroutine sort_array_coord(ndim,npoint,x,y,z,ibool,nglob)
 ! this routine MUST be in double precision to avoid sensitivity
 ! to roundoff errors in the coordinates of the points
 !
-! returns: sorted indexing array (ibool),  reordering array (iglob) & 
-! number of global points (nglob)  
-  
+! returns: sorted indexing array (ibool),  reordering array (iglob) &
+! number of global points (nglob)
+
  use math_constants, only : zerotol
  implicit none
 
  integer,intent(in) :: ndim,npoint
  double precision,dimension(npoint),intent(in) :: x,y,z
  integer,dimension(npoint),intent(inout) :: ibool
- integer,intent(out) :: nglob 
-  
+ integer,intent(out) :: nglob
+
  integer,dimension(npoint) :: iglob
  integer,dimension(npoint) :: iloc,ind,ninseg
  logical,dimension(npoint) :: ifseg
-  
+
  integer,dimension(npoint) :: iwork(npoint)
  double precision,dimension(npoint) :: work(npoint)
 
  integer :: i,j
  integer :: nseg,ioff,iseg,ig
- double precision :: xtol  
+ double precision :: xtol
 
 ! establish initial pointers
  do i=1,npoint

@@ -33,7 +33,7 @@ integer :: ipart ! partition ID
 logical :: wsurf_mesh
 
 type water_surface
-  integer :: rdir,stype  
+  integer :: rdir,stype
   real(kind=kreal) :: rx1,rx2,z1,z2 ! z-coordinates of water surface
   integer :: nface
   integer,allocatable :: ielmt(:),iface(:)
@@ -123,17 +123,17 @@ do i_face=1,6 ! there are 6 faces in a hexahedron
     face(i_face)%gnod(1)=face(i_face)%nod(1)
     face(i_face)%gnod(2)=face(i_face)%nod(ngllx)
     face(i_face)%gnod(3)=face(i_face)%nod(ngllzx)
-    face(i_face)%gnod(4)=face(i_face)%nod(ngllzx-ngllx+1)  
+    face(i_face)%gnod(4)=face(i_face)%nod(ngllzx-ngllx+1)
   elseif(i_face==2 .or. i_face==4)then ! YZ plane
     face(i_face)%gnod(1)=face(i_face)%nod(1)
     face(i_face)%gnod(2)=face(i_face)%nod(nglly)
     face(i_face)%gnod(3)=face(i_face)%nod(ngllyz)
-    face(i_face)%gnod(4)=face(i_face)%nod(ngllyz-nglly+1)  
+    face(i_face)%gnod(4)=face(i_face)%nod(ngllyz-nglly+1)
   elseif(i_face==5 .or. i_face==6)then ! XY plane
     face(i_face)%gnod(1)=face(i_face)%nod(1)
     face(i_face)%gnod(2)=face(i_face)%nod(ngllx)
     face(i_face)%gnod(3)=face(i_face)%nod(ngllxy)
-    face(i_face)%gnod(4)=face(i_face)%nod(ngllxy-ngllx+1)  
+    face(i_face)%gnod(4)=face(i_face)%nod(ngllxy-ngllx+1)
   else
     write(errtag,'(a)')'ERROR: wrong face ID for traction!'
     return
@@ -173,23 +173,23 @@ do i_wsurf=1,nwsurf
   endif
 enddo
 close(11)
-    
+
 ! compute distance to the free surface
 wpressure=zero
 nodal: do i_node=1,nnode
   if(submerged_node(i_node))then
     xp=g_coord(:,i_node) ! coordinates of the node
-    
+
     do i_wsurf=1,nwsurf
       if(wsurf(i_wsurf)%stype==0)then ! sweep horizontal line all across (z=constant)
         rdir=wsurf(i_wsurf)%rdir
         rx1=wsurf(i_wsurf)%rx1
         rx2=wsurf(i_wsurf)%rx2
-        z=wsurf(i_wsurf)%z1        
+        z=wsurf(i_wsurf)%z1
         !print*,rdir,rx1,rx2,z,xp(3)
         !stop
         if(xp(rdir)>=rx1 .and. xp(rdir)<=rx2 .and. xp(3)<=z)then
-          ! point lies below this water surface          
+          ! point lies below this water surface
           ! compute pressure
           if(z>xp(3))then
             wpressure(i_node)=gamw*(z-xp(3))
@@ -200,15 +200,15 @@ nodal: do i_node=1,nnode
         rdir=wsurf(i_wsurf)%rdir
         rx1=wsurf(i_wsurf)%rx1
         rx2=wsurf(i_wsurf)%rx2
-        z1=wsurf(i_wsurf)%z1  
-        z2=wsurf(i_wsurf)%z2             
-        
+        z1=wsurf(i_wsurf)%z1
+        z2=wsurf(i_wsurf)%z2
+
         if(xp(rdir)>=min(rx1,rx2) .and. xp(rdir)<=max(rx1,rx2) .and. xp(3)<=max(z1,z2))then
           ! point lies below this water surface
           !compute z
-          z=z1+(z2-z1)*(xp(rdir)-rx1)/(rx2-rx1)    
+          z=z1+(z2-z1)*(xp(rdir)-rx1)/(rx2-rx1)
           !print*,rdir,rx1,rx2,z1,z2,z,xp(rdir),xp(3)
-          !stop      
+          !stop
           ! compute pressure
           if(z>xp(3))then
             wpressure(i_node)=gamw*(z-xp(3))
@@ -216,13 +216,13 @@ nodal: do i_node=1,nnode
           cycle nodal
         endif
       elseif(wsurf(i_wsurf)%stype==2)then ! meshed surface in the model
- 
+
         do i_face=1,wsurf(i_wsurf)%nface
           xf=g_coord(:,g_num(face(wsurf(i_wsurf)%iface(i_face))%gnod,wsurf(i_wsurf)%ielmt(i_face))) ! coordinates vector of the face
           xmin=minval(xf(1,:)); xmax=maxval(xf(1,:))
           ymin=minval(xf(2,:)); ymax=maxval(xf(2,:))
           zmin=minval(xf(3,:)); zmax=maxval(xf(3,:))
-          
+
           if(xp(1)>=xmin .and. xp(1)<=xmax .and. xp(2)>=ymin .and. xp(2)<=ymax .and. xp(3)<=zmax)then
             ! find equation of the plane
             ! Ax+By+Cz+D=0
@@ -234,7 +234,7 @@ nodal: do i_node=1,nnode
             B=v2(1)*v1(3)-v1(1)*v2(3)
             C=v1(1)*v2(2)-v2(1)*v1(2)
             D=determinant(xf(:,1:3))
-            
+
             ! find Z-coordinates on the plane just above the point (xp)
             if (C==zero)then
               write(*,*)'WARNING: free surface face is vertical!'
@@ -245,8 +245,8 @@ nodal: do i_node=1,nnode
             if (z>maxval(xf(3,:)) .or. z<minval(xf(3,:)))then
               write(errtag,'(a)')'ERROR: free surface cannot be determined!'
               return
-            endif          
-            
+            endif
+
             ! compute pressure
             if(z>xp(3))then
               wpressure(i_node)=gamw*(z-xp(3))
@@ -258,7 +258,7 @@ nodal: do i_node=1,nnode
     enddo
   endif
 enddo nodal
-! deallocate variables  
+! deallocate variables
 do i=1,6
   deallocate(face(i)%nod)
 enddo

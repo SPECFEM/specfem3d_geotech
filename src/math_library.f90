@@ -77,14 +77,14 @@ end function factorial
 
 ! this function returns the determinant of a 1x1, 2x2 or 3x3
 ! jacobian matrix.
-! this routine was copied and modified from 
+! this routine was copied and modified from
 ! Smith and Griffiths (2004): Programming the finite element method
 function determinant(jac)result(det)
-implicit none    
+implicit none
 real(kind=kreal),intent(in)::jac(:,:)
 real(kind=kreal)::det
-integer::it 
-it=ubound(jac,1)  
+integer::it
+it=ubound(jac,1)
 select case(it)
 case(1)
   det=1.0_kreal
@@ -102,7 +102,7 @@ end function determinant
 !=======================================================
 
 ! this subroutine inverts a small square matrix onto itself.
-! this routine was copied and modified from 
+! this routine was copied and modified from
 ! Smith and Griffiths (2004): Programming the finite element method
 subroutine invert(matrix)
 implicit none
@@ -160,7 +160,7 @@ end subroutine invert
 !=======================================================
 
 ! this subroutine forms the stress invariants in 2- or 3-d.
-! this routine was copied and modified from 
+! this routine was copied and modified from
 ! Smith and Griffiths (2004): Programming the finite element method
 subroutine stress_invariant(stress,sigm,dsbar,theta)
 implicit none
@@ -169,7 +169,7 @@ real(kind=kreal),intent(out),optional::sigm,dsbar,theta
 real(kind=kreal)::sx,sy,sz,txy,dx,dy,dz,xj3,sine,s1,s2,s3,s4,s5,s6,ds1,ds2,ds3,&
   d2,d3,sq3,zero=0.0_kreal,small=1.e-12_kreal,one=1.0_kreal,two=2.0_kreal,     &
   three=3.0_kreal,six=6.0_kreal,thpt5=13.5_kreal
-integer::nst 
+integer::nst
 nst=ubound(stress,1)
 select case(nst)
 case(4)
@@ -193,28 +193,28 @@ case(4)
   end if
 case(6)
   sq3=sqrt(three)
-  s1=stress(1)  
+  s1=stress(1)
   s2=stress(2)
-  s3=stress(3) 
+  s3=stress(3)
   s4=stress(4)
   s5=stress(5)
   s6=stress(6)
   sigm=(s1+s2+s3)/three
   d2=((s1-s2)**2+(s2-s3)**2+(s3-s1)**2)/six+s4*s4+s5*s5+s6*s6
-  
+
   if(d2<small)d2=small ! special case of hydrostatic pressure or just at the tip
-  
-  ds1=s1-sigm 
-  ds2=s2-sigm  
+
+  ds1=s1-sigm
+  ds2=s2-sigm
   ds3=s3-sigm
   d3=ds1*ds2*ds3-ds1*s5*s5-ds2*s6*s6-ds3*s4*s4+two*s4*s5*s6
   dsbar=sq3*sqrt(d2)
-  if(dsbar<small)then     
+  if(dsbar<small)then
     theta=zero
   else
     sine=-three*sq3*d3/(two*sqrt(d2)**3)
-    if(sine>=one)sine=one 
-    if(sine<-one)sine=-one 
+    if(sine>=one)sine=one
+    if(sine<-one)sine=-one
     theta=asin(sine)/three
   end if
 case default
@@ -231,7 +231,7 @@ integer, dimension(n) :: x ! data vector to sort
 integer :: temp
 integer :: i,j
 integer,dimension(n) :: xnew
- 
+
 do i = 2, n
   j = i - 1
   temp = x(i)
@@ -252,7 +252,7 @@ real(kind=kreal), dimension(n) :: x ! data vector to sort
 real(kind=kreal) :: temp
 integer :: i,j
 real(kind=kreal),dimension(n) :: xnew
- 
+
 do i = 2, n
   j = i - 1
   temp = x(i)
@@ -272,7 +272,7 @@ integer,intent(in) :: n ! size of the vector data x
 real, intent(inout), dimension(n) :: x ! data vector to sort
 real :: temp
 integer :: i, j
- 
+
 do i = 2, n
   j = i - 1
   temp = x(i)

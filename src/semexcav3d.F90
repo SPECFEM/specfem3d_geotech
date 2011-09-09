@@ -166,7 +166,7 @@ lagrange_gll,dlagrange_gll)
 ! this removes the repeated use of reshape later but it has larger size than gdof!!!
 allocate(gdof_elmt(nedof,nelmt))
 gdof_elmt=0
-do i_elmt=1,nelmt 
+do i_elmt=1,nelmt
   gdof_elmt(:,i_elmt)=reshape(gdof(:,g_num(:,i_elmt)),(/nedof/)) !g=g_g(:,i_elmt)
 enddo
 !-------------------------------
@@ -186,7 +186,7 @@ stress_local=zero
 
 if(s0_type==0)then
   ! compute initial stress using SEM itself
-  
+
   allocate(extload(0:neq),x(0:neq),dprecon(0:neq),storkm(nedof,nedof,          &
   nelmt_intact),stat=istat) ! elastic(0:neq),
   if (istat/=0)then
@@ -209,7 +209,7 @@ if(s0_type==0)then
   ! apply traction boundary conditions
   if(istraction)then
     if(myid==1)write(*,'(a)',advance='no')'applying traction...'
-    call apply_traction(ismpi,myid,nproc,gnod,gdof,neq,extload,errcode,errtag)  
+    call apply_traction(ismpi,myid,nproc,gnod,gdof,neq,extload,errcode,errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myid)
     if(myid==1)write(*,*)'complete!'
   endif
@@ -218,15 +218,15 @@ if(s0_type==0)then
   ! compute water pressure
   if(iswater)then
     if(myid==1)write(stdout,'(a)',advance='no')'computing water pressure...'
-    allocate(wpressure(nnode),submerged_node(nnode))  
+    allocate(wpressure(nnode),submerged_node(nnode))
     call compute_pressure(ismpi,myid,nproc,wpressure,submerged_node,errcode,   &
     errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myid)
     ! write pore pressure file
-  
+
     ! open Ensight Gold data file to store data
-    out_fname=trim(out_path)//trim(file_head)//trim(ptail)//'.por'    
-    npart=1;  
+    out_fname=trim(out_path)//trim(file_head)//trim(ptail)//'.por'
+    npart=1;
     destag='Pore pressure'
     call write_ensight_pernode(out_fname,destag,npart,1,nnode,real(wpressure))
     if(myid==1)write(stdout,*)'complete!'
@@ -258,7 +258,7 @@ if(s0_type==0)then
 elseif(s0_type==1)then
   ! compute initial stress using simple relation for overburden pressure
   call overburden_stress(nelmt,g_num,mat_id,z_datum,s0_datum,epk0,stress_local)
-else  
+else
   write(stdout,*)'ERROR: s0_type:',s0_type,' not supported!'
   stop
 endif
@@ -313,15 +313,15 @@ allocate(ngpart_node(nnode))
 ! excavation-stage loop
 nodalu=zero
 excavation_stage: do i_excav=0,nexcav
-  
+
   vmeps=zero; scf=inftol
   if(i_excav>0)then
   !deallocate(load,bodyload,oldx,extload,x,dprecon,stat=istat)
   if(myid==1)write(stdout,'(/,a,i4)')'excavation stage:',i_excav
-  
+
   ! find appropriate indices in excavid
   id0=(i_excav-1)*nexcavid(i_excav)+1; id1=id0+nexcavid(i_excav)-1
-  
+
   ! disable excavated material id
   ismat(excavid(id0:id1))=off !ismat(excavid(i_excav))=off
   !print*,id0,id1
@@ -338,18 +338,18 @@ excavation_stage: do i_excav=0,nexcav
     exit excavation_stage
   endif
   allocate(elmt_intact(nelmt_intact),elmt_void(nelmt_void))
-  ! find intact and void elements after excavation  
+  ! find intact and void elements after excavation
   call intact_void_elmt(nexcavid(i_excav),excavid(id0:id1),ismat,nelmt_intact, &
-  nelmt_void,elmt_intact,elmt_void,isnode)   
-   
+  nelmt_void,elmt_intact,elmt_void,isnode)
+
   ! count intact and void nodes after excavation
   nnode_intact=count(isnode)
   nnode_void=nnode-nnode_intact
   allocate(node_intact(nnode_intact),node_void(nnode_void))
   ! find intact and void nodes after excavation
   call intact_void_node(isnode,nnode_intact,nnode_void,node_intact,node_void,  &
-  nmir)   
-  
+  nmir)
+
   tot_nelmt=sumscal(nelmt_intact); tot_nnode=sumscal(nnode_intact)
   max_nelmt=maxscal(nelmt_intact); max_nnode=maxscal(nnode_intact)
   min_nelmt=minscal(nelmt_intact); min_nnode=minscal(nnode_intact)
@@ -360,32 +360,32 @@ excavation_stage: do i_excav=0,nexcav
 
   !write(stdout,'(a,i10)')' total intact nodes:',nnode_intact
   !write(stdout,'(a,i10)')' total intact elements:',nelmt_intact
-  
+
   ! correct node valency subtracting dead element-nodes
   call correct_nvalency(node_valency,nelmt_void,g_num(:,elmt_void))
-  
+
   ! modify global-degrees-of-freedom (gdof)
   call modify_gdof(gdof,nnode_void,node_void,neq)
-  
+
   tot_neq=sumscal(neq); max_neq=maxscal(neq); min_neq=minscal(neq)
   if(myid==1)then
     write(stdout,*)'degrees of freedoms => total:',tot_neq,' max:',max_neq,' min:',min_neq
   endif
   !write(stdout,'(a,i10)')' total degrees of freedoms:',neq
-   
+
   ! store elemental global degrees of freedoms from nodal gdof
   ! this removes the repeated use of reshape later but it has larger size than gdof!!!
   gdof_elmt=0
   do i_elmt=1,nelmt
     gdof_elmt(:,i_elmt)=reshape(gdof(:,g_num(:,i_elmt)),(/nedof/)) !g=g_g(:,i_elmt)
   enddo
-  
+
   ! write geo file for this stage
   ! open Ensight Gold geo file to store mesh data
   write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//'_step',i_excav,trim(ptail)//'.geo'
   npart=1
   destag='unstructured meshes'
-  call write_ensight_geocoord(geo_file,destag,npart,nnode_intact,real(g_coord(:,node_intact)),funit) 
+  call write_ensight_geocoord(geo_file,destag,npart,nnode_intact,real(g_coord(:,node_intact)),funit)
 
   ! writes element information
   buffer=ensight_etype
@@ -416,38 +416,38 @@ excavation_stage: do i_excav=0,nexcav
       enddo
     enddo
   enddo
-  close(funit)  
-  
-  ! reallocate those arrays whose size depend on the neq  
+  close(funit)
+
+  ! reallocate those arrays whose size depend on the neq
   allocate(load(0:neq),bodyload(0:neq),extload(0:neq),oldx(0:neq),x(0:neq), & !,extload1(0:neq)
   dprecon(0:neq),storkm(nedof,nedof,nelmt_intact),stat=istat) ! elastic(0:neq),
   if (istat/=0)then
     write(stdout,*)'ERROR: cannot allocate memory!'
     stop
   endif
-  
-  ! modify ghost partitions after excavation 
+
+  ! modify ghost partitions after excavation
   !call prepare_ghost(myid,nproc,gdof,ngpart,maxngnode)
   call modify_ghost(myid,nproc,gdof,ngpart,isnode)
   call count_active_nghosts(myid,ngpart,maxngnode,nndof,ngpart_node)
- 
+
   excavload=zero; extload=zero; ! extload1=zero
-  
+
   ! compute excavation load at gdofs
   !call excavation_load(nelmt_void,neq,gnod,g_num(:,elmt_void),gdof_elmt(:,elmt_void), &
   !mat_id(elmt_void),dshape_hex8,lagrange_gll,dlagrange_gll,gll_weights, &
   !stress_local(:,:,elmt_void),extload)
-  
+
   ! compute excavation load at nodes
   call excavation_load_nodal(nelmt_void,neq,gnod,g_num(:,elmt_void), &
   mat_id(elmt_void),dshape_hex8,lagrange_gll,dlagrange_gll,gll_weights, &
   stress_local(:,:,elmt_void),excavload)
-    
-  ! if the excavation load is discarded by the partition (it can happens due to 
-  ! the special combination of partition geometry and excavation geoemtry) it 
+
+  ! if the excavation load is discarded by the partition (it can happens due to
+  ! the special combination of partition geometry and excavation geoemtry) it
   ! should be distributed equally to the active sharing partitions.
   call distribute2ghosts(myid,gdof,ngpart,maxngnode,nndof,neq,ngpart_node,excavload,extload)
-!#else 
+!#else
 !  ! store nodal values to gdof locations
 !  do j=1,nnode
 !    do i=1,nndof
@@ -462,57 +462,57 @@ excavation_stage: do i_excav=0,nexcav
   ! strength reduction
   call strength_reduction(srf(i_srf),phinu,nmat,coh,nu,phi,psi,cohf,nuf,phif,  &
   psif,istat)
-  
+
   ! compute minimum pseudo-time step for viscoplasticity
   dt=dt_viscoplas(nmat,nuf,phif,ym,ismat)
-  
+
   ! compute stiffness matrix
   gravity=.false.; pseudoeq=.false.
   call stiffness_bodyload(nelmt_intact,neq,gnod,g_num(:,elmt_intact),          &
   gdof_elmt(:,elmt_intact),mat_id(elmt_intact),gam,nuf,ym,dshape_hex8,         &
   lagrange_gll,dlagrange_gll,gll_weights,storkm,dprecon)!,extload,gravity,pseudoeq)
-   
+
   ! assemble from ghost partitions
   call assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,dprecon,dprecon)
   dprecon(0)=zero; dprecon(1:)=one/dprecon(1:)
-  
+
   ! find global dt
-  dt=minscal(dt) 
-  
+  dt=minscal(dt)
+
   cg_tot=0; nl_tot=0
   ! load incremental loop
   if(myid==1)write(stdout,'(a,i10)')' total load increments:',ninc
   extload=extload/ninc
   load_increment: do i_inc=1,ninc
   !stress_local(:,:,elmt_void)=zero
-  
-  bodyload=zero; evpt=zero  
-  
+
+  bodyload=zero; evpt=zero
+
   x=zero; oldx=zero
   ! plastic iteration loop
-  plastic: do nl_iter=1,nl_maxiter  
+  plastic: do nl_iter=1,nl_maxiter
     fmax=zero
-    
-    load=extload+bodyload    
-    load(0)=zero      
-    
+
+    load=extload+bodyload
+    load(0)=zero
+
     ! pcg solver
     !x=zero
     call pcg_solver(myid,ngpart,maxngnode,neq,nelmt_intact,storkm,x,load,      &
     dprecon,gdof_elmt(:,elmt_intact),cg_iter,errcode,errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myid)
-    cg_tot=cg_tot+cg_iter    
+    cg_tot=cg_tot+cg_iter
     x(0)=zero
-    
+
     if(allelastic)then
       !print*,size(stress_local)
       call elastic_stress_intact(nelmt_intact,neq,gnod,elmt_intact,            &
       g_num(:,elmt_intact),gdof_elmt(:,elmt_intact),mat_id(elmt_intact),       &
-      dshape_hex8,dlagrange_gll,x,stress_local(:,:,:))      
-            
+      dshape_hex8,dlagrange_gll,x,stress_local(:,:,:))
+
       exit plastic
     endif
-    
+
     ! check plastic convergence
     uerr=maxvec(abs(x-oldx))/maxvec(abs(x))
     oldx=x
@@ -523,7 +523,7 @@ excavation_stage: do i_excav=0,nexcav
       ielmt=elmt_intact(i_elmt)
 
       imat=mat_id(ielmt)
-      !tnph=tan(phi(mat_id(ielmt))*pi/r180)      
+      !tnph=tan(phi(mat_id(ielmt))*pi/r180)
       !phif=atan(tnph/srf(i_srf))*r180/pi
       !tnps=tan(psi(mat_id(ielmt))*pi/r180)
       !psif=atan(tnps/srf(i_srf))*r180/pi
@@ -532,16 +532,16 @@ excavation_stage: do i_excav=0,nexcav
       num=g_num(:,ielmt)
       coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
       egdof=gdof_elmt(:,ielmt) !reshape(gdof(:,g_num(:,ielmt)),(/nedof/))
-      eld=x(egdof)  
+      eld=x(egdof)
       !print*,egdof
-      !stop       
+      !stop
       bload=zero
       do i=1,ngll ! loop over integration points
-        jac=matmul(dshape_hex8(:,:,i),coord)        
+        jac=matmul(dshape_hex8(:,:,i),coord)
         detjac=determinant(jac)
         call invert(jac)
 
-        deriv=matmul(jac,dlagrange_gll(:,i,:)) 
+        deriv=matmul(jac,dlagrange_gll(:,i,:))
         call compute_bmat(bmat,deriv)
         eps=matmul(bmat,eld)
         eps=eps-evpt(:,i,ielmt)
@@ -561,17 +561,17 @@ excavation_stage: do i_excav=0,nexcav
         ! check whether yield is violated
         call mohcouf(phif(imat),cohf(imat),sigm,dsbar,lode_theta,f)
         if(f>fmax)fmax=f
-        
+
         if(f>=zero)then !.or.(nl_isconv.or.nl_iter==nl_maxiter))then
           call mohcouq(psif(imat),dsbar,lode_theta,dq1,dq2,dq3)
           call formm(effsigma,m1,m2,m3)
           !if(dsbar<=zerotol)print*,m1*dq1+m2*dq2+m3*dq3
-          flow=f*(m1*dq1+m2*dq2+m3*dq3) 
-          
+          flow=f*(m1*dq1+m2*dq2+m3*dq3)
+
           erate=matmul(flow,effsigma)
           evp=erate*dt
           evpt(:,i,ielmt)=evpt(:,i,ielmt)+evp
-          devp=matmul(cmat,evp)          
+          devp=matmul(cmat,evp)
           ! if not converged we need body load for next iteration
           if(.not.nl_isconv .and. nl_iter/=nl_maxiter)then
             !devp(1:3)=devp(1:3)-wpressure(num(i))
@@ -597,10 +597,10 @@ excavation_stage: do i_excav=0,nexcav
         !  stop
         !endif
       end do ! i_gll
-      
+
       if(nl_isconv .or. nl_iter==nl_maxiter)cycle
       ! compute total body load vector
-      bodyload(egdof)=bodyload(egdof)+bload      
+      bodyload(egdof)=bodyload(egdof)+bload
     end do ! i_elmt
     bodyload(0)=zero
     fmax=maxscal(fmax)
@@ -614,12 +614,12 @@ excavation_stage: do i_excav=0,nexcav
     if(nl_isconv.or.nl_iter==nl_maxiter)exit
   end do plastic ! plastic iteration
   if(nl_iter>=nl_maxiter .and. .not.nl_isconv)then
-    write(stdout,*)'WARNING: nonconvergence in nonlinear iterations!' 
-    write(stdout,*)'desired tolerance:',nl_tol,' achieved tolerance:',uerr  
+    write(stdout,*)'WARNING: nonconvergence in nonlinear iterations!'
+    write(stdout,*)'desired tolerance:',nl_tol,' achieved tolerance:',uerr
   endif
   nl_tot=nl_tot+nl_iter
   !if(myid==1)print*,cg_tot,nl_tot
-  ! nodal displacement  
+  ! nodal displacement
   do i=1,nndof
     do j=1,nnode
       if(gdof(i,j)/=0)then
@@ -632,30 +632,30 @@ excavation_stage: do i_excav=0,nexcav
   if (istat/=0)then
     write(stdout,*)'ERROR: cannot deallocate memory!'
     stop
-  endif   
-  
+  endif
+
   ! write summary
   uxmax=maxvec(abs(reshape(nodalu(:,node_intact),(/nndof*nnode_intact/))))
   umax=maxvec(sqrt(nodalu(1,node_intact)*nodalu(1,node_intact)+ &
   nodalu(2,node_intact)*nodalu(2,node_intact)+nodalu(3,node_intact)*           &
   nodalu(3,node_intact)))
-  open(10,file=trim(sum_file),status='old',position='append',action='write')  
+  open(10,file=trim(sum_file),status='old',position='append',action='write')
   write(10,*)i_excav,cg_tot,nl_tot,uxmax,umax,fmax
   close(10)
-  
+
   ! compute average effective strain
   do i_node=1,nnode_intact
     inode=node_intact(i_node)
     vmeps(inode)=vmeps(inode)/real(node_valency(inode),kreal)
   enddo
-  
-  endif ! if(i_excav>0)  
-  
+
+  endif ! if(i_excav>0)
+
   ! compute stress_global
-  stress_global=zero  
+  stress_global=zero
   do i_elmt=1,nelmt_intact
     ielmt=elmt_intact(i_elmt)
-    num=g_num(:,ielmt)    
+    num=g_num(:,ielmt)
     stress_global(:,num)=stress_global(:,num)+stress_local(:,:,ielmt)
   enddo
 
@@ -665,20 +665,20 @@ excavation_stage: do i_excav=0,nexcav
     stress_global(:,inode)=stress_global(:,inode)/real(node_valency(inode),    &
     kreal)
   enddo
-  
+
   call save_data(ptail,format_str,i_excav,nnode_intact,nelmt_intact,           &
   g_num(:,elmt_intact),nodalu(:,node_intact),scf(node_intact),                 &
   vmeps(node_intact),stress_global(:,node_intact))
-  
+
   ! deallocate those variables whose size depend on changing geometry
-  deallocate(elmt_intact,node_intact,stat=istat) 
-  if(i_excav>0)deallocate(elmt_void,node_void)  
-  
+  deallocate(elmt_intact,node_intact,stat=istat)
+  if(i_excav>0)deallocate(elmt_void,node_void)
+
   !call sync_process
   if(nl_iter==nl_maxiter)exit
-  
+
 enddo excavation_stage ! i_excav time stepping loop
-enddo srf_loop ! i_srf safety factor loop 
+enddo srf_loop ! i_srf safety factor loop
 deallocate(mat_id,gam,ym,coh,nu,phi,psi,srf)
 deallocate(excavload,g_coord,g_num,isnode,nmir)
 call free_ghost(ngpart)

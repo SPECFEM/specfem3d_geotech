@@ -76,14 +76,14 @@ ystore=zero
 zstore=zero
 
 ipoint=0
-do i_elmt=1,nelmt  
+do i_elmt=1,nelmt
   do k=1,ngllz
     do j=1,nglly
       do i=1,ngllx
         xgll = zero
         ygll = zero
         zgll = zero
-        
+
         do i_gnod=1,ngnod
           xgll = xgll + shape_hex8(i_gnod,i,j,k)*g_coord(1,g_num(i_gnod,i_elmt))
           ygll = ygll + shape_hex8(i_gnod,i,j,k)*g_coord(2,g_num(i_gnod,i_elmt))
@@ -387,15 +387,15 @@ subroutine get_global_indirect_addressing(nelmt,nnode,npoint,ibool)
 ! (put into this subroutine but compiler keeps on complaining that it can't vectorize loops...)
 
 implicit none
-  
+
 integer :: nelmt,nnode,npoint
 integer, dimension(npoint) :: ibool
-  
+
 ! mask to sort ibool
 integer, dimension(nnode) :: mask_ibool
-integer, dimension(npoint) :: copy_ibool_ori  
+integer, dimension(npoint) :: copy_ibool_ori
 integer :: inumber
-integer:: i_point  
+integer:: i_point
 
 mask_ibool = -1
 copy_ibool_ori = ibool

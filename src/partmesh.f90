@@ -57,8 +57,8 @@ do
   read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
   if (ios/=0)exit
   ! check for blank and comment line
-  if (isblank(line) .or. iscomment(line,'#'))cycle 
-   
+  if (isblank(line) .or. iscomment(line,'#'))cycle
+
   ! look for line continuation
   tag=trim(line)
   call last_char(line,tmp_char,ind)
@@ -66,7 +66,7 @@ do
     slen=len(line)
     tag=trim(line(1:ind-1))
     read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
-    tag=trim(tag)//trim(line)         
+    tag=trim(tag)//trim(line)
   endif
   call first_token(tag,token)
 
@@ -78,7 +78,7 @@ do
     if(npart<=1)then
       write(*,*)'ERROR: number of processors should be greater than 1!'
       stop
-    endif        
+    endif
     call seek_string('inp_path',strval,args,narg)
     if (.not. isblank(strval))inp_path=trim(strval)
     slen=len_trim(inp_path)
@@ -86,11 +86,11 @@ do
     call seek_string('part_path',strval,args,narg)
     if (.not. isblank(strval))out_path=trim(strval)
     slen=len_trim(out_path)
-    if(out_path(slen:slen)/='/')out_path=trim(out_path)//'/'    
+    if(out_path(slen:slen)/='/')out_path=trim(out_path)//'/'
     out_phead=trim(out_path)//trim(file_head)//'_'
 
-    preinfo_stat=0      
-    cycle      
+    preinfo_stat=0
+    cycle
   endif
   ! read mesh information
   if (trim(token)=='mesh:')then
@@ -99,12 +99,12 @@ do
     yfile=get_string('yfile',args,narg)
     zfile=get_string('zfile',args,narg)
     confile=get_string('confile',args,narg)
-    idfile=get_string('idfile',args,narg)    
-   
-    mesh_stat=0      
-    cycle      
+    idfile=get_string('idfile',args,narg)
+
+    mesh_stat=0
+    cycle
   endif
-  
+
   ! read bc information
   if (trim(token)=='bc:')then
     call split_string(tag,',',args,narg)
@@ -113,9 +113,9 @@ do
     uzfile=get_string('uzfile',args,narg)
 
     bc_stat=0
-    cycle      
+    cycle
   endif
-  
+
   ! read traction information
   if (trim(token)=='traction:')then
     call split_string(tag,',',args,narg)
@@ -123,18 +123,18 @@ do
     traction_stat=0
     istraction=.true.
     !print*,trfile
-    cycle      
+    cycle
   endif
-  
+
   ! read material list
   if (trim(token)=='material:')then
     material_stat=-1
-    call split_string(tag,',',args,narg)    
-    matfile=get_string('matfile',args,narg)           
-                
+    call split_string(tag,',',args,narg)
+    matfile=get_string('matfile',args,narg)
+
     material_stat=0
-    cycle      
-  endif  
+    cycle
+  endif
 enddo ! do
 close(11)
 
@@ -175,24 +175,24 @@ write(*,*)'partition directory: ',out_path
 call cpu_time(cpu_tstart)
 
 ! reads in (CUBIT) mesh files: mesh_file,nodes_coord_file, ...
-  call read_mesh_files()  
-  
+  call read_mesh_files()
+
 ! checks valence of nodes
   call check_valence()
-  
-! partitions mesh 
-  call scotch_partitioning()  
-  
-! writes out database files  
+
+! partitions mesh
+  call scotch_partitioning()
+
+! writes out database files
   call write_mesh_databases()
-  
+
   write(*,*)'mesh partitioning finished successfully!'
-  
-! elapsed time  
+
+! elapsed time
   call cpu_time(cpu_tend)
   write(*,*)'total elapsed time: ',cpu_tend-cpu_tstart,'s'
   write(*,*)'-----------------------------------------'
- 
+
 end program partmesh
 !=======================================================
 

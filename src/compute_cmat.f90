@@ -1,7 +1,7 @@
 ! this subroutine returns the elastic matrix for ih=3 (plane strain),
 ! ih=4 (axisymmetry or plane strain elastoplasticity) or ih=6 (3D)
-! REFERENCE: 
-!  copied and modified from 
+! REFERENCE:
+!  copied and modified from
 !  Smith and Griffiths (2004): Programming the finite element method
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
@@ -12,7 +12,7 @@ use set_precision
  real(kind=kreal),intent(out)::cmat(:,:)
  real(kind=kreal)::v1,v2,c,vv,zero=0.0_kreal,pt5=0.5_kreal,one=1.0_kreal,two=2.0_kreal
  integer::i,ih
- cmat=zero  
+ cmat=zero
  ih=ubound(cmat,1)
  v1=one-v
  c=e/((one+v)*(one-two*v))
@@ -27,7 +27,7 @@ use set_precision
    cmat(1,1)=v1*c
    cmat(2,2)=v1*c
    cmat(4,4)=v1*c
-   cmat(3,3)=pt5*c*(one-two*v) 
+   cmat(3,3)=pt5*c*(one-two*v)
    cmat(1,2)=v*c
    cmat(2,1)=v*c
    cmat(1,4)=v*c
@@ -54,4 +54,4 @@ use set_precision
    write(*,*)'ERROR: wrong size for "cmat" matrix!'
  end select
 return
-end subroutine compute_cmat    
+end subroutine compute_cmat
