@@ -6,12 +6,13 @@ use mpi
 contains
 
 ! start MPI processes
-subroutine start_process(myid,nproc,ounit)
+subroutine start_process(ismpi,myid,nproc,ounit)
 implicit none
+logical,intent(out) :: ismpi
 integer,intent(out) :: myid,nproc
 integer,intent(in) :: ounit
 integer :: errcode
-
+ismpi=.true. ! parallel
 call MPI_INIT(errcode)
 if(errcode /= 0) call mpierror('ERROR: cannot initialize MPI!',errcode,ounit)
 call MPI_COMM_RANK(MPI_COMM_WORLD,myid,errcode)
@@ -66,5 +67,21 @@ write(ounit,'(a)')'aborting MPI...'
 call MPI_ABORT(MPI_COMM_WORLD,errcode,ierr)
 stop
 end subroutine error_stop
+!=======================================================
+
+! get processor tag
+function proc_tag(myid,nproc) result(ptag)
+implicit none
+integer,intent(in) :: myid,nproc
+character(len=20) :: format_str,ptag
+
+write(format_str,*)ceiling(log10(real(nproc)+1.))
+format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
+
+write(ptag,fmt=format_str)'_proc',myid-1
+
+return
+end function
+!=======================================================
 
 end module mpi_library

@@ -3,47 +3,48 @@ module math_library_mpi
 use math_constants
 use set_precision_mpi
 
-private :: iminvec_par,fminvec_par
-private :: isumscal_par,fsumscal_par
-private :: imaxscal_par,fmaxscal_par
-private :: imaxvec_par,fmaxvec_par
+private :: iminscal,fminscal
+private :: iminvec,fminvec
+private :: isumscal,fsumscal
+private :: imaxscal,fmaxscal
+private :: imaxvec,fmaxvec
 
 ! global sum of a scalar in all processors
-interface sumscal_par
-  module procedure isumscal_par
-  module procedure fsumscal_par
+interface sumscal
+  module procedure isumscal
+  module procedure fsumscal
 end interface
 
 ! global maximum of a scalar in all processors
-interface minscal_par
-  module procedure iminscal_par
-  module procedure fminscal_par
+interface minscal
+  module procedure iminscal
+  module procedure fminscal
 end interface
 
 ! global maximum of a scalar in all processors
-interface maxscal_par
-  module procedure imaxscal_par
-  module procedure fmaxscal_par
+interface maxscal
+  module procedure imaxscal
+  module procedure fmaxscal
 end interface
 
 ! global maximum of a vector in all processors
-interface maxvec_par
-  module procedure imaxvec_par
-  module procedure fmaxvec_par
+interface maxvec
+  module procedure imaxvec
+  module procedure fmaxvec
 end interface
 
 ! global minimum of a scalar in all processors
-interface minvec_par
-  module procedure iminvec_par
-  module procedure fminvec_par
+interface minvec
+  module procedure iminvec
+  module procedure fminvec
 end interface
 contains
 !=======================================================
 !=======================================================
 
-function iminscal_par(scal) result(gmin)
+function iminscal(scal) result(gmin)
 !
-! this finds a summation of a scalar across the processors
+! this finds a global minimum of a scalar across the processors
 !
 implicit none 
 integer,intent(in)::scal 
@@ -53,12 +54,12 @@ integer :: ierr
 call MPI_ALLREDUCE(scal,gmin,1,MPI_INTEGER,MPI_MIN,MPI_COMM_WORLD,ierr)
  
 return
-end function iminscal_par
+end function iminscal
 !=======================================================
 
-function fminscal_par(scal) result(gmin)
+function fminscal(scal) result(gmin)
 !
-! this finds a summation of a scalar across the processors
+! this finds a global minimum of a scalar across the processors
 !
 implicit none 
 real(kind=kreal),intent(in)::scal 
@@ -68,12 +69,12 @@ integer :: ierr
 call MPI_ALLREDUCE(scal,gmin,1,MPI_KREAL,MPI_MIN,MPI_COMM_WORLD,ierr)
  
 return
-end function fminscal_par
+end function fminscal
 !=======================================================
 
-function imaxscal_par(scal) result(gmax)
+function imaxscal(scal) result(gmax)
 !
-! this finds a summation of a scalar across the processors
+! this finds a global maximum of a scalar across the processors
 !
 implicit none 
 integer,intent(in)::scal 
@@ -83,12 +84,12 @@ integer :: ierr
 call MPI_ALLREDUCE(scal,gmax,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,ierr)
  
 return
-end function imaxscal_par
+end function imaxscal
 !=======================================================
 
-function fmaxscal_par(scal) result(gmax)
+function fmaxscal(scal) result(gmax)
 !
-! this finds a summation of a scalar across the processors
+! this finds a global maximum of a scalar across the processors
 !
 implicit none 
 real(kind=kreal),intent(in)::scal 
@@ -98,10 +99,10 @@ integer :: ierr
 call MPI_ALLREDUCE(scal,gmax,1,MPI_KREAL,MPI_MAX,MPI_COMM_WORLD,ierr)
  
 return
-end function fmaxscal_par
+end function fmaxscal
 !=======================================================
 
-function imaxvec_par(vec) result(gmax)
+function imaxvec(vec) result(gmax)
 implicit none
 integer,intent(in)::vec(:)
 integer :: lmax,gmax ! local and global
@@ -112,10 +113,10 @@ lmax=maxval(vec)
 call MPI_ALLREDUCE(lmax,gmax,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,ierr)
 
 return
-end function imaxvec_par
+end function imaxvec
 !=======================================================
 
-function fmaxvec_par(vec) result(gmax)
+function fmaxvec(vec) result(gmax)
 implicit none
 real(kind=kreal),intent(in)::vec(:)
 real(kind=kreal) :: lmax,gmax ! local and global
@@ -126,10 +127,10 @@ lmax=maxval(vec)
 call MPI_ALLREDUCE(lmax,gmax,1,MPI_KREAL,MPI_MAX,MPI_COMM_WORLD,ierr)
 
 return
-end function fmaxvec_par
+end function fmaxvec
 !=======================================================
 
-function iminvec_par(vec) result(gmin)
+function iminvec(vec) result(gmin)
 implicit none
 integer,intent(in)::vec(:)
 integer :: lmin,gmin ! local and global
@@ -140,10 +141,10 @@ lmin=minval(vec)
 call MPI_ALLREDUCE(lmin,gmin,1,MPI_INTEGER,MPI_MIN,MPI_COMM_WORLD,ierr)
 
 return
-end function iminvec_par
+end function iminvec
 !=======================================================
 
-function fminvec_par(vec) result(gmin)
+function fminvec(vec) result(gmin)
 implicit none
 real(kind=kreal),intent(in)::vec(:)
 real(kind=kreal) :: lmin,gmin ! local and global
@@ -154,12 +155,12 @@ lmin=minval(vec)
 call MPI_ALLREDUCE(lmin,gmin,1,MPI_KREAL,MPI_MIN,MPI_COMM_WORLD,ierr)
 
 return
-end function fminvec_par
+end function fminvec
 !=======================================================
 
-function isumscal_par(scal) result(gsum)
+function isumscal(scal) result(gsum)
 !
-! this finds a summation of a scalar across the processors
+! this finds a global summation of a scalar across the processors
 !
 implicit none 
 integer,intent(in)::scal 
@@ -169,12 +170,12 @@ integer :: ierr
 call MPI_ALLREDUCE(scal,gsum,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,ierr)
  
 return
-end function isumscal_par
+end function isumscal
 !=======================================================
 
-function fsumscal_par(scal) result(gsum)
+function fsumscal(scal) result(gsum)
 !
-! this finds a summation of a scalar across the processors
+! this finds a global summation of a scalar across the processors
 !
 implicit none 
 real(kind=kreal),intent(in)::scal 
@@ -184,12 +185,12 @@ integer :: ierr
 call MPI_ALLREDUCE(scal,gsum,1,MPI_KREAL,MPI_SUM,MPI_COMM_WORLD,ierr)
  
 return
-end function fsumscal_par
+end function fsumscal
 !=======================================================
 
 function dot_product_par(vec1,vec2) result(gdot)
 !
-! this finds dot product of two vectors across the processors
+! this finds global dot product of two vectors across the processors
 !
 implicit none
 real(kind=kreal),intent(in)::vec1(:),vec2(:) 

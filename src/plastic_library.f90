@@ -9,19 +9,23 @@ use math_constants
 contains
 ! this function computes the stable pseudo-time step 
 ! for viscoplastic algorithm (Cormeau 1975, Smith and Griffiths 2003)
-function dt_viscoplas(nmat,nuf,phif,ymf) result(dt_min)
+function dt_viscoplas(nmat,nuf,phif,ymf,ismat) result(dt_min)
 implicit none
 integer,intent(in) :: nmat
 ! friction angle,Poisson's ratio, strength reduction factor
 real(kind=kreal),intent(in) :: ymf(nmat),phif(nmat),nuf(nmat) ! phif in degrees
+logical,optional,intent(in) :: ismat(nmat)
 real(kind=kreal) :: dt_min
 real(kind=kreal) :: dt,snphi
 real(kind=kreal),parameter :: r4=4.0_kreal
 integer :: i_mat
-
+logical :: ismat_on(nmat)
+ismat_on=.true.
+if(present(ismat))ismat_on=ismat
 ! compute minimum pseudo-time step for viscoplasticity
 dt_min=inftol
 do i_mat=1,nmat
+  if(.not.ismat_on(i_mat))cycle
   snphi=sin(phif(i_mat)*deg2rad)
   dt=r4*(one+nuf(i_mat))*(one-two*nuf(i_mat))/(ymf(i_mat)*(one-two*nuf(i_mat)+ &
   snphi**2))
@@ -242,3 +246,4 @@ end subroutine formm
 !=======================================================
 
 end module plastic_library
+

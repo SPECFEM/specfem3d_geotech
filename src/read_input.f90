@@ -60,6 +60,7 @@ eqload_stat=0
 water_stat=0
 mesh_stat=-1
 material_stat=-1
+stress0_stat=-1
 control_stat=-1
 save_stat=0
 
@@ -223,7 +224,7 @@ do
     cycle      
   endif
   
-  ! read bc information
+  ! read initial stress information
   if (trim(token)=='stress0:')then
     if(stress0_stat==1)then
       write(errtag,*)'ERROR: copy of line type stress0: not permitted!'
@@ -234,8 +235,8 @@ do
     call seek_integer('type',ival,args,narg,istat)
     if(istat==0)s0_type=ival
     if(s0_type==1)then
-      z_datum=get_integer('z0',args,narg)
-      s0_datum=get_integer('s0',args,narg)
+      z_datum=get_real('z0',args,narg)
+      s0_datum=get_real('s0',args,narg)
     endif
     call seek_real('k0',rval,args,narg,istat)
     if(istat==0)epk0=rval
@@ -367,6 +368,10 @@ do
       nexcavid_all=sum(nexcavid)
       allocate(excavid(nexcavid_all))    
       excavid=get_integer_vect('excavid',nexcavid_all,args,narg)
+    endif
+    if(nsrf>1 .and. nexcav>1)then
+      write(errtag,'(a)')'ERROR: cannot run slope stabiliy and excavation simultaneously!'
+      return
     endif
     !---------------------------
      
@@ -571,6 +576,10 @@ water(nmat))
 do i=1,nmat
   read(11,*)imat,mat_domain,gam(i),ym(i),nu(i),phi(i),coh(i),psi(i)
 enddo
+if(minval(mat_id)<1 .or. maxval(mat_id)>nmat)then
+  write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined material regions!'
+  return
+endif 
 water=.false.
 if(iswater)then
   read(11,*,iostat=ios)nwmat
@@ -590,3 +599,4 @@ errcode=0
 if(myid==1)write(*,*)'complete!'
 
 end subroutine read_input
+

@@ -8,10 +8,10 @@ use math_constants, only : zero
 
 contains
 
-! diagonally preconditioned conjuate gradient solver
-subroutine pcg_solver(neq,nelmt,k,u,f,dprecon,gdof_elmt,cg_iter,errcode,errtag)
+! diagonally preconditioned conjuate-gradient solver
+subroutine pcg_solver(myid,ngpart,maxngnode,neq,nelmt,k,u,f,dprecon,gdof_elmt,cg_iter,errcode,errtag)
 implicit none
-integer,intent(in) :: neq,nelmt ! nelmt (for intact) may not be same as global nelmt 
+integer,intent(in) :: myid,ngpart,maxngnode,neq,nelmt ! nelmt (for intact) may not be same as global nelmt 
 real(kind=kreal),dimension(nedof,nedof,nelmt),intent(in) :: k ! only for intact elements
 real(kind=kreal),dimension(0:neq),intent(inout) :: u
 real(kind=kreal),dimension(0:neq),intent(in) :: f,dprecon

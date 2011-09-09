@@ -1,5 +1,9 @@
 ! this module contains the routines to process parallel communications across 
 ! the ghost partitions
+! TODO:
+!   - better to avoid using allocatable component of derived type variable which
+!     is fortran 95 standard? How much influence will be on the performance with
+!     repeated allocate and deallocate
 ! REVISION:
 !   HNG, APR 15,2011; HNG, Apr 09,2010
 module ghost_library_mpi
@@ -24,7 +28,7 @@ subroutine prepare_ghost(myid,nproc,gdof,ngpart,maxngnode)
 use global,only:ndim,nnode,nndof,ngllx,nglly,ngllz,g_num,g_coord,gfile,        &
 part_path,stdout
 use math_library, only : quick_sort
-use math_library_mpi, only : maxvec_par
+use math_library_mpi, only : maxvec
 
 implicit none
 integer,intent(in) :: myid,nproc
@@ -231,7 +235,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
 enddo ! do i_gpart
 close(11)
 !stop
-maxngnode=maxvec_par(gpart(1:ngpart)%nnode)
+maxngnode=maxvec(gpart(1:ngpart)%nnode)
 
 return
 end subroutine prepare_ghost
@@ -559,6 +563,19 @@ return
 end subroutine distribute2ghosts
 !===========================================
 
+! deallocate ghost variables
+subroutine free_ghost(ngpart)
+implicit none
+integer,intent(in) :: ngpart
+integer :: i
+do i=1,ngpart
+  deallocate(gpart(i)%node,gpart(i)%gdof)
+enddo
+deallocate(gpart)
+return
+end subroutine free_ghost
+!===========================================
+
 ! routines below are imported and modified from SPECFEM3D 
 
 ! subroutines to sort MPI buffers to assemble between chunks
@@ -774,4 +791,5 @@ subroutine sort_array_coord(ndim,npoint,x,y,z,ibool,nglob)
 !===========================================
 
 end module ghost_library_mpi
+
 

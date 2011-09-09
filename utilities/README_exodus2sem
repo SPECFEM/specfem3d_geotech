@@ -1,6 +1,6 @@
 /*This program converts the Binary (provided that ncdump command exists)
 or ASCII exodus file exported from the CUBIT to several mesh files required
-by the fem3d and sem3d_solid packages. Basic steps starting from the CUBIT:
+by the SPECFEM3D_GEOTECH package. Basic steps starting from the CUBIT:
 in CUBIT:
 - blocks defines only the material regions
   -> actual material properties should not be defined within the CUBIT.
@@ -53,5 +53,4 @@ OPTIONS:
 HISTORY: 
   HNG,Apr 23,2010;HNG,Apr 17,2010;HNG,Feb 08,2009
 TODO:
-  - add support to side sets,i.e., surface boundary conditions
 -------------------------------------------------------*/

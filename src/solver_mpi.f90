@@ -5,15 +5,15 @@ module solver_mpi
 use set_precision
 use global, only : cg_maxiter,cg_tol,g_num,nedof,nndof,nnode
 use math_constants, only : zero
-!use math_library !, only : dot_product_par,maxvec_par
+!use math_library !, only : dot_product_par,maxvec
 use math_library_mpi
 use ghost_library_mpi
 
 contains
 
-! diagonally preconditioned conjuate gradient solver
-subroutine pcg_solver_par(myid,ngpart,maxngnode,neq,nelmt,k,u_g,f, &
-dprecon_g,gdof_elmt,cg_iter,errcode,errtag)
+! diagonally preconditioned conjuate-gradient solver
+subroutine pcg_solver(myid,ngpart,maxngnode,neq,nelmt,k,u_g,f,dprecon_g,       &
+gdof_elmt,cg_iter,errcode,errtag)
 !use math_library
 implicit none
 integer,intent(in) :: myid,ngpart,maxngnode,neq,nelmt ! nelmt (for intact) may not be same as global nelmt
@@ -66,11 +66,11 @@ pcg: do cg_iter=1,cg_maxiter
   alpha=rz/dot_product_par(p_g,kp)
   u_g=u_g+alpha*p_g
   
-  if(abs(alpha)*maxvec_par(abs(p_g))/maxvec_par(abs(u_g)).le.cg_tol)then
+  if(abs(alpha)*maxvec(abs(p_g))/maxvec(abs(u_g)).le.cg_tol)then
     errcode=0
     return
   endif
-  !if(myid==1)print*,abs(alpha)*maxvec_par(abs(p_g))/maxvec_par(abs(u_g))
+  !if(myid==1)print*,abs(alpha)*maxvec(abs(p_g))/maxvec(abs(u_g))
   r=r-alpha*kp  
   z=dprecon_g*r
   call assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,z,z_g) !,gdof)
@@ -80,7 +80,7 @@ pcg: do cg_iter=1,cg_maxiter
 end do pcg
 write(errtag,'(a)')'ERROR: PCG solver doesn''t converge!'
 return
-end subroutine pcg_solver_par
+end subroutine pcg_solver
 !============================================
 
 end module solver_mpi
