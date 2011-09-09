@@ -1,7 +1,6 @@
 REVISION:
   HNG, Jul 08,2011
 TODO LIST
- - integrate excavation program
  - automatic factor of safey determination
  - need to consider ghost partitions for the averaging nodal quantities
  - block visualization so that interior part can be clearly visualized
