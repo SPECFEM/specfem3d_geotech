@@ -1,0 +1,18 @@
+#pre information
+preinfo: nproc=8, method='sem', ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, inp_path='../input', out_path='../output/'
+
+#mesh information
+mesh: xfile='excavation_3d_coord_x', yfile='excavation_3d_coord_y', zfile='excavation_3d_coord_z', &
+confile='excavation_3d_connectivity', idfile='excavation_3d_material_id', gfile='excavation_3d8_np8_ghost'
+
+#boundary conditions
+bc: uxfile='excavation_3d_ssbcux', uyfile='excavation_3d_ssbcuy', uzfile='excavation_3d_ssbcuz'
+
+#initial stress
+stress0: type=0, z0=0, s0=0, k0=0.5, usek0=1
+
+#material list
+material: matfile='excavation_3d_material_list', allelastic=1
+
+#control parameters
+control: cg_tol=1e-8, cg_maxiter=5000, nl_tol=0.0005, nl_maxiter=500, nsrf=1, srf=1.0, nexcav=3, excavid=2 3 4, ninc=1

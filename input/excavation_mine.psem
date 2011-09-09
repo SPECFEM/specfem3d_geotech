@@ -1,0 +1,15 @@
+#pre information
+preinfo: nproc=32, method='sem', ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, inp_path='../input', out_path='../output/'
+
+#mesh information
+mesh: xfile='excavation_mine_coord_x', yfile='excavation_mine_coord_y', zfile='excavation_mine_coord_z', &
+confile='excavation_mine_connectivity', idfile='excavation_mine_material_id', gfile='excavation_mine_ghost'
+
+#boundary conditions
+bc: uxfile='excavation_mine_ssbcux', uyfile='excavation_mine_ssbcuy', uzfile='excavation_mine_ssbcuz'
+
+#material list
+material: matfile='excavation_mine_material_list'
+
+#control parameters
+control: cg_tol=1e-8, cg_maxiter=3000, nl_tol=0.0005, nl_maxiter=500, nsrf=1, srf=1.0, nexcav=4, excavid=3 4 5 6, ninc=10
