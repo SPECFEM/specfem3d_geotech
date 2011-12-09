@@ -2,7 +2,7 @@
 ! this library is copied and modified from the original
 ! SPECFEM3D package (Komatitsch and Tromp 1999, Peter et al. 2011)
 ! REVISION
-!   HNG, Jul 12,2011; HNG, Apr 09,2010
+!   HNG, Dec 09,2011; HNG, Jul 12,2011; HNG, Apr 09,2010
 module partmesh_scotch
 
 use partmesh_library
@@ -75,7 +75,7 @@ character(len=256) :: prname
 
 real(kind=kreal),dimension(SCOTCH_GRAPHDIM) :: scotchgraph !double precision
 real(kind=kreal),dimension(SCOTCH_STRATDIM) :: scotchstrat !double precision
-character(len=256),parameter :: scotch_strategy='b{job=t,map=t,poli=S,sep=h{pass=30}}'
+!character(len=256),parameter :: scotch_strategy='b{job=t,map=t,poli=S,sep=h{pass=30}}'
 integer  :: istat,idummy
 
 !pll
@@ -475,10 +475,11 @@ call scotchfstratinit (scotchstrat(1), istat)
     stop 'ERROR : MAIN : Cannot initialize strat'
 endif
 
-call scotchfstratgraphmap (scotchstrat(1), trim(scotch_strategy), istat)
-  if (istat /= 0) then
-    stop 'ERROR : MAIN : Cannot build strat'
-endif
+! no need to use this for default strategy
+!call scotchfstratgraphmap (scotchstrat(1), trim(scotch_strategy), istat)
+!  if (istat /= 0) then
+!    stop 'ERROR : MAIN : Cannot build strat'
+!endif
 
 call scotchfgraphinit (scotchgraph(1), istat)
 if (istat /= 0) then
