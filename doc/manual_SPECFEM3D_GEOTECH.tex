@@ -51,19 +51,12 @@
 %   \includegraphics[width=\paperwidth]{cover}
 %\end{textblock*}
 
-%\begin{figure}[H]
-%\centering
-%\noindent\includegraphics[width=0.8\paperwidth]{cover}
-%\noindent\includegraphics[scale=1.0]{cover}
-%\end{figure}
-
 \thispagestyle{empty} % no page number
 \title{\textbf{\packver \\
 User Manual}}
 
-
-\author{Hom Nath Gharti, NORSAR, Norway \\
-Dimitri Komatitsch, University of Toulouse, France \\
+\author{Hom Nath Gharti\footnote{Previously at: NORSAR, Norway}, Princeton University, USA \\
+Dimitri Komatitsch, Aix-Marseille University, France\\
 Volker Oye, NORSAR, Norway \\
 Roland Martin, University of Toulouse, France \\
 Jeroen Tromp, Princeton University, USA}
@@ -108,13 +101,13 @@ and supported by industry partners BP, Statoil, and Total. Some of the routines 
 \chapter{Introduction}
 \section{Background}
 
-\pack\ is a free and open-source command-driven software for 3D slope stability analysis~\citep[For more detail see][]{gharti2011} and simulation of 3D multistage excavation~\citep[For more detail see][]{gharti2011b} based on the spectral-element method~\citep[e.g.,][]{patera1984,canuto1988,seriani1994,faccioli1997,komatitsch1998,komatitsch1999,peter2011}. The software can run on a single processor as well as multi-core machines or large clusters. It is written mainly in FORTRAN 90, and parallelized using
-MPI~\citep{gropp1994,pacheco1997} based on domain decomposition. For the domain decomposition, an open-source graph partitioning library SCOTCH~\citep{pellegrini1996} is used. The element-by-element preconditioned conjugate-gradient method~\citep[e.g.,][]{hughes1983,law1986,king1987,barragy1988} is implemented to solve the linear equations. For elastoplastic failure,
-Mohr-coulomb failure criterion is used with viscoplastic strain method~ \citep{zienkiewicz1974}.\\
+\pack\ is a free and open-source command-driven software for 3D slope stability analysis~\citep[for more details see][]{gharti2012b} and simulation of 3D multistage excavation~\citep[for more details see][]{gharti2012a} based on the spectral-element method~\citep[e.g.,][]{patera1984,canuto1988,seriani1994,faccioli1997,komatitsch1998,komatitsch1999,peter2011}. The slope stability and the excavation routines were originally started from the routines found in the book ``Programming the finite element method''~\citep{smith2004}. The software can run on a single processor as well as multi-core machines or large clusters. It is written mainly in FORTRAN 90, and parallelized using
+MPI~\citep{gropp1994,pacheco1997} based on domain decomposition. For the domain decomposition, the open-source graph partitioning library SCOTCH~\citep{pellegrini1996} is used. The element-by-element preconditioned conjugate-gradient method~\citep[e.g.,][]{hughes1983,law1986,king1987,barragy1988} is implemented to solve the linear equations. For elastoplastic failure,
+a Mohr-coulomb failure criterion is used with a viscoplastic strain method~ \citep{zienkiewicz1974}.\\
 
-This program does not automatically determine the factor of safety of the slope stability. Simulation can be performed for a series of safety factors. After plotting the safety factor vs maximum displacement curve, one can determine the factor of safety of the given slope. Although, the software is optimized for slope stability analysis and multistage excavation, other relevant simulations of static problems in solid (geo)mechanics can also be performed with this software.\\
+This program does not automatically determine the factor of safety of slope stability. Simulations can be performed for a series of safety factors. After plotting the safety factor verses maximum displacement curve, one can determine the factor of safety of the given slope. Although the software is optimized for slope stability analysis and multistage excavation, other relevant simulations of quasistatic problems in solid (geo)mechanics can also be performed with this software.\\
 
-The software currently does not include the inbuilt mesher. Existing tools such as Gmsh~\citep{geuzaine2009}, CUBIT~\citep{cubit2011}, TrueGrid~\citep{truegrid2006}, etc. can be used for the hexahedral meshing, and the resulting mesh file can be converted to the input files required by the \pack. Output data can be visualized and processed using an open-source visualization application ParaView (\texttt{www.paraview.org}).
+The software currently does not include an inbuilt mesher. Existing tools, such as Gmsh~\citep{geuzaine2009}, CUBIT~\citep{cubit2011}, TrueGrid~\citep{truegrid2006}, etc., can be used for hexahedral meshing, and the resulting mesh file can be converted to the input files required by \pack. Output data can be visualized and processed using the open-source visualization application ParaView (\texttt{www.paraview.org}).
 
 \section{Status summary}
 \begin{desclist}{Pseudo-static earthquake loading}
@@ -127,20 +120,18 @@ The software currently does not include the inbuilt mesher. Existing tools such 
 \item[Automatic factor of safety]      : No
 \end{desclist}
 
-\section*{Revision}
+\section*{Revisions}
 
-HNG, Sep 08, 2011; HNG, Jul 12, 2011; HNG, May 20, 2011; HNG, Jan 17, 2011
+HNG, Jan 12, 2012; HNG, Sep 08, 2011; HNG, Jul 12, 2011; HNG, May 20, 2011; HNG, Jan 17, 2011
 
 
 \chapter{Getting started}
 \section{Package structure}
-Original \pack\ package comes in a single compressed file \linebreak\texttt{\pack.tar.gz}, which can be extracted using \texttt{tar} command:\\
+The original \pack\ package comes in a single compressed file \linebreak\texttt{\pack.tar.gz}, which can be extracted using \texttt{tar} command:\\
 
 \texttt{tar -zxvf \pack.tar.gz}\\
 
-Or\\
-
-using, for example, \texttt{7-zip (www.7-zip.org)} in WINDOWS. The package has a following structure.\\
+or using, for example, \texttt{7-zip (www.7-zip.org)} under WINDOWS. The package has the following structure:\\
 
 
 
@@ -159,17 +150,17 @@ using, for example, \texttt{7-zip (www.7-zip.org)} in WINDOWS. The package has a
 
 \section{Prerequisites}
 \begin{itemize}[-]
-  \item \underline{CMake build system}. The CMake version >= 2.8.4 is necessary to configure the software. It is free and open-source, and can be downloaded from \texttt{www.cmake.org}.
-  \item \underline{Make utility}. The make utility is necessary to build the software using Makefile. This utility is usually installed by default in most of the LINUX systems. In WINDOWS, one can use Cygwin (\texttt{www.cygwin.com}) or MinGW (\texttt{www.mingw.org}) to install the make utility.
-  \item \underline{A recent FORTRAN compiler}. The software is written mainly in FORTRAN 90, but it also uses a few FORTRAN 2003 features (e.g., streaming IO). These features are already available in most of the FORTRAN compilers, e.g., gfortran version >= 4.2 (\texttt{gcc.gnu.org/wiki/GFortran}) and g95 (\texttt{www.g95.org}).
+  \item \underline{CMake build system}. The CMake version $\ge$ 2.8.4 is necessary to configure the software. It is free and open-source, and can be downloaded from \texttt{www.cmake.org}.
+  \item \underline{Make utility}. The make utility is necessary to build the software using Makefile. This utility is usually installed by default in most LINUX systems. Under WINDOWS, one can use Cygwin (\texttt{www.cygwin.com}) or MinGW (\texttt{www.mingw.org}) to install the make utility.
+  \item \underline{A recent FORTRAN compiler}. The software is written mainly in FORTRAN 90, but it also uses a few FORTRAN 2003 features (e.g., streaming IO). These features are already available in most of the FORTRAN compilers, e.g., gfortran version $\ge$ 4.2 (\texttt{gcc.gnu.org/wiki/GFortran}) and g95 (\texttt{www.g95.org}).
 \end{itemize}
   Following libraries are necessary for parallel processing.
 \begin{itemize}[-]
-  \item \underline{A recent MPI library}. It should be built with same FORTRAN compiler which will be used to compile the software. Please see \texttt{www.open-mpi.org} or \linebreak\texttt{www.mcs.anl.gov/research/projects/mpich2} for detail on how to install MPI library and how to run MPI programs.
-  \item \underline{SCOTCH graph partitioning library}. This library should be compiled with same\linebreak FORTRAN compiler which will be used to compile the software. Please see\linebreak \texttt{www.labri.fr/perso/pelegrin/scotch} for detail on how to install SCOTCH. Version 5.1.7 was successfully tested with \pack.
+  \item \underline{A recent MPI library}. It should be built with the same FORTRAN compiler used to compile the software. Please see \texttt{www.open-mpi.org} or \linebreak\texttt{www.mcs.anl.gov/research/projects/mpich2} for details on how to install MPI library and how to run MPI programs.
+  \item \underline{SCOTCH graph partitioning library}. This library should be compiled with the same\linebreak FORTRAN compiler used to compile the software. Please see\linebreak \texttt{www.labri.fr/perso/pelegrin/scotch} for details on how to install SCOTCH.
 \end{itemize}
 
-  Finally, following compiler is necessary to build the documentation (this file).
+  Finally, the following compiler is necessary to build the documentation (this file):
 \begin{itemize}[-]
   \item \underline{\LaTeX\ compiler}. This is necessary to compile the documentation files.
 \end{itemize}
@@ -177,16 +168,16 @@ using, for example, \texttt{7-zip (www.7-zip.org)} in WINDOWS. The package has a
 \section{Configure}
 \label{sec:configure}
 
-Software package \pack\ is configured using CMake, and the package uses out-of-source build. Hence, \underline{DO NOT} build in the same source directory. Let's say the full path to the package (source directory) is \texttt{\$HOME/download/\pack}.
+Software package \pack\ is configured using CMake, and the package uses an out-of-source build. Hence, \underline{DO NOT} build in the same source directory. Let's say the full path to the package (source directory) is \texttt{\$HOME/download/\pack}.
 
 \begin{itemize}
 \item Create a separate build directory, e.g.,\\
 \texttt{mkdir \$HOME/work/\pack}
 
-\item Go to build directory \\
+\item Go to the build directory \\
 \texttt{cd \$HOME/work/\pack}
 
-\item Type cmake command \\
+\item Type the cmake command \\
 \texttt{ccmake \$HOME/projects/\pack}
 \end{itemize}
 
@@ -204,8 +195,8 @@ CMake configuration is an iterative process (See Figure~\ref{fig:cmake}):
 \item Configure (c key or Configure button)
 \end{itemize}
 
-If WARNINGS or ERRORS occur, press e key (or OK button) to return to configuration. These steps have to be repeated until successful configuration. Then, press g key (or Generate button) to generate build files. Check carefully that all necessary variables are set properly. Unless configuration is successful, generate is not enabled. Sometimes, c key (or Configure button) has to be pressed repeatedly until generate is enabled. Initially, all variables may not be visible. To see all variables, toggle advanced mode pressing t key (or Advanced button).
-To set or change a variable, move the cursor to the variable and press Enter key. If the variable is a boolean (ON/OFF), it will flip the value on pressing the Enter key. If the variable is a string or a file, it can be edited. For more detail, please see the CMake documentation (\texttt{www.cmake.org}).
+If WARNINGS or ERRORS occur, press the e key (or the OK button) to return to configuration. These steps have to be repeated until successful configuration. Then, press the g key (or the Generate button) to generate build files. Check carefully that all necessary variables are set properly. Unless configuration is successful, generate is not enabled. Sometimes, the c key (or Configure button) has to be pressed repeatedly until generate is enabled. Initially, all variables may not be visible. To see all variables, toggle advanced mode by pressing the t key (or the Advanced button).
+To set or change a variable, move the cursor to the variable and press Enter key. If the variable is a boolean (ON/OFF), it will flip the value on pressing the Enter key. If the variable is a string or a file, it can be edited. For more details, please see the CMake documentation (\texttt{www.cmake.org}).
 \\
 
 Following are the main CMake variables for the \pack\ (See Figure~\ref{fig:cmake})
@@ -213,25 +204,25 @@ Following are the main CMake variables for the \pack\ (See Figure~\ref{fig:cmake
 \colorbox{gray}{
 \parbox{15.5cm}{
 \begin{adescription}{BUILD\_UTILITIES\_EXODUS2SEM}
-\item[BUILD\_DOCUMENTATION]           : If \texttt{ON}, user manual (this file) is created. The default is \texttt{OFF}.
-\item[BUILD\_PARTMESH]                : If \texttt{ON}, \texttt{partmesh} program is built. The default is \texttt{OFF}. The \texttt{partmesh} program is necessary to partition the mesh for parallel processing.
-\item[BUILD\_UTILITIES\_EXODUS2SEM]   : If \texttt{ON}, \texttt{exodus2sem} program is built. The default is \texttt{OFF}. The \texttt{exodus2sem} program convert exodus mesh file to input files required by the \pack\ package (see also Chapter~\ref{chap:utilities}).
-\item[BUILD\_UTILITIES\_WRITE\_SOS]   : If \texttt{ON}, \texttt{write\_sos} program is built. The default is \texttt{OFF}. The \texttt{write\_sos} program writes a EnSight SOS file necessary for the parallel visualization (see also Chapter~\ref{chap:utilities}).
-\item[ENABLE\_MPI]                    : If \texttt{ON}, main parallel program \texttt{psemgeotech} is built otherwise main serial program \texttt{semgeotech} is built. The default is \texttt{OFF}.
+\item[BUILD\_DOCUMENTATION]           : If \texttt{ON}, the user manual (this file) is created. The default is \texttt{OFF}.
+\item[BUILD\_PARTMESH]                : If \texttt{ON}, the \texttt{partmesh} program is built. The default is \texttt{OFF}. The \texttt{partmesh} program is necessary to partition the mesh for parallel processing.
+\item[BUILD\_UTILITIES\_EXODUS2SEM]   : If \texttt{ON}, the \texttt{exodus2sem} program is built. The default is \texttt{OFF}. The \texttt{exodus2sem} program convert exodus mesh file to input files required by the \pack\ package (see also Chapter~\ref{chap:utilities}).
+\item[BUILD\_UTILITIES\_WRITE\_SOS]   : If \texttt{ON}, the \texttt{write\_sos} program is built. The default is \texttt{OFF}. The \texttt{write\_sos} program writes a EnSight SOS file necessary for the parallel visualization (see also Chapter~\ref{chap:utilities}).
+\item[ENABLE\_MPI]                    : If \texttt{ON}, the main parallel program \texttt{psemgeotech} is built otherwise main serial program \texttt{semgeotech} is built. The default is \texttt{OFF}.
 \item[SCOTCH\_LIBRARY\_PATH]          : This is required if \texttt{BUILD\_PARTMESH} is \texttt{ON}. If not found automatically, it can be set manually.
-\item[CMAKE\_Fortran\_COMPILER]       : This defines the Fortran compiler. If not found automatically or automatically found compiler is not correct, it can be set manually.
+\item[CMAKE\_Fortran\_COMPILER]       : This defines the Fortran compiler. If not found automatically or the automatically found compiler is not correct, it can be set manually.
 \end{adescription}
 }}\\
 
 {\emph{Note 1: If}} \texttt{CMAKE\_Fortran\_COMPILER} {\emph{has to be changed, first change this and configure, and then change other variables if necessary and configure.}}\\
-{\emph{Note 2: Even if some of the above variables are set }} \texttt{ON}{\emph{, if appropriate working compilers are not found, corresponding variables are internally set}} \texttt{OFF} {\emph{with WARNING message.}}
+{\emph{Note 2: Even if some of the above variables are set }} \texttt{ON}{\emph{, if appropriate working compilers are not found, corresponding variables are internally set}} \texttt{OFF} {\emph{with WARNING messages.}}
 
 \section{Compile}
 \begin{itemize}[]
-  \item Once configuration and generation are successful, necessary build files are created. Now to build the main program, type: \\
+  \item Once configuration and generation are successful, the necessary build files are created. Now to build the main program, type: \\
   \texttt{make}
 
-  \item On the multi-processor system (let's say eight processor), type:\\
+  \item On multi-processor systems (let's say eight processors), type:\\
   \texttt{make -j 8}
 
   \item To clean, type\\
@@ -242,7 +233,7 @@ Following are the main CMake variables for the \pack\ (See Figure~\ref{fig:cmake
 \section{Run}
 \subsubsection{Serial run}
 \begin{itemize}[-]
-\item To run serial program, type \\
+\item To run the serial program, type \\
     \texttt{./bin/semgeotech} \emph{input\_file\_name}
 
     Example:
@@ -260,7 +251,7 @@ Following are the main CMake variables for the \pack\ (See Figure~\ref{fig:cmake
 
     \texttt{./bin/partmesh ./input/validation1.psem}
 
-\item To run parallel program, type \\
+\item To run the parallel program, type \\
     \texttt{mpirun -n} \emph{number\_of\_nodes} \texttt{./bin/psemgeotech} \emph{input\_file\_name} \\
 
     OR
@@ -272,13 +263,13 @@ Following are the main CMake variables for the \pack\ (See Figure~\ref{fig:cmake
     \texttt{mpirun -n 8 ./bin/psemgeotech ./input/validation1.psem}
 \end{itemize}
 
-{\emph{Note: see Chapter~\ref{chap:input} for detail on input and input files. Try to run one or more examples included in}} \texttt{input/}{\emph{. By default, example files included in the package are not copied to build directory during build process. If necessary, copy files within}} \texttt{input/} {\emph{folder of source directory to the}} \texttt{input/} {\emph{folder of build directory.}}
+{\emph{Note: see Chapter~\ref{chap:input} for details on input and input files. Try to run one or more examples included in}} \texttt{input/}{\emph{. By default, example files included in the package are not copied to build directory during build process. If necessary, copy files within}} \texttt{input/} {\emph{folder of source directory to the}} \texttt{input/} {\emph{folder of build directory.}}
 
 \chapter{Input}
 \label{chap:input}
 \section{Main input file}
 
-Main input file structure is motivated by the ``E3D''~\citep{larsen1995} software package. The main input file consists of legitimate input lines defined in the specified formats. Any number of blank lines or comment lines can be placed for user friendly input structure. The blank lines contain no or only white-space characters, and the comment lines contain "\#" as the first character. \\
+The main input file structure is motivated by the ``E3D''~\citep{larsen1995} software package. The main input file consists of legitimate input lines defined in the specified formats. Any number of blank lines or comment lines can be placed for user friendly input structure. The blank lines contain no or only white-space characters, and the comment lines contain "\#" as the first character. \\
 
 Each legitimate input line consists of a line type, and list of arguments and corresponding values. All argument-value pair are separated by comma (,). If necessary, any legitimate input line can be continued to next line using FORTRAN 90 continuation  character "\&" as an absolute last character of a line to be continued. Repetition of same line type is not allowed.\\
 
@@ -289,7 +280,7 @@ Example:\\
 \texttt{preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
 inp\_path=\sq{../input}, part\_path=\sq{../partition}, out\_path=\sq{../output/}}\\
 
-All legitimate input lines should be written in lower case. Line type and argument-value pairs must be separated by space. Each argument-value pair must be separated by comma(,) and space/s. No space/s are recommended before line type and in between argument name and "=" or "=" and argument value. If argument value is a string, the FORTRAN 90 string (i.e., enclosed within the single quotes) should be used, for example, \texttt{inp\_path=\sq{../input}}. If the argument value is a vector (i.e., multi-valued), a list of values separated by space (no comma!) shoud be used, e.g, \texttt{srf=1.0 1.2 1.3 1.4}.
+All legitimate input lines should be written in lower case. Line type and argument-value pairs must be separated by a space. Each argument-value pair must be separated by a comma(,) and a space/s. No space/s are recommended before line type and in between argument name and "=" or "=" and argument value. If argument value is a string, the FORTRAN 90 string (i.e., enclosed within single quotes) should be used, for example, \texttt{inp\_path=\sq{../input}}. If the argument value is a vector (i.e., multi-valued), a list of values separated by space (no comma!) shoud be used, e.g, \texttt{srf=1.0 1.2 1.3 1.4}.
 
 \subsection{Line types}
 
@@ -529,13 +520,13 @@ nexcav=3, excavid=2 3 4, ninc=10\\
 }}
 \\
 
-There are only two additional informations, i.e., number of processors \texttt{\sq{nproc}} in line \texttt{\sq{preinfo}} and file name for ghost partition interfaces \texttt{\sq{gfile}} in line \texttt{\sq{mesh}} in parallel input file.
+There are only two additional pieces of information, i.e., number of processors \texttt{\sq{nproc}} in line \texttt{\sq{preinfo}} and file name for ghost partition interfaces \texttt{\sq{gfile}} in line \texttt{\sq{mesh}} in parallel input file.
 
 \section{Input files detail}
 All local element/face/edge/node numbering follows the EXODUS II convention.\\
 
 \subsection{Coordinates files: \texttt{xfile, yfile, zfile}}
-Each of the coordinates files contains list of corresponding coordinates in following format:\\
+Each of the coordinates files contains a list of corresponding coordinates in the following format:\\
 
 \emph{number of points \\
 coordinate of point  1\\
@@ -560,7 +551,7 @@ Example:\\\\
 
 \subsection{Connectivity file: \texttt{confile}}
 
-The connectivity file contains the connectivity lists of elements in following format:\\
+The connectivity file contains the connectivity lists of elements in the following format:\\
 
 \emph{number of elements\\
 $n_1$ $n_2$ $n_3$ $n_4$ $n_5$ $n_6$ $n_7$ $n_8$ of element 1\\
@@ -592,7 +583,7 @@ Example:\\\\
 \subsection{Element IDs (or Material IDs) file: \texttt{idfile}}
 
 
-This file contains the IDs of elements. This ID will be used in the program mainly to identify the material regions. This file has a following format: \\
+This file contains the IDs of elements. This ID will be used in the program mainly to identify the material regions. This file has the following format: \\
 
 \emph{number of elements\\
 ID of element 1\\
@@ -625,7 +616,7 @@ This file will be generated automatically by a program \texttt{partmesh}.\\
 
 \subsection{Displacement boundary conditions files: \texttt{uxfile, uyfile, uzfile}}
 
-This file contains information on the displacement boundary conditions (currently only the zero-displacement is implemented), and has following format:\\
+This file contains information on the displacement boundary conditions (currently only the zero-displacement is implemented), and has the following format:\\
 
 \emph{number of element faces}\\
 \emph{elementID faceID \\
@@ -665,12 +656,12 @@ elementID entityID \\
 ...\\
 ...\\}
 
-This can be repeated as many times as many tractions.\\
+This can be repeated as many times as there are tractions.\\
 
-The \emph{relevant-axis} denotes the axis along which the load is varying, and it is represented by an integer as 1 = $x$-axis, 2 = $y$-axis, and 3 = $z$-axis. The variables $x_1$ and $x_2$ denote the coordinates (only the \emph{relevant-axis}) of two points between which the linearly distributed load is applied. Similarly, $q_{x1}$, $q_{y1}$ and $q_{z1}$, and $q_{x2}$, $q_{y2}$ and $q_{z2}$ denote the load vectors in kN/m\tsup{2} at the point 1 and 2, respectively.\\
+The \emph{relevant-axis} denotes the axis along which the load is varying, and is represented by an integer as 1 = $x$-axis, 2 = $y$-axis, and 3 = $z$-axis. The variables $x_1$ and $x_2$ denote the coordinates (only the \emph{relevant-axis}) of two points between which the linearly distributed load is applied. Similarly, $q_{x1}$, $q_{y1}$ and $q_{z1}$, and $q_{x2}$, $q_{y2}$ and $q_{z2}$ denote the load vectors in kN/m\tsup{2} at the point 1 and 2, respectively.\\
 
 Example:\\
-Following data specify the two tractions: a uniformly distributed traction and a linearly distributed traction.\\\\
+The following data specify the two tractions: a uniformly distributed traction and a linearly distributed traction.\\\\
 
 \texttt{1\\
 0.0 0.0 -167.751\\
@@ -701,7 +692,7 @@ Following data specify the two tractions: a uniformly distributed traction and a
 
 \subsection{Material list file: \texttt{matfile}}
 
-This file contains material properties of each material regions. Material properties must be listed in a sequential order of the unique material IDs. In addition, this data file optionally contains the information on the water condition of material regions. Material regions or material IDs must be consistent with the Material IDs (Element IDs) defined in \texttt{idfile}. The \texttt{matfile} has following format:\\\\
+This file contains material properties of each material regions. Material properties must be listed in a sequential order of the unique material IDs. In addition, this data file optionally contains the information on the water condition of material regions. Material regions or material IDs must be consistent with the Material IDs (Element IDs) defined in \texttt{idfile}. The \texttt{matfile} has the following format:\\\\
 
 \emph{comment line}\\
 \emph{number of material regions (unique material IDs)\\
@@ -720,7 +711,7 @@ The \emph{materilID} must be in a sequential order starting from 1. The \emph{do
 
 Example:\\
 \\
-Following data defines four material regions. No region is submerged in water.\\
+The following data defines four material regions. No region is submerged in water.\\
 
 \texttt{\# material properties (id, domain, gamma, ym, nu, phi, coh, psi)\\
 4\\
@@ -730,7 +721,7 @@ Following data defines four material regions. No region is submerged in water.\\
 4 1 18.5 1e5 0.3 20.0 29.0 0.0\\
 }\\
 
-Following data defines four material regions with two of them submerged.\\
+The following data defines four material regions with two of them submerged.\\
 
 \texttt{\# material properties (id, domain, gamma, ym, nu, phi, coh, psi)\\
 4\\
@@ -779,15 +770,15 @@ Following data specify the two water surfaces: a horizontal surface and an incli
 
 \subsection{Summary file}
 
-This file is self explanatory and it contains the summary of the result including control parameters, maximum displacement at each step, and elapsed time. The file is written in ASCII format and its name follows the convention \emph{input\_file\_name\_header}\texttt{\_summary} for serial run and \emph{input\_file\_name\_header}\texttt{\_summary\_proc}\emph{processor\_ID} for parallel run.
+This file is self explanatory and it contains a summary of the results including control parameters, maximum displacement at each step, and elapsed time. The file is written in ASCII format and its name follows the convention \emph{input\_file\_name\_header}\texttt{\_summary} for serial run and \emph{input\_file\_name\_header}\texttt{\_summary\_proc}\emph{processor\_ID} for parallel run.
 
 \subsection{Mesh files}
 
-This file contains the mesh information of the model including coordinates, connectivity, element types etc. in EnSight Gold binary format~\citep[see][]{ensight2008}. The file name follows the format \emph{input\_file\_name\_header}\texttt{\_summary} for serial run and \emph{input\_file\_name\_header}\texttt{\_summary\_proc}\emph{processor\_ID} for parallel run.
+This file contains the mesh information of the model including coordinates, connectivity, element types, etc., in EnSight Gold binary format~\citep[see][]{ensight2008}. The file name follows the format \emph{input\_file\_name\_header}\texttt{\_summary} for serial run and \emph{input\_file\_name\_header}\texttt{\_summary\_proc}\emph{processor\_ID} for parallel run.
 
 \subsection{Displacement field file}
 
-This file contains the nodal displacement field in the model written in EnSight Gold binary format. The file name follows the format \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{.dis} for serial run and \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{\_proc}\emph{processor\_ID}\texttt{.dis} for parallel run.
+This file contains the nodal displacement field in the model written in EnSight Gold binary format. The file name follows the format \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{.dis} for serial run and \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{\_proc}\emph{processor\_ID}\texttt{.dis} for parallel runs.
 
 \subsection{Pore pressure file}
 
@@ -846,18 +837,18 @@ The program \texttt{exodus2sem.c} contained in the utilities directory can be us
 \texttt{gcc -o exodus2sem exodus2sem.c}
 \subsubsection*{Run}
  \texttt{exodus2sem} {\emph{EXODUS\_mesh\_file}} {\emph{OPTIONS}}\\
- For more detail, see \texttt{/utilities/README\_exodus2sem}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
+ For more details, see \texttt{/utilities/README\_exodus2sem}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
 
 \section{Generate SOS file}
 \label{sec:sos}
 
-The program \texttt{write\_sos.f90} contained in the utilities directory can be used to write EnSight Gold server-of-server file (.sos file, see~\citep{ensight2008}) to visualize the multi-processors data in parallel. This file does not contain the actual data, but only the information on the data location and parallel processing.
+The program \texttt{write\_sos.f90} contained in the utilities directory can be used to write EnSight Gold server-of-server file (.sos file, see~\citep{ensight2008}) to visualize the multi-processors data in parallel. This file does not contain the actual data, but only information on the data location and parallel processing.
 \subsubsection*{Compile}
 \texttt{gfortran -o write\_sos write\_sos.f90}
 \subsubsection*{Run}
 \texttt{exodus2sem} {\it{input\_file}}\\
 
-For more detail, see \texttt{/utilities/README\_write\_sos}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
+For more details, see \texttt{/utilities/README\_write\_sos}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
 
 \bibliographystyle{chicago}
 \bibliography{manual_SPECFEM3D_GEOTECH}

@@ -56,11 +56,11 @@ do ii=1,ngll ! ngllx*nglly*ngllz
   eta=gll_points(2,ii)
   zeta=gll_points(3,ii)
 
-  ! compute 1d lagrange polynomials
-  call lagrange1d(ngllx,xi,lagrange_x,lagrange_dx)
-  call lagrange1d(nglly,eta,lagrange_y,lagrange_dy)
-  call lagrange1d(ngllz,zeta,lagrange_z,lagrange_dz)
-
+  ! compute 1d lagrange polynomials on GLL points
+  ! this can also be computed in a simple manner due to the orthogonality 
+  call lagrange1dGLL(ngllx,gllpx,xi,lagrange_x,lagrange_dx)
+  call lagrange1dGLL(nglly,gllpy,eta,lagrange_y,lagrange_dy)
+  call lagrange1dGLL(ngllz,gllpz,zeta,lagrange_z,lagrange_dz)  
   n=0
   do k=1,ngllz
     do j=1,nglly
@@ -74,7 +74,6 @@ do ii=1,ngll ! ngllx*nglly*ngllz
     enddo
   enddo
 enddo
-
 return
 end subroutine gll_quadrature
 !===========================================
@@ -127,9 +126,9 @@ do ii=1,ngll ! ngllx*nglly
   eta=gll_points2d(2,ii)
 
   ! compute 1d lagrange polynomials
-  call lagrange1d(ngllx,xi,lagrange_x,lagrange_dx)
-  call lagrange1d(nglly,eta,lagrange_y,lagrange_dy)
-
+  ! this can also be computed in a simple manner due to the orthogonality
+  call lagrange1dGLL(ngllx,gllpx,xi,lagrange_x,lagrange_dx)
+  call lagrange1dGLL(nglly,gllpy,eta,lagrange_y,lagrange_dy) 
   n=0
   do j=1,nglly
     do i=1,ngllx
@@ -186,7 +185,8 @@ do ii=1,ngll ! ngllx
   xi=gll_points1d(1,ii)
 
   ! compute 1d lagrange polynomials
-  call lagrange1d(ngllx,xi,lagrange_x,lagrange_dx)
+  ! this can also be computed in a simple manner due to the orthogonality
+  call lagrange1dGLL(ngllx,gllpx,xi,lagrange_x,lagrange_dx)
 
   n=0
   do i=1,ngllx
@@ -202,7 +202,7 @@ end subroutine gll_quadrature1d
 
 ! this subroutine computes the 1d lagrange interpolation functions and their
 ! derivatives at a given point xi.
-subroutine lagrange1d(nenod,xi,phi,dphi_dxi)
+subroutine lagrange1dGEN(nenod,xi,phi,dphi_dxi)
 implicit none
 integer,intent(in) :: nenod ! number of nodes in an 1d element
 integer :: i,j,k
@@ -252,7 +252,54 @@ do i=1,nenod
 enddo
 
 return
-end subroutine lagrange1d
+end subroutine lagrange1dGEN
+!===========================================
+
+! this subroutine computes the 1d lagrange interpolation functions and their
+! derivatives at a given point xi.
+subroutine lagrange1dGLL(nenod,xii,xi,phi,dphi_dxi)
+implicit none
+integer,intent(in) :: nenod ! number of nodes in an 1d element
+real(kind=kreal),dimension(nenod),intent(in) :: xii
+real(kind=kreal),intent(in) :: xi ! point where to calculate lagrange function and
+!its derivative
+real(kind=kreal),dimension(nenod),intent(out) :: phi,dphi_dxi
+
+integer :: i,j,k
+real(kind=kreal),dimension(nenod) :: term,dterm,sum_term
+real(kind=kreal) :: dx
+
+do i=1,nenod
+  k=0
+  phi(i)=1.0_kreal
+  do j=1,nenod
+    if(j/=i)then
+      k=k+1
+      term(k)=(xi-xii(j))/(xii(i)-xii(j))
+      dterm(k)=1.0_kreal/(xii(i)-xii(j)) ! derivative of the term wrt xi
+
+      phi(i)=phi(i)*(xi-xii(j))/(xii(i)-xii(j))
+    endif
+  enddo
+
+  sum_term=1.0_kreal
+  do j=1,nenod-1
+    do k=1,nenod-1
+      if(k==j)then
+        sum_term(j)=sum_term(j)*dterm(k)
+      else
+        sum_term(j)=sum_term(j)*term(k)
+      endif
+    enddo
+  enddo
+  dphi_dxi(i)=0.0_kreal
+  do j=1,nenod-1
+    dphi_dxi(i)=dphi_dxi(i)+sum_term(j)
+  enddo
+enddo
+
+return
+end subroutine lagrange1dGLL
 !===========================================
 
 !===========================================

@@ -44,7 +44,7 @@ real(kind=kreal) :: detjac,zero=0.0_kreal
 real(kind=kreal) :: cmat(nst,nst),coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
 bmat(nst,nedof),eld(nedof),eqload(nedof),km(nedof,nedof)
 integer :: egdof(nedof),num(nenod)
-integer :: i,i_elmt,k
+integer :: i,idof,i_elmt,k
 
 if(present(extload).and.(.not.present(gravity) .or. .not.present(pseudoeq)))then
   write(*,'(/,a)')'ERROR: both "gravity" and "pseudoeq" must be defined for "extload"!'
@@ -61,6 +61,7 @@ do i_elmt=1,nelmt
   !print*,ngllx,nglly,ngllz,ngll,nndof,nenod ,gdof(:,g_num(:,ielmt))
   egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,ielmt)),(/nndof*nenod/)) !g=g_g(:,ielmt)
   km=zero; eld=zero; eqload=zero
+  idof=0
   do i=1,ngll
     !call shape_function(fun,gll_points(i))
     ! compute Jacobian at GLL point using 20 noded element
@@ -72,8 +73,10 @@ do i_elmt=1,nelmt
     deriv=matmul(jac,dlagrange_gll(:,i,:)) ! use der for gll
     call compute_bmat(bmat,deriv) !!! gll bmat matrix
     km=km+matmul(matmul(transpose(bmat),cmat),bmat)*detjac*gll_weights(i)
-    eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
-    !eld(2:nedof-1:3)=eld(2:nedof-1:3)+fun(:)*detjac*weights(i)
+    idof=idof+3
+    ! interpolation functions are orthogonal, hence it is simple
+    eld(idof)=eld(idof)+detjac*gll_weights(i)
+    !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)    
   end do ! i=1,ngll
   storkm(:,:,i_elmt)=km
   do k=1,nedof

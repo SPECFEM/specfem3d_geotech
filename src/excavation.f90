@@ -3,7 +3,7 @@
 ! REVISION:
 !   April 09,2010, Hom Nath Gharti
 ! FEEDBACK:
-!   homnath_AT_norsar_DOT_no
+!   hgharti_AT_princeton_DOT_edu
 module excavation
 use set_precision
 contains
@@ -23,7 +23,6 @@ logical :: ismat_off(nmat)
 
 ismat_off=.false.
 ismat_off(excavid)=.true.
-
 
 ! find intact and void elements
 ielmt_intact=0; ielmt_void=0
@@ -145,7 +144,7 @@ real(kreal) :: detjac,zero=0.0_kreal
 real(kreal) :: coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
 bmat(nst,nedof),eld(nedof),bload(nedof),eload(nedof),sigma(nst)
 integer :: egdof(nedof),num(nenod)
-integer :: i,i_elmt
+integer :: i,idof,i_elmt
 
 ! compute excavation load
 do i_elmt=1,nelmt
@@ -153,7 +152,7 @@ do i_elmt=1,nelmt
   num=g_num(:,i_elmt)
   coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
   egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,ielmt)),(/nndof*nenod/))
-
+  idof=0
   do i=1,ngll
     !call shape_function(fun,gll_points(i))
     ! compute Jacobian at GLL point using 20 noded element
@@ -166,7 +165,10 @@ do i_elmt=1,nelmt
     sigma=stress_local(:,i,i_elmt)
     eload=MATMUL(sigma,bmat)
     bload=bload+eload*detjac*gll_weights(i)
-    eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
+    ! since interpolation funtions are orthogonal we compute only nonzero terms
+    idof=idof+3
+    eld(idof)=eld(idof)+detjac*gll_weights(i)
+    !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)   
   end do ! i=1,ngll
   extload(egdof)=extload(egdof)+eld*gam(mat_id(i_elmt))+bload
 enddo
@@ -194,7 +196,7 @@ real(kreal) :: detjac,zero=0.0_kreal
 real(kreal) :: coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
 bmat(nst,nedof),eld(nedof),bload(nedof),eload(nedof),tload(nedof),sigma(nst)
 integer :: egdof(nedof),num(nenod)
-integer :: i,i_elmt
+integer :: i,idof,i_elmt
 
 excavload=zero
 ! compute excavation load
@@ -203,7 +205,7 @@ do i_elmt=1,nelmt
   num=g_num(:,i_elmt)
   coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
   !egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,ielmt)),(/nndof*nenod/))
-
+  idof=0
   do i=1,ngll
     !call shape_function(fun,gll_points(i))
     ! compute Jacobian at GLL point using 20 noded element
@@ -216,7 +218,10 @@ do i_elmt=1,nelmt
     sigma=stress_local(:,i,i_elmt)
     eload=MATMUL(sigma,bmat)
     bload=bload+eload*detjac*gll_weights(i)
-    eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
+    ! since interpolation funtions are orthogonal we compute only nonzero terms
+    idof=idof+3
+    eld(idof)=eld(idof)+detjac*gll_weights(i)
+    !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
   end do ! i=1,ngll
   tload=eld*gam(mat_id(i_elmt))+bload
   !excavload(:,num)=excavload(:,num)+reshape(tload,(/nndof,ngll/))

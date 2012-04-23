@@ -1,5 +1,7 @@
 ! include 'license.txt'
 ! this is a main routine for multistage excavation
+! this program was originally based on the book "Programming the finite element
+! method" Smith and Griffiths (2004)
 ! REVISION:
 !   HNG, Aug 25,2011; HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
 subroutine semexcav3d(ismpi,myid,nproc,gnod,sum_file,ptail,format_str)

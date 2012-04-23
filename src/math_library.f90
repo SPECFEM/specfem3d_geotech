@@ -76,26 +76,26 @@ end function factorial
 !=======================================================
 
 ! this function returns the determinant of a 1x1, 2x2 or 3x3
-! jacobian matrix.
+! matrix.
 ! this routine was copied and modified from
 ! Smith and Griffiths (2004): Programming the finite element method
-function determinant(jac)result(det)
+function determinant(xmat)result(det)
 implicit none
-real(kind=kreal),intent(in)::jac(:,:)
+real(kind=kreal),intent(in) :: xmat(:,:)
 real(kind=kreal)::det
-integer::it
-it=ubound(jac,1)
-select case(it)
+integer::n
+n=ubound(xmat,1)
+select case(n)
 case(1)
   det=1.0_kreal
 case(2)
-  det=jac(1,1)*jac(2,2)-jac(1,2)*jac(2,1)
+  det=xmat(1,1)*xmat(2,2)-xmat(1,2)*xmat(2,1)
 case(3)
-  det=jac(1,1)*(jac(2,2)*jac(3,3)-jac(3,2)*jac(2,3))
-  det=det-jac(1,2)*(jac(2,1)*jac(3,3)-jac(3,1)*jac(2,3))
-  det=det+jac(1,3)*(jac(2,1)*jac(3,2)-jac(3,1)*jac(2,2))
+  det=xmat(1,1)*(xmat(2,2)*xmat(3,3)-xmat(3,2)*xmat(2,3))
+  det=det-xmat(1,2)*(xmat(2,1)*xmat(3,3)-xmat(3,1)*xmat(2,3))
+  det=det+xmat(1,3)*(xmat(2,1)*xmat(3,2)-xmat(3,1)*xmat(2,2))
 case default
-  write(*,*)'ERROR: wrong dimension for jacobian matrix!'
+  write(*,*)'ERROR: determinant of ',n,'X',n,' matrix not supported!'
 end select
 return
 end function determinant
@@ -104,53 +104,48 @@ end function determinant
 ! this subroutine inverts a small square matrix onto itself.
 ! this routine was copied and modified from
 ! Smith and Griffiths (2004): Programming the finite element method
-subroutine invert(matrix)
+subroutine invert(xmat)
 implicit none
-real(kind=kreal),intent(in out)::matrix(:,:)
+real(kind=kreal),intent(in out)::xmat(:,:)
 real(kind=kreal)::det,j11,j12,j13,j21,j22,j23,j31,j32,j33,con
 integer::ndim,i,k
-ndim=ubound(matrix,1)
+ndim=ubound(xmat,1)
 if(ndim==2)then
-  det=matrix(1,1)*matrix(2,2)-matrix(1,2)*matrix(2,1)
-  j11=matrix(1,1)
-  matrix(1,1)=matrix(2,2)
-  matrix(2,2)=j11
-  matrix(1,2)=-matrix(1,2)
-  matrix(2,1)=-matrix(2,1)
-  matrix=matrix/det
+  det=xmat(1,1)*xmat(2,2)-xmat(1,2)*xmat(2,1)
+  j11=xmat(1,1)
+  xmat(1,1)=xmat(2,2)
+  xmat(2,2)=j11
+  xmat(1,2)=-xmat(1,2)
+  xmat(2,1)=-xmat(2,1)
+  xmat=xmat/det
 else if(ndim==3)then
-  det=matrix(1,1)*(matrix(2,2)*matrix(3,3)-matrix(3,2)*matrix(2,3))
-  det=det-matrix(1,2)*(matrix(2,1)*matrix(3,3)-matrix(3,1)*matrix(2,3))
-  det=det+matrix(1,3)*(matrix(2,1)*matrix(3,2)-matrix(3,1)*matrix(2,2))
-  j11=matrix(2,2)*matrix(3,3)-matrix(3,2)*matrix(2,3)
-  j21=-matrix(2,1)*matrix(3,3)+matrix(3,1)*matrix(2,3)
-  j31=matrix(2,1)*matrix(3,2)-matrix(3,1)*matrix(2,2)
-  j12=-matrix(1,2)*matrix(3,3)+matrix(3,2)*matrix(1,3)
-  j22=matrix(1,1)*matrix(3,3)-matrix(3,1)*matrix(1,3)
-  j32=-matrix(1,1)*matrix(3,2)+matrix(3,1)*matrix(1,2)
-  j13=matrix(1,2)*matrix(2,3)-matrix(2,2)*matrix(1,3)
-  j23=-matrix(1,1)*matrix(2,3)+matrix(2,1)*matrix(1,3)
-  j33=matrix(1,1)*matrix(2,2)-matrix(2,1)*matrix(1,2)
-  matrix(1,1)=j11
-  matrix(1,2)=j12
-  matrix(1,3)=j13
-  matrix(2,1)=j21
-  matrix(2,2)=j22
-  matrix(2,3)=j23
-  matrix(3,1)=j31
-  matrix(3,2)=j32
-  matrix(3,3)=j33
-  matrix=matrix/det
+  det=xmat(1,1)*(xmat(2,2)*xmat(3,3)-xmat(3,2)*xmat(2,3))
+  det=det-xmat(1,2)*(xmat(2,1)*xmat(3,3)-xmat(3,1)*xmat(2,3))
+  det=det+xmat(1,3)*(xmat(2,1)*xmat(3,2)-xmat(3,1)*xmat(2,2))
+  j11=xmat(2,2)*xmat(3,3)-xmat(3,2)*xmat(2,3)
+  j21=-xmat(2,1)*xmat(3,3)+xmat(3,1)*xmat(2,3)
+  j31=xmat(2,1)*xmat(3,2)-xmat(3,1)*xmat(2,2)
+  j12=-xmat(1,2)*xmat(3,3)+xmat(3,2)*xmat(1,3)
+  j22=xmat(1,1)*xmat(3,3)-xmat(3,1)*xmat(1,3)
+  j32=-xmat(1,1)*xmat(3,2)+xmat(3,1)*xmat(1,2)
+  j13=xmat(1,2)*xmat(2,3)-xmat(2,2)*xmat(1,3)
+  j23=-xmat(1,1)*xmat(2,3)+xmat(2,1)*xmat(1,3)
+  j33=xmat(1,1)*xmat(2,2)-xmat(2,1)*xmat(1,2)
+  
+  xmat(1,1)=j11; xmat(1,2)=j12; xmat(1,3)=j13
+  xmat(2,1)=j21; xmat(2,2)=j22; xmat(2,3)=j23
+  xmat(3,1)=j31; xmat(3,2)=j32; xmat(3,3)=j33
+  xmat=xmat/det
 else
   do k=1,ndim
-    con=matrix(k,k)
-    matrix(k,k)=1.0_kreal
-    matrix(k,:)=matrix(k,:)/con
+    con=xmat(k,k)
+    xmat(k,k)=1.0_kreal
+    xmat(k,:)=xmat(k,:)/con
     do i=1,ndim
       if(i/=k)then
-        con=matrix(i,k)
-        matrix(i,k)=0.0_kreal
-        matrix(i,:)=matrix(i,:)-matrix(k,:)*con
+        con=xmat(i,k)
+        xmat(i,k)=0.0_kreal
+        xmat(i,:)=xmat(i,:)-xmat(k,:)*con
       end if
     end do
   end do
@@ -159,67 +154,50 @@ return
 end subroutine invert
 !=======================================================
 
-! this subroutine forms the stress invariants in 2- or 3-d.
+! this subroutine forms the stress invariants 3d.
 ! this routine was copied and modified from
 ! Smith and Griffiths (2004): Programming the finite element method
 subroutine stress_invariant(stress,sigm,dsbar,theta)
 implicit none
 real(kind=kreal),intent(in)::stress(:)
 real(kind=kreal),intent(out),optional::sigm,dsbar,theta
-real(kind=kreal)::sx,sy,sz,txy,dx,dy,dz,xj3,sine,s1,s2,s3,s4,s5,s6,ds1,ds2,ds3,&
-  d2,d3,sq3,zero=0.0_kreal,small=1.e-12_kreal,one=1.0_kreal,two=2.0_kreal,     &
-  three=3.0_kreal,six=6.0_kreal,thpt5=13.5_kreal
-integer::nst
+real(kind=kreal)::sx,sy,sz,txy,dx,dy,dz,xj3,sine,s1,s2,s3,s4,s5,s6,ds1,ds2,  &
+ds3,d2,d3,sq3,zero=0.0_kreal,small=1.e-12_kreal,one=1.0_kreal,two=2.0_kreal, &
+three=3.0_kreal,six=6.0_kreal,thpt5=13.5_kreal
+integer :: nst
+
+! check size
 nst=ubound(stress,1)
-select case(nst)
-case(4)
-  sx=stress(1)
-  sy=stress(2)
-  txy=stress(3)
-  sz=stress(4)
-  sigm=(sx+sy+sz)/three
-  dsbar=sqrt((sx-sy)**2+(sy-sz)**2+(sz-sx)**2+six*txy**2)/sqrt(two)
-  if(dsbar<small)then
-    theta=zero
-  else
-    dx=(two*sx-sy-sz)/three
-    dy=(two*sy-sz-sx)/three
-    dz=(two*sz-sx-sy)/three
-    xj3=dx*dy*dz-dz*txy**2
-    sine=-thpt5*xj3/dsbar**3
-    if(sine>=one)sine=one
-    if(sine<-one)sine=-one
-    theta=asin(sine)/three
-  end if
-case(6)
-  sq3=sqrt(three)
-  s1=stress(1)
-  s2=stress(2)
-  s3=stress(3)
-  s4=stress(4)
-  s5=stress(5)
-  s6=stress(6)
-  sigm=(s1+s2+s3)/three
-  d2=((s1-s2)**2+(s2-s3)**2+(s3-s1)**2)/six+s4*s4+s5*s5+s6*s6
+if(nst.ne.6)then
+  write(*,*)'ERROR: wrong size of the stress tensor!'
+  stop
+endif
+  
+sq3=sqrt(three)
+s1=stress(1)
+s2=stress(2)
+s3=stress(3)
+s4=stress(4)
+s5=stress(5)
+s6=stress(6)
+sigm=(s1+s2+s3)/three
+d2=((s1-s2)**2+(s2-s3)**2+(s3-s1)**2)/six+s4*s4+s5*s5+s6*s6
 
-  if(d2<small)d2=small ! special case of hydrostatic pressure or just at the tip
+if(d2<small)d2=small ! special case of hydrostatic pressure or just at the tip
 
-  ds1=s1-sigm
-  ds2=s2-sigm
-  ds3=s3-sigm
-  d3=ds1*ds2*ds3-ds1*s5*s5-ds2*s6*s6-ds3*s4*s4+two*s4*s5*s6
-  dsbar=sq3*sqrt(d2)
-  if(dsbar<small)then
-    theta=zero
-  else
-    sine=-three*sq3*d3/(two*sqrt(d2)**3)
-    if(sine>=one)sine=one
-    if(sine<-one)sine=-one
-    theta=asin(sine)/three
-  end if
-case default
-  write(*,*)"ERROR: wrong size for nst in invar!"
-end select
+ds1=s1-sigm
+ds2=s2-sigm
+ds3=s3-sigm
+d3=ds1*ds2*ds3-ds1*s5*s5-ds2*s6*s6-ds3*s4*s4+two*s4*s5*s6
+dsbar=sq3*sqrt(d2)
+if(dsbar<small)then
+  theta=zero
+else
+  sine=-three*sq3*d3/(two*sqrt(d2)**3)
+  if(sine>=one)sine=one
+  if(sine<-one)sine=-one
+  theta=asin(sine)/three
+end if
 return
 end subroutine stress_invariant
 !=======================================================

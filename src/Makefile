@@ -9,7 +9,7 @@ BIN = ../bin
 #FFLAGS = -g -std=f2003 -fbounds-check -fimplicit-none -O5 -pedantic -pedantic-errors -Wline-truncation -fno-trapping-math -fno-backslash
 
 # parallel fortran compiler
-FC = ~/openmpi-1.4.3/bin/mpif90 # OR path to appropriate MPI forrtan compiler
+FC = mpif90 # OR path to appropriate MPI forrtan compiler
 FFLAGS = -g -std=f2003 -fbounds-check -fimplicit-none -O5 -pedantic -pedantic-errors -Wline-truncation -fno-trapping-math -fno-backslash
 
 FC_COMPILE = $(FC) $(FFLAGS)

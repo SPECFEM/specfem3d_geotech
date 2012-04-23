@@ -15,13 +15,13 @@ logical,intent(in) :: ismpi
 integer,intent(in) :: myid,nproc
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
-character(len=256) :: line
-character(len=400) ::tag
-character(len=80) :: strval,token
+character(len=250) :: line
+character(len=800) ::tag
+character(len=250) :: strval,token
 character(len=1) :: tmp_char
-character(len=80),dimension(50) :: args
-character(len=80) :: confile,idfile,matfile
-character(len=80),dimension(3) :: coordfile
+character(len=250),dimension(50) :: args
+character(len=250) :: confile,idfile,matfile
+character(len=250),dimension(3) :: coordfile
 integer :: id,ind,ios,narg,slen
 
 integer :: bc_stat,preinfo_stat,mesh_stat,material_stat,control_stat,eqload_stat, &
@@ -31,7 +31,7 @@ integer :: i_elmt,ielmt,i_node,inode,i_mat,imat,mat_domain,tmp_nelmt,tmp_nnode
 
 character(len=20) :: format_str,ptail
 character(len=250) :: fname
-character(len=150) :: data_path,mat_path
+character(len=250) :: data_path,mat_path
 
 integer :: ipart,nproc_inp ! partition ID
 integer :: iselastic,ismatpart,istat,ival,issave,nexcavid_all

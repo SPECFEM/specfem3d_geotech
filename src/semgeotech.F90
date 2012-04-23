@@ -23,7 +23,7 @@ integer :: i_elmt,i_node,i_inc,i_srf,ielmt,igdof,imat,inode
 integer :: gnod(8),map2exodus(8),ngllxy,node_hex8(8)
 
 character(len=250) :: arg1,inp_fname,out_fname,prog
-character(len=150) :: path
+character(len=250) :: path
 character(len=20), parameter :: wild_char='********************'
 character(len=20) :: ensight_etype
 character(len=80) :: buffer,destag ! this must be 80 characters long
@@ -65,7 +65,7 @@ if(trim(arg1)==('--help'))then
   call close_process()
 elseif(trim(arg1)==('--version'))then
   if(myid==1)then
-    write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.0 Beta'
+    write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.1 Beta'
     write(stdout,'(a)')'This is free software; see the source for copying '
     write(stdout,'(a)')'conditions.  There is NO warranty; not even for '
     write(stdout,'(a)')'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.'

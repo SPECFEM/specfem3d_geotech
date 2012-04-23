@@ -115,132 +115,95 @@ end subroutine mohcouf
 ! Smith and Griffiths (2004): Programming the finite element method
 subroutine mohcouq(psi,dsbar,theta,dq1,dq2,dq3)
 implicit none
- real(kind=kreal),intent(in)::psi,dsbar,theta
- real(kind=kreal),intent(out)::dq1,dq2,dq3
- real(kind=kreal)::psir,snth,snps,sq3,c1,csth,cs3th,tn3th,tnth,pt49=0.49_kreal,&
- pt5=0.5_kreal,r3=3.0_kreal
+real(kind=kreal),intent(in)::psi,dsbar,theta
+real(kind=kreal),intent(out)::dq1,dq2,dq3
+real(kind=kreal)::psir,snth,snps,sq3,c1,csth,cs3th,tn3th,tnth,pt49=0.49_kreal,&
+pt5=0.5_kreal,r3=3.0_kreal
 
- psir=psi*deg2rad
- snth=sin(theta)
- snps=sin(psir)
- sq3=sqrt(r3)
- dq1=snps
+psir=psi*deg2rad
+snth=sin(theta)
+snps=sin(psir)
+sq3=sqrt(r3)
+dq1=snps
 
- if(abs(snth).gt.pt49)then
-   c1=one
-   if(snth.lt.zero)c1=-one
-   dq2=(sq3*pt5-c1*snps*pt5/sq3)*sq3*pt5/dsbar
-   dq3=zero
- else
-   csth=cos(theta)
-   cs3th=cos(r3*theta)
-   tn3th=tan(r3*theta)
-   tnth=snth/csth
-   dq2=sq3*csth/dsbar*((one+tnth*tn3th)+snps*(tn3th-tnth)/sq3)*pt5
-   dq3=pt5*r3*(sq3*snth+snps*csth)/(cs3th*dsbar*dsbar)
- end if
+if(abs(snth).gt.pt49)then
+  c1=one
+  if(snth.lt.zero)c1=-one
+  dq2=(sq3*pt5-c1*snps*pt5/sq3)*sq3*pt5/dsbar
+  dq3=zero
+else
+  csth=cos(theta)
+  cs3th=cos(r3*theta)
+  tn3th=tan(r3*theta)
+  tnth=snth/csth
+  dq2=sq3*csth/dsbar*((one+tnth*tn3th)+snps*(tn3th-tnth)/sq3)*pt5
+  dq3=pt5*r3*(sq3*snth+snps*csth)/(cs3th*dsbar*dsbar)
+end if
 return
 end subroutine mohcouq
 !=======================================================
 
 ! this subroutine forms the derivatives of the invariants with respect to
-! stress in 2- or 3-d.
+! stress in 3d.
 ! this routine was copied and modified from
 ! Smith and Griffiths (2004): Programming the finite element method
 subroutine formm(stress,m1,m2,m3)
- implicit none
- real(kind=kreal),intent(in)::stress(:)
- real(kind=kreal),intent(out)::m1(:,:),m2(:,:),m3(:,:)
- real(kind=kreal)::sx,sy,txy,tyz,tzx,sz,dx,dy,dz,sigm,  &
-   r3=3.0_kreal,r6=6.0_kreal,r9=9.0_kreal
- integer::nst,i,j
- nst=ubound(stress,1)
- select case(nst)
- case(4)
-   sx=stress(1); sy=stress(2); sz=stress(4)
-   txy=stress(3)
+implicit none
+real(kind=kreal),intent(in)::stress(:)
+real(kind=kreal),intent(out)::m1(:,:),m2(:,:),m3(:,:)
+real(kind=kreal)::sx,sy,txy,tyz,tzx,sz,dx,dy,dz,sigm,  &
+r3=3.0_kreal,r6=6.0_kreal,r9=9.0_kreal
+integer::nst,i,j
 
-   dx=(two*sx-sy-sz)/r3; dy=(two*sy-sz-sx)/r3; dz=(two*sz-sx-sy)/r3
-   sigm=(sx+sy+sz)/r3
-   m1=zero; m2=zero; m3=zero
-   m1(1,1:2)=one
-   m1(2,1:2)=one
-   m1(4,1:2)=one
-   m1(1,4)=one
-   m1(4,4)=one
-   m1(2,4)=one
-   m1=m1/r9/sigm
-   m2(1,1)=two/r3
-   m2(2,2)=two/r3
-   m2(4,4)= two/r3
-   m2(2,4)=-one/r3
-   m2(4,2)=-one/r3
-   m2(1,2)=-one/r3
-   m2(2,1)=-one/r3
-   m2(1,4)=-one/r3
-   m2(4,1)=-one/r3
-   m2(3,3)=two
-   m3(3,3)=-dz
-   m3(1:2,3)=txy/r3
-   m3(3,1:2)=txy/r3
-   m3(3,4)=-two*txy/r3
-   m3(4,3)=-two*txy/r3
-   m3(1,1)=dx/r3
-   m3(2,4)=dx/r3
-   m3(4,2)=dx/r3
-   m3(2,2)=dy/r3
-   m3(1,4)=dy/r3
-   m3(4,1)=dy/r3
-   m3(4,4)=dz/r3
-   m3(1,2)=dz/r3
-   m3(2,1)=dz/r3
- case(6)
-   sx=stress(1);  sy=stress(2);  sz=stress(3)
-   txy=stress(4); tyz=stress(5); tzx=stress(6)
-   sigm=(sx+sy+sz)/r3
-   dx=sx-sigm; dy=sy-sigm; dz=sz-sigm
-   m1=zero; m2=zero
-   m1(1:3,1:3)=one/(r3*sigm)
-   do i=1,3
-     m2(i,i)=two
-     m2(i+3,i+3)=r6
-   end do
-   m2(1,2)=-one
-   m2(1,3)=-one
-   m2(2,3)=-one
-   m3(1,1)=dx
-   m3(1,2)=dz
-   m3(1,3)=dy
-   m3(1,4)=txy
-   m3(1,5)=-two*tyz
-   m3(1,6)=tzx
-   m3(2,2)=dy
-   m3(2,3)=dx
-   m3(2,4)=txy
-   m3(2,5)=tyz
-   m3(2,6)=-two*tzx
-   m3(3,3)=dz
-   m3(3,4)=-two*txy
-   m3(3,5)=tyz
-   m3(3,6)=tzx
-   m3(4,4)=-r3*dz
-   m3(4,5)=r3*tzx
-   m3(4,6)=r3*tyz
-   m3(5,5)=-r3*dx
-   m3(5,6)=r3*txy
-   m3(6,6)=-r3*dy
-   do i=1,6
-     do j=i+1,6
-       m1(j,i)=m1(i,j)
-       m2(j,i)=m2(i,j)
-       m3(j,i)=m3(i,j)
-     end do
-   end do
-   m1=m1/r3; m2=m2/r3; m3=m3/r3
- case default
-   write(*,*)"ERROR: nst size not recognized in formm!"
-   stop
- end select
+nst=ubound(stress,1)
+if(nst.ne.6)then
+  write(*,*)'ERROR: wrong size of the stress tensor!'
+  stop
+endif
+
+sx=stress(1);  sy=stress(2);  sz=stress(3)
+txy=stress(4); tyz=stress(5); tzx=stress(6)
+sigm=(sx+sy+sz)/r3
+dx=sx-sigm; dy=sy-sigm; dz=sz-sigm
+
+m1=zero; m2=zero
+m1(1:3,1:3)=one/(r3*sigm)
+do i=1,3
+  m2(i,i)=two
+  m2(i+3,i+3)=r6
+end do
+m2(1,2)=-one
+m2(1,3)=-one
+m2(2,3)=-one
+m3(1,1)=dx
+m3(1,2)=dz
+m3(1,3)=dy
+m3(1,4)=txy
+m3(1,5)=-two*tyz
+m3(1,6)=tzx
+m3(2,2)=dy
+m3(2,3)=dx
+m3(2,4)=txy
+m3(2,5)=tyz
+m3(2,6)=-two*tzx
+m3(3,3)=dz
+m3(3,4)=-two*txy
+m3(3,5)=tyz
+m3(3,6)=tzx
+m3(4,4)=-r3*dz
+m3(4,5)=r3*tzx
+m3(4,6)=r3*tyz
+m3(5,5)=-r3*dx
+m3(5,6)=r3*txy
+m3(6,6)=-r3*dy
+do i=1,6
+  do j=i+1,6
+    m1(j,i)=m1(i,j)
+    m2(j,i)=m2(i,j)
+    m3(j,i)=m3(i,j)
+  end do
+end do
+m1=m1/r3; m2=m2/r3; m3=m3/r3
 return
 end subroutine formm
 !=======================================================

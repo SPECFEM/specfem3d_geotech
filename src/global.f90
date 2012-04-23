@@ -46,9 +46,9 @@ real(kind=kreal) :: eqkx,eqky,eqkz
 integer,parameter :: nst=6 ! number of unique stress components
 ! sx,sy,sz,tauxy,tauyz,tauzx
 
-character(len=150) :: file_head,inp_path,out_path,part_path
+character(len=250) :: file_head,inp_path,out_path,part_path
 ! displacement BC, ghost, traction, and water surface files
-character(len=150) :: uxfile,uyfile,uzfile,gfile,trfile,wsfile
+character(len=250) :: uxfile,uyfile,uzfile,gfile,trfile,wsfile
 integer :: cg_maxiter,nl_maxiter,nexcav,ninc,nsrf,ntstep
 real(kind=kreal) :: cg_tol,nl_tol
 integer,allocatable :: excavid(:),nexcavid(:) ! Excavation ID (regions), nunber of excavation IDs (regions) in each stage
