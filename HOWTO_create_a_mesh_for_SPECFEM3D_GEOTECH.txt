@@ -1,0 +1,13 @@
+Subject: Re: [CIG-SEISMO] GEOTECH issue
+From: "Hom N. Gharti" 
+Date: 16/06/2014 17:16
+To: "cig-seismo" 
+
+Hi Steven,
+
+Creating model and mesh in CUBIT for geotech is identical to SPECFEM 3D. Only difference is how to define boundary conditions since the BCs for geotech problems are slightly different from wave propagation problems (See "cubit_example.jou"). Additionally, geotech uses a slightly different file formats which you can generate using exodus2sem tool included in the utilities/ folder.
+
+Here, I attach an example CUBIT journal file "cubit_example.jou" and a step-by-step guide "CubitExampleForSPECFEM3D_GEOTECH.pdf". I hope it helps.
+
+Best,
+Hom Nath
