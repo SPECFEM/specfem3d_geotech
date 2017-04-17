@@ -284,7 +284,7 @@ real(kind=kreal),dimension(0:neq),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
 real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array
 integer,parameter :: tag=0
-integer, dimension(MPI_STATUS_SIZE) :: mpi_status
+integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
 real(kind=kreal),parameter :: zero=0.0_kreal
 
@@ -315,7 +315,7 @@ enddo
 
 ! wait for receive-communications completion (recv)
 do i_gpart=1,ngpart
-  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)
+  call MPI_WAIT(recv_req(i_gpart),mpistatus,ierr)
 enddo
 
 ! adding contributions of all ghost neighbours
@@ -329,7 +329,7 @@ enddo
 
 ! wait for send communications completion (send)
 do i_gpart=1,ngpart
-  call MPI_WAIT(send_req(i_gpart),mpi_status,ierr)
+  call MPI_WAIT(send_req(i_gpart),mpistatus,ierr)
 enddo
 call sync_process()
 array_g(0)=zero
@@ -357,7 +357,7 @@ real(kind=kreal),dimension(nndof,nnode) :: tarray
 real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array
 real(kind=kreal),dimension(nndof,maxngnode) :: garray
 integer,parameter :: tag=0
-integer, dimension(MPI_STATUS_SIZE) :: mpi_status
+integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
 !integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node
 real(kind=kreal),parameter :: zero=0.0_kreal
@@ -381,7 +381,7 @@ enddo
 
 ! wait for receive-communications completion (recv)
 do i_gpart=1,ngpart
-  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)
+  call MPI_WAIT(recv_req(i_gpart),mpistatus,ierr)
 enddo
 
 ! adding contributions of all ghost neighbours
@@ -395,7 +395,7 @@ enddo
 
 ! wait for send communications completion (send)
 do i_gpart=1,ngpart
-  call MPI_WAIT(send_req(i_gpart),mpi_status,ierr)
+  call MPI_WAIT(send_req(i_gpart),mpistatus,ierr)
 enddo
 call sync_process()
 return
@@ -417,7 +417,7 @@ integer,dimension(nnode),intent(out) :: ngpart_node
 
 logical,dimension(maxngnode,ngpart) :: lsend_array,lrecv_array
 integer,parameter :: tag=0
-integer, dimension(MPI_STATUS_SIZE) :: mpi_status
+integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
 integer :: i,j,ierr,i_gpart,ignode,ngnode
 
@@ -439,7 +439,7 @@ enddo
 
 ! wait for receive-communications completion (recv)
 do i_gpart=1,ngpart
-  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)
+  call MPI_WAIT(recv_req(i_gpart),mpistatus,ierr)
 enddo
 
 ! count active partitons along the interfaces
@@ -452,7 +452,7 @@ enddo
 
 ! wait for send communications completion (send)
 do i_gpart=1,ngpart
-  call MPI_WAIT(send_req(i_gpart),mpi_status,ierr)
+  call MPI_WAIT(send_req(i_gpart),mpistatus,ierr)
 enddo
 call sync_process()
 
@@ -481,7 +481,7 @@ real(kind=kreal),dimension(nndof,nnode) :: tarray
 real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array
 real(kind=kreal),dimension(nndof,maxngnode) :: garray
 integer,parameter :: tag=0
-integer, dimension(MPI_STATUS_SIZE) :: mpi_status
+integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
 !integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node
 real(kind=kreal),parameter :: zero=0.0_kreal
@@ -531,7 +531,7 @@ enddo
 
 ! wait for receive-communications completion (recv)
 do i_gpart=1,ngpart
-  call MPI_WAIT(recv_req(i_gpart),mpi_status,ierr)
+  call MPI_WAIT(recv_req(i_gpart),mpistatus,ierr)
 enddo
 
 ! adding contributions of all ghost neighbours
@@ -545,7 +545,7 @@ enddo
 
 ! wait for send communications completion (send)
 do i_gpart=1,ngpart
-  call MPI_WAIT(send_req(i_gpart),mpi_status,ierr)
+  call MPI_WAIT(send_req(i_gpart),mpistatus,ierr)
 enddo
 call sync_process()
 

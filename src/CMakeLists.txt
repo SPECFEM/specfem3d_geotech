@@ -34,6 +34,7 @@ IF(ISPARALLEL)
      math_library_mpi.f90
      ghost_library_mpi.f90
      solver_mpi.f90)
+  #SET_PROPERTY(SOURCE ${srcparallel} PROPERTY COMPILE_DEFINITIONS USE_MPI)
   ADD_LIBRARY(parallel ${srcparallel})
   ADD_DEPENDENCIES(parallel sem)
   #TARGET_LINK_LIBRARIES(parallel ${MPI_Fortran_LIBRARIES})

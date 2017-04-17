@@ -42,7 +42,7 @@
 
 % Package name and version
 \def\pack{SPECFEM3D\_GEOTECH}
-\def\packver{\pack\ 1.2 Beta}
+\def\packver{\pack\ 1.3 Beta}
 
 \begin{document}
 %\thispagestyle{empty}\textbf{}%
@@ -178,7 +178,10 @@ Software package \pack\ is configured using CMake, and the package uses an out-o
 \texttt{cd \$HOME/work/\pack}
 
 \item Type the cmake command \\
-\texttt{ccmake \$HOME/projects/\pack}
+\texttt{ccmake \$HOME/projects/\pack} \\
+OR \\
+\texttt{CC=gcc CXX=g++ FC=gfortran MPIFC=mpif90 ccmake \$HOME/projects/\pack} \\
+
 \end{itemize}
 
 \begin{figure}[ht]

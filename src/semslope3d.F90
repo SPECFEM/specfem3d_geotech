@@ -248,8 +248,8 @@ endif
 allocate(cohf(nmat),nuf(nmat),phif(nmat),psif(nmat),ymf(nmat))
 
 if(myid==1)then
-  write(stdout,'(a,e10.4,a,i5)')'CG_TOL:',cg_tol,' CG_MAXITER:',cg_maxiter
-  write(stdout,'(a,e10.4,a,i5)')'NL_TOL:',nl_tol,' NL_MAXITER:',nl_maxiter
+  write(stdout,'(a,e12.4,a,i5)')'CG_TOL:',cg_tol,' CG_MAXITER:',cg_maxiter
+  write(stdout,'(a,e12.4,a,i5)')'NL_TOL:',nl_tol,' NL_MAXITER:',nl_maxiter
   write(stdout,'(a)',advance='no')'SRFs:'
   do i_srf=1,nsrf
     write(stdout,'(f7.4,1x)',advance='no')srf(i_srf)

@@ -85,15 +85,16 @@ IF(ENABLE_MPI)
   # Test MPI Fortran compiler
   #include_directories(${MPI_Fortran_INCLUDE_PATH})
   TRY_COMPILE(TEST_MPI ${CMAKE_BINARY_DIR}/CMakeTmp ${CMAKE_SOURCE_DIR}/src/testmpi.f90
-  COMPILE_DEFINITIONS ${MPI_Fortran_LINK_FLAGS}
-  CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${MPI_Fortran_INCLUDE_PATH}"
-  "-DLINK_LIBRARIES=${MPI_Fortran_LIBRARIES}"
+  #COMPILE_DEFINITIONS ${MPI_Fortran_LINK_FLAGS}
+  #CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${MPI_Fortran_INCLUDE_PATH}"
+  #"-DLINK_LIBRARIES=${MPI_Fortran_LIBRARIES}"
+  LINK_LIBRARIES ${MPI_Fortran_LIBRARIES}
   OUTPUT_VARIABLE test)
   IF(NOT TEST_MPI)
-    MESSAGE(WARNING "MPI Fortran compiler: ${CMAKE_Fortran_COMPILER} doesn't work! Parallel semgeotech cannot be built!")
+    MESSAGE(WARNING "MPI Fortran compiler: ${MPI_Fortran_COMPILER} doesn't work! Parallel semgeotech cannot be built!")
     SET(ISPARALLEL OFF)
   ENDIF(NOT TEST_MPI) 
-INCLUDE_DIRECTORIES(${MPI_Fortran_INCLUDE_PATH}) 
+INCLUDE_DIRECTORIES(${MPI_Fortran_INCLUDE_DIRS}) 
 ENDIF(ENABLE_MPI)
 
 # process CMakeLists.txt in other subdirectories

@@ -1,0 +1,37 @@
+# Configure time
+
+# Build time
+arc/
+tmp/
+bin/
+input/
+output/
+partition/
+viscoelastic/
+EXAMPLES/
+*.mod
+*.o
+
+# documentation
+doc/*.aux
+doc/*.bbl
+doc/*.blg
+doc/*.brf
+doc/*.log
+doc/*.out
+doc/*.synctex.gz
+doc/*.toc
+
+# Trash files
+.*swp
+.*swo
+*~
+submit*
+*.output
+slurm*
+fort.*
+*OLD.*
+
+# until successful testing
+cmake-modules/
+*.cmake
