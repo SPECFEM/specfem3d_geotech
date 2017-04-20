@@ -3,7 +3,7 @@
 #   HNG, Sep 06,2011;
 
 # build sem library
-SET(srcsem 
+SET(srcsem
    global.f90
    string_library.f90
    math_library.f90
@@ -44,7 +44,7 @@ ELSE(ISPARALLEL)
      math_library_serial.f90
      solver.f90)
   ADD_LIBRARY(serial ${srcserial})
-  ADD_DEPENDENCIES(serial sem) 
+  ADD_DEPENDENCIES(serial sem)
 ENDIF(ISPARALLEL)
 
 # build geotech library
@@ -56,7 +56,7 @@ ENDIF(ISPARALLEL)
 #IF(BUILD_SLOPE)
 #  LIST(APPEND srcgeotech semslope3d.f90)
 #ENDIF(BUILD_SLOPE)
-SET(srcgeotech   
+SET(srcgeotech
    semexcav3d.F90
    semslope3d.F90)
 #compiler preprocessor directives
@@ -96,8 +96,8 @@ TARGET_LINK_LIBRARIES(${mainprog} ${LIBS})
 
 # Build partmesh program
 # partmesh program partitions the mesh for the parallel processing
-IF(ISPARTMESH)  
-  SET(srcpartmesh 
+IF(ISPARTMESH)
+  SET(srcpartmesh
      global.f90
      string_library.f90
      partmesh_library.f90

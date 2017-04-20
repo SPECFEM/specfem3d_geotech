@@ -168,7 +168,7 @@ do i_elmt=1,nelmt
     ! since interpolation funtions are orthogonal we compute only nonzero terms
     idof=idof+3
     eld(idof)=eld(idof)+detjac*gll_weights(i)
-    !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)   
+    !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
   end do ! i=1,ngll
   extload(egdof)=extload(egdof)+eld*gam(mat_id(i_elmt))+bload
 enddo
