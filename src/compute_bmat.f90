@@ -20,7 +20,7 @@ if(nst.ne.6)then
 endif
 nod=ubound(deriv,2)
 
-bmat=0.0_kreal 
+bmat=0.0_kreal
 DO m=1,nod
   n=3*m
   k=n-1

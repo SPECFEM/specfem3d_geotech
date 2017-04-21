@@ -76,7 +76,7 @@ do i_elmt=1,nelmt
     idof=idof+3
     ! interpolation functions are orthogonal, hence it is simple
     eld(idof)=eld(idof)+detjac*gll_weights(i)
-    !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)    
+    !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
   end do ! i=1,ngll
   storkm(:,:,i_elmt)=km
   do k=1,nedof

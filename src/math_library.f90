@@ -131,7 +131,7 @@ else if(ndim==3)then
   j13=xmat(1,2)*xmat(2,3)-xmat(2,2)*xmat(1,3)
   j23=-xmat(1,1)*xmat(2,3)+xmat(2,1)*xmat(1,3)
   j33=xmat(1,1)*xmat(2,2)-xmat(2,1)*xmat(1,2)
-  
+
   xmat(1,1)=j11; xmat(1,2)=j12; xmat(1,3)=j13
   xmat(2,1)=j21; xmat(2,2)=j22; xmat(2,3)=j23
   xmat(3,1)=j31; xmat(3,2)=j32; xmat(3,3)=j33
@@ -172,7 +172,7 @@ if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!'
   stop
 endif
-  
+
 sq3=sqrt(three)
 s1=stress(1)
 s2=stress(2)

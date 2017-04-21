@@ -22,7 +22,7 @@ endif
 cmat=zero
 v1=one-v
 c=e/((one+v)*(one-two*v))
- 
+
 v2=v/(one-v)
 vv=(one-two*v)/(one-v)*pt5
 do i=1,3

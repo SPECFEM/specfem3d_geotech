@@ -19,7 +19,7 @@ CC = gcc
 CFLAGS = -g -O3 -Werror -Wall -pedantic-errors
 CC_COMPILE = $(CC) $(CFLAGS)
 
-LIB = 
+LIB =
 LIBMPI = -L/~/openmpi-1.4.3/lib/lmpi # OR path to appropriate MPI library
 LIBSCOTCH = -L/staff/homnath/lsoft/scotch_5.1.7/lib -lscotch -lscotcherr
 
@@ -54,20 +54,20 @@ OBJ_SEMMPI = $(BIN)/set_precision_mpi.o \
              $(BIN)/solver_mpi.o
 
 # object tree for EXCAVATION
-OBJ_EXCAV = $(BIN)/excavation.o 
+OBJ_EXCAV = $(BIN)/excavation.o
 
 # object tree for SEM
 OBJ_SEM = $(BIN)/serial_library.o      \
           $(BIN)/math_library_serial.o \
           $(BIN)/solver.o
-         
+
 # object tree for PARTMESH
 OBJ_PARTMESH = $(BIN)/global.o           \
                $(BIN)/string_library.o   \
                $(BIN)/partmesh_library.o \
 	       $(BIN)/partmesh_scotch.o  \
                $(BIN)/partmesh.o
-				
+
 OBJ_semgeotech = $(OBJ) $(OBJ_SEM) $(BIN)/semslope3d.o $(OBJ_EXCAV) $(BIN)/semexcav3d.o $(BIN)/semgeotech.o
 OBJ_psemgeotech = $(OBJ) $(OBJ_SEMMPI) $(BIN)/psemslope3d.o $(OBJ_EXCAV) $(BIN)/psemexcav3d.o $(BIN)/psemgeotech.o
 
@@ -89,16 +89,16 @@ all: clean partmesh semgeotech psemgeotech
 semgeotech: $(OBJ_semgeotech)
 	$(FC_COMPILE) -o $(semgeotech) $(OBJ_semgeotech) $(LIB)
 
-psemgeotech: $(OBJ_psemgeotech)  
+psemgeotech: $(OBJ_psemgeotech)
 	$(FC_COMPILE) -o $(psemgeotech) $(OBJ_psemgeotech) $(LIBMPI)
-	
+
 partmesh: $(OBJ_PARTMESH)
 	$(FC_COMPILE) -o ${PARTMESH} $(OBJ_PARTMESH) $(LIBSCOTCH)
-	
+
 # compile instruction for each source
 $(BIN)/set_precision_mpi.o: set_precision_mpi.f90
 	$(FC_COMPILE) -c -o $(BIN)/set_precision_mpi.o set_precision_mpi.f90
-	
+
 $(BIN)/global.o: global.f90
 	$(FC_COMPILE) -c -o $(BIN)/global.o global.f90
 
@@ -107,10 +107,10 @@ $(BIN)/string_library.o: string_library.f90
 
 $(BIN)/math_library.o: math_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/math_library.o math_library.f90
-	
+
 $(BIN)/mpi_library.o: mpi_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/mpi_library.o mpi_library.f90
-	
+
 $(BIN)/serial_library.o: serial_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/serial_library.o serial_library.f90
 
@@ -140,68 +140,68 @@ $(BIN)/compute_cmat.o: compute_cmat.f90
 
 $(BIN)/gauss_library.o: gauss_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/gauss_library.o gauss_library.f90
-	
+
 $(BIN)/apply_bc.o: apply_bc.f90
 	$(FC_COMPILE) -c -o $(BIN)/apply_bc.o apply_bc.f90
-	
+
 $(BIN)/preprocess.o: preprocess.f90
 	$(FC_COMPILE) -c -o $(BIN)/preprocess.o preprocess.f90
-	
+
 $(BIN)/apply_traction.o: apply_traction.f90
 	$(FC_COMPILE) -c -o $(BIN)/apply_traction.o apply_traction.f90
-	
+
 $(BIN)/compute_pressure.o: compute_pressure.f90
 	$(FC_COMPILE) -c -o $(BIN)/compute_pressure.o compute_pressure.f90
-	
+
 $(BIN)/ghost_library_mpi.o: ghost_library_mpi.f90
 	$(FC_COMPILE) -c -o $(BIN)/ghost_library_mpi.o ghost_library_mpi.f90
 
 $(BIN)/plastic_library.o: plastic_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/plastic_library.o plastic_library.f90
-	
+
 $(BIN)/visual.o: visual.f90
 	$(FC_COMPILE) -c -o $(BIN)/visual.o visual.f90
-	
+
 $(BIN)/postprocess.o: postprocess.f90
 	$(FC_COMPILE) -c -o $(BIN)/postprocess.o postprocess.f90
-	
+
 $(BIN)/solver.o: solver.f90
 	$(FC_COMPILE) -c -o $(BIN)/solver.o solver.f90
-	
-$(BIN)/solver_mpi.o: solver_mpi.f90
-	$(FC_COMPILE) -c -o $(BIN)/solver_mpi.o solver_mpi.f90	
 
-# following objective files are compiled from the same file but with 
+$(BIN)/solver_mpi.o: solver_mpi.f90
+	$(FC_COMPILE) -c -o $(BIN)/solver_mpi.o solver_mpi.f90
+
+# following objective files are compiled from the same file but with
 # different compiler preprocessing directives options.
 # -DUSE_MPI provides the flag to use the MPI library for the compilation.
 # the flag -DUSE_MPI is equivalent to #define USE_MPI 1.
 $(BIN)/semslope3d.o: semslope3d.F90
 	$(FC_COMPILE) -c -o $(BIN)/semslope3d.o semslope3d.F90
-	
+
 $(BIN)/psemslope3d.o: semslope3d.F90
 	$(FC_COMPILE) -DUSE_MPI -c -o $(BIN)/psemslope3d.o semslope3d.F90
 
 $(BIN)/excavation.o: excavation.f90
 	$(FC_COMPILE) -c -o $(BIN)/excavation.o excavation.f90
 
-# following objective files are compiled from the same file but with 
+# following objective files are compiled from the same file but with
 # different compiler preprocessing directives options.
 # -DUSE_MPI provides the flag to use the MPI library for the compilation.
 # the flag -DUSE_MPI is equivalent to #define USE_MPI 1.
 $(BIN)/semexcav3d.o: semexcav3d.F90
 	$(FC_COMPILE) -c -o $(BIN)/semexcav3d.o semexcav3d.F90
-	
+
 $(BIN)/psemexcav3d.o: semexcav3d.F90
 	$(FC_COMPILE) -DUSE_MPI -c -o $(BIN)/psemexcav3d.o semexcav3d.F90
-	
-# following objective files are compiled from the same file but with 
+
+# following objective files are compiled from the same file but with
 # different compiler preprocessing directives options.
 $(BIN)/semgeotech.o: semgeotech.F90
 	$(FC_COMPILE) -c -o $(BIN)/semgeotech.o semgeotech.F90
-	
+
 $(BIN)/psemgeotech.o: semgeotech.F90
 	$(FC_COMPILE) -DUSE_MPI -c -o $(BIN)/psemgeotech.o semgeotech.F90
-	
+
 # mesh partition
 $(BIN)/partmesh_library.o: partmesh_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/partmesh_library.o partmesh_library.f90

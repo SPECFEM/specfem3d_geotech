@@ -57,10 +57,10 @@ do ii=1,ngll ! ngllx*nglly*ngllz
   zeta=gll_points(3,ii)
 
   ! compute 1d lagrange polynomials on GLL points
-  ! this can also be computed in a simple manner due to the orthogonality 
+  ! this can also be computed in a simple manner due to the orthogonality
   call lagrange1dGLL(ngllx,gllpx,xi,lagrange_x,lagrange_dx)
   call lagrange1dGLL(nglly,gllpy,eta,lagrange_y,lagrange_dy)
-  call lagrange1dGLL(ngllz,gllpz,zeta,lagrange_z,lagrange_dz)  
+  call lagrange1dGLL(ngllz,gllpz,zeta,lagrange_z,lagrange_dz)
   n=0
   do k=1,ngllz
     do j=1,nglly
@@ -128,7 +128,7 @@ do ii=1,ngll ! ngllx*nglly
   ! compute 1d lagrange polynomials
   ! this can also be computed in a simple manner due to the orthogonality
   call lagrange1dGLL(ngllx,gllpx,xi,lagrange_x,lagrange_dx)
-  call lagrange1dGLL(nglly,gllpy,eta,lagrange_y,lagrange_dy) 
+  call lagrange1dGLL(nglly,gllpy,eta,lagrange_y,lagrange_dy)
   n=0
   do j=1,nglly
     do i=1,ngllx
