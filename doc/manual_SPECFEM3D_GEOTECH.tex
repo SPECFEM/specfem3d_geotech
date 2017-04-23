@@ -107,7 +107,7 @@ a Mohr-coulomb failure criterion is used with a viscoplastic strain method~ \cit
 
 This program does not automatically determine the factor of safety of slope stability. Simulations can be performed for a series of safety factors. After plotting the safety factor verses maximum displacement curve, one can determine the factor of safety of the given slope. Although the software is optimized for slope stability analysis and multistage excavation, other relevant simulations of quasistatic problems in solid (geo)mechanics can also be performed with this software.\\
 
-The software currently does not include an inbuilt mesher. Existing tools, such as Gmsh~\citep{geuzaine2009}, CUBIT~\citep{cubit2011}, TrueGrid~\citep{truegrid2006}, etc., can be used for hexahedral meshing, and the resulting mesh file can be converted to the input files required by \pack. Output data can be visualized and processed using the open-source visualization application ParaView (\texttt{www.paraview.org}).
+The software currently does not include an inbuilt mesher. Existing tools, such as Gmsh~\citep{geuzaine2009}, CUBIT/Trelis~\citep{cubit2011}, TrueGrid~\citep{truegrid2006}, etc., can be used for hexahedral meshing, and the resulting mesh file can be converted to the input files required by \pack. Output data can be visualized and processed using the open-source visualization application ParaView (\texttt{www.paraview.org}).
 
 \section{Status summary}
 \begin{desclist}{Pseudo-static earthquake loading}
@@ -122,7 +122,7 @@ The software currently does not include an inbuilt mesher. Existing tools, such 
 
 \section*{Revisions}
 
-HNG, Jan 12, 2012; HNG, Sep 08, 2011; HNG, Jul 12, 2011; HNG, May 20, 2011; HNG, Jan 17, 2011
+HNG, Apr 22, 2017; HNG, Jan 12, 2012; HNG, Sep 08, 2011; HNG, Jul 12, 2011; HNG, May 20, 2011; HNG, Jan 17, 2011
 
 
 \chapter{Getting started}
@@ -146,6 +146,7 @@ or using, for example, \texttt{7-zip (www.7-zip.org)} under WINDOWS. The package
 \item[~~partition/]            : contains partition files for parallel processing.
 \item[~~output/]               : default output folder. All output files are stored in this folder unless the different output path is defined in the main input file.
 \item[~~src/]                  : contains all source files.
+\item[~~util/]                  : contains several utilities source files.
 \end{adescription}
 
 \section{Prerequisites}
