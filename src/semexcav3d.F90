@@ -38,10 +38,10 @@ character(len=250),intent(in) :: sum_file
 character(len=20),intent(in) :: ptail,format_str
 
 integer :: funit,i,ios,istat,j,k,neq
-integer :: i_elmt,i_node,i_inc,i_srf,i_excav,ielmt,igdof,imat,inode
+integer :: i_elmt,i_node,i_inc,i_srf,i_excav,ielmt,imat,inode
 real(kind=kreal),parameter :: r3=3.0_kreal,two_third=two/r3
-real(kind=kreal) :: detjac,dq1,dq2,dq3,dsbar,dt,f,fmax,h1,h2,lode_theta,phifr, &
-sf,sigm,tnph,tnps
+real(kind=kreal) :: detjac,dq1,dq2,dq3,dsbar,dt,f,fmax,lode_theta,phifr, &
+sf,sigm
 
 real(kind=kreal) :: uerr,umax,uxmax
 integer :: cg_iter,cg_tot,nl_iter,nl_tot
@@ -71,16 +71,12 @@ real(kind=kreal),allocatable :: zetagll(:),wzgll(:) !double precision
 real(kind=kreal),allocatable :: gll_weights(:),gll_points(:,:)
 real(kind=kreal),allocatable :: lagrange_gll(:,:),dlagrange_gll(:,:,:)
 
-character(len=250) :: inp_fname,out_fname,prog
-character(len=150) :: path
+character(len=250) :: out_fname
 character(len=20), parameter :: wild_char='********************'
 character(len=20) :: ensight_etype
 character(len=80) :: buffer,destag ! this must be 80 characters long
-character(len=20) :: ext !,format_str,ptail
-character(len=250) :: case_file,geo_file !,sum_file
-integer :: npart,tinc,tstart,twidth,ts ! ts: time set for ensight gold
-
-real(kind=kreal) :: cpu_tstart,cpu_tend,telap,step_telap,max_telap,mean_telap
+character(len=250) :: geo_file !,sum_file
+integer :: npart
 
 logical :: gravity,pseudoeq ! gravity load and pseudostatic load
 real(kind=kreal),allocatable :: wpressure(:) ! water pressure
@@ -88,13 +84,12 @@ logical,allocatable :: submerged_node(:)
 
 ! excavation
 integer :: id0,id1
-integer :: ielmt_intact,ielmt_void,nelmt_intact,nelmt_void
+integer :: nelmt_intact,nelmt_void
 integer,allocatable :: elmt_intact(:),elmt_void(:)
-integer :: inode_intact,inode_void,nnode_intact,nnode_void
+integer :: nnode_intact,nnode_void
 integer,allocatable :: nmir(:),node_intact(:),node_void(:)
 logical,allocatable :: ismat(:),isnode(:)
 
-!logical :: ismpi !.true. : MPI, .false. : serial
 integer :: ipart !,myid,nproc
 integer :: tot_nelmt,max_nelmt,min_nelmt,tot_nnode,max_nnode,min_nnode
 integer :: tot_neq,max_neq,min_neq
@@ -103,7 +98,6 @@ integer :: ngpart,maxngnode
 integer,allocatable :: ngpart_node(:)
 character(len=250) :: errtag ! error message
 integer :: errcode
-logical :: isopen ! flag to check whether the file is opened
 
 errtag=""; errcode=-1
 

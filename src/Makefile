@@ -9,19 +9,21 @@ BIN = ../bin
 #FFLAGS = -g -std=f2003 -fbounds-check -fimplicit-none -O5 -pedantic -pedantic-errors -Wline-truncation -fno-trapping-math -fno-backslash
 
 # parallel fortran compiler
-FC = mpif90 # OR path to appropriate MPI forrtan compiler
-FFLAGS = -g -std=f2003 -fbounds-check -fimplicit-none -O5 -pedantic -pedantic-errors -Wline-truncation -fno-trapping-math -fno-backslash
-
+#FC = mpif90 # OR path to appropriate MPI forrtan compiler
+FC = mpiifort # OR path to appropriate MPI forrtan compiler
+#FFLAGS = -g -std=f2003 -fbounds-check -fimplicit-none -O5 -pedantic -pedantic-errors -Wline-truncation -fno-trapping-math -fno-backslash -Wunused
+FFLAGS = -std08 -O3 -g -axAVX -xHost -mcmodel medium -shared-intel -check all -check bounds -fp-stack-check -traceback -ftz -funroll-loops -unroll5 -align sequence -qopt-report0 -qopt-report-phase=vec -implicitnone -warn truncated_source -warn unused -warn declarations -warn alignments -warn ignore_loc -warn usage -check nobounds
 FC_COMPILE = $(FC) $(FFLAGS)
 
 # C compiler
-CC = gcc
+#CC = gcc
+CC = icc
 CFLAGS = -g -O3 -Werror -Wall -pedantic-errors
 CC_COMPILE = $(CC) $(CFLAGS)
 
 LIB =
-LIBMPI = -L/~/openmpi-1.4.3/lib/lmpi # OR path to appropriate MPI library
-LIBSCOTCH = -L/staff/homnath/lsoft/scotch_5.1.7/lib -lscotch -lscotcherr
+#LIBMPI = -L/~/openmpi-1.4.3/lib/lmpi # OR path to appropriate MPI library
+LIBSCOTCH = -L/home/hgharti/lsoft/scotch_6.0.4-intel17/lib -lscotch -lscotcherr
 
 # object tree
 OBJ = $(BIN)/global.o           \
