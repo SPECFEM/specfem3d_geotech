@@ -17,12 +17,12 @@ use math_library_serial
 use visual
 
 implicit none
-integer :: funit,i,ios,istat,j,k,neq
-integer :: i_elmt,i_node,i_inc,i_srf,ielmt,igdof,imat,inode
+integer :: funit,i,ios,j,k
+integer :: i_elmt
 
 integer :: gnod(8),map2exodus(8),ngllxy,node_hex8(8)
 
-character(len=250) :: arg1,inp_fname,out_fname,prog
+character(len=250) :: arg1,inp_fname,prog
 character(len=250) :: path
 character(len=20), parameter :: wild_char='********************'
 character(len=20) :: ensight_etype
@@ -31,7 +31,7 @@ character(len=20) :: ext,format_str,ptail
 character(len=250) :: case_file,geo_file,sum_file
 integer :: npart,nt,tinc,tstart,twidth,ts ! ts: time set for ensight gold
 
-real(kind=kreal) :: cpu_tstart,cpu_tend,telap,step_telap,max_telap,mean_telap
+real(kind=kreal) :: cpu_tstart,cpu_tend,telap,max_telap,mean_telap
 
 logical :: ismpi !.true. : MPI, .false. : serial
 integer :: myid,nproc
