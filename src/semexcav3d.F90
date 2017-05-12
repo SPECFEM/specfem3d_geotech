@@ -431,12 +431,12 @@ excavation_stage: do i_excav=0,nexcav
 
   ! compute excavation load at gdofs
   !call excavation_load(nelmt_void,neq,gnod,g_num(:,elmt_void),gdof_elmt(:,elmt_void), &
-  !mat_id(elmt_void),dshape_hex8,lagrange_gll,dlagrange_gll,gll_weights, &
+  !mat_id(elmt_void),dshape_hex8,dlagrange_gll,gll_weights, &
   !stress_local(:,:,elmt_void),extload)
 
   ! compute excavation load at nodes
-  call excavation_load_nodal(nelmt_void,neq,gnod,g_num(:,elmt_void), &
-  mat_id(elmt_void),dshape_hex8,lagrange_gll,dlagrange_gll,gll_weights, &
+  call excavation_load_nodal(nelmt_void,gnod,g_num(:,elmt_void), &
+  mat_id(elmt_void),dshape_hex8,dlagrange_gll,gll_weights, &
   stress_local(:,:,elmt_void),excavload)
 
   ! if the excavation load is discarded by the partition (it can happens due to
@@ -663,7 +663,7 @@ excavation_stage: do i_excav=0,nexcav
   enddo
 
   call save_data(ptail,format_str,i_excav,nnode_intact,nelmt_intact,           &
-  g_num(:,elmt_intact),nodalu(:,node_intact),scf(node_intact),                 &
+  nodalu(:,node_intact),scf(node_intact),                 &
   vmeps(node_intact),stress_global(:,node_intact))
 
   ! deallocate those variables whose size depend on changing geometry

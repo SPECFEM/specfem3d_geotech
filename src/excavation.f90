@@ -127,7 +127,7 @@ end subroutine correct_nvalency
 ! this subroutine computes the excavation loads. this load consists of both
 ! gravity and stress load
 subroutine excavation_load(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8, &
-lagrange_gll,dlagrange_gll,gll_weights,stress_local,extload)
+dlagrange_gll,gll_weights,stress_local,extload)
 use global,only:ndim,nedof,nenod,ngll,ngnod,nst,g_coord,gam
 use preprocess,only:compute_bmat
 use math_library,only:determinant,invert
@@ -135,7 +135,7 @@ implicit none
 integer,intent(in) :: nelmt,neq,gnod(8) ! nelmt (only void elements)
 integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)  ! only void elements
 !integer,intent(in) :: nelmt_void,elmt_void(nelmt_void)
-real(kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),lagrange_gll(ngll,ngll), &
+real(kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),                        &
 dlagrange_gll(ndim,ngll,ngll),gll_weights(ngll)
 real(kreal),intent(in) :: stress_local(nst,ngll,nelmt)
 real(kreal),intent(inout) :: extload(0:neq)
@@ -178,16 +178,16 @@ end subroutine excavation_load
 
 ! this subroutine computes the excavation loads. this load consists of both
 ! gravity and stress load
-subroutine excavation_load_nodal(nelmt,neq,gnod,g_num,mat_id,dshape_hex8, &
-lagrange_gll,dlagrange_gll,gll_weights,stress_local,excavload)
+subroutine excavation_load_nodal(nelmt,gnod,g_num,mat_id,dshape_hex8, &
+dlagrange_gll,gll_weights,stress_local,excavload)
 use global,only:ndim,nedof,nndof,nenod,ngll,ngnod,nnode,nst,g_coord,gam
 use preprocess,only:compute_bmat
 use math_library,only:determinant,invert
 implicit none
-integer,intent(in) :: nelmt,neq,gnod(8) ! nelmt (only void elements)
+integer,intent(in) :: nelmt,gnod(8) ! nelmt (only void elements)
 integer,intent(in) :: g_num(nenod,nelmt),mat_id(nelmt)  ! ,gdof_elmt(nedof,nelmt) only void elements
 !integer,intent(in) :: nelmt_void,elmt_void(nelmt_void)
-real(kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),lagrange_gll(ngll,ngll), &
+real(kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),                        &
 dlagrange_gll(ndim,ngll,ngll),gll_weights(ngll)
 real(kreal),intent(in) :: stress_local(nst,ngll,nelmt)
 real(kreal),intent(out) :: excavload(nndof,nnode) ! nnode include all nodes
@@ -195,7 +195,7 @@ real(kreal),intent(out) :: excavload(nndof,nnode) ! nnode include all nodes
 real(kreal) :: detjac,zero=0.0_kreal
 real(kreal) :: coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
 bmat(nst,nedof),eld(nedof),bload(nedof),eload(nedof),tload(nedof),sigma(nst)
-integer :: egdof(nedof),num(nenod)
+integer :: num(nenod)
 integer :: i,idof,i_elmt
 
 excavload=zero
