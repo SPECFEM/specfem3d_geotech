@@ -41,7 +41,7 @@ integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)
 real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),dlagrange_gll(ndim,ngll,ngll),x(0:neq)
 real(kind=kreal),intent(inout) :: stress_local(nst,ngll,nelmt)
 
-real(kind=kreal) :: detjac,zero=0.0_kreal
+real(kind=kreal) :: detjac
 real(kind=kreal) :: cmat(nst,nst),coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
 bmat(nst,nedof),eld(nedof),eps(nst),sigma(nst)
 integer :: egdof(nedof),num(nenod)
@@ -83,7 +83,7 @@ gdof_elmt(nedof,nelmt_intact),mat_id(nelmt_intact)
 real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),dlagrange_gll(ndim,ngll,ngll),x(0:neq)
 real(kind=kreal),intent(inout) :: stress_local(nst,ngll,nelmt)
 
-real(kind=kreal) :: detjac,zero=0.0_kreal
+real(kind=kreal) :: detjac
 real(kind=kreal) :: cmat(nst,nst),coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
 bmat(nst,nedof),eld(nedof),eps(nst),sigma(nst)
 integer :: egdof(nedof),num(nenod)
@@ -124,17 +124,17 @@ end subroutine elastic_stress_intact
 
 ! this routine save data to files Ensight Gold format
 ! TODO: make it optional
-subroutine save_data(ptail,format_str,istep,nnode,nelmt,g_num,nodalu,scf,vmeps,stress_global)
+subroutine save_data(ptail,format_str,istep,nnode,nelmt,nodalu,scf,vmeps,stress_global)
 use global,only:ngll,nst,out_path,file_head,savedata
 use math_constants
 use math_library,only:rquick_sort,stress_invariant
 use visual
 implicit none
 character(len=20),intent(in) :: format_str,ptail
-integer,intent(in) :: istep,nnode,nelmt,g_num(ngll,nelmt)
+integer,intent(in) :: istep,nnode,nelmt
 real(kind=kreal),intent(in) :: nodalu(3,nnode),scf(nnode),vmeps(nnode),stress_global(nst,nnode)
 
-integer :: i_elmt,i_node,npart,num(ngll)
+integer :: i_node,npart
 real(kind=kreal) :: psigma(3,nnode),nsigma(nnode),taumax(nnode)
 real(kind=kreal) :: dsbar,lode_theta,sigm,two_third=2.0_kreal/3.0_kreal
 character(len=250) :: out_fname

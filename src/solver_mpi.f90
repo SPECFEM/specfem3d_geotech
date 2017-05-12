@@ -29,7 +29,7 @@ character(len=250),intent(out) :: errtag
 integer :: i_elmt
 integer,dimension(nedof) :: egdof
 real(kind=kreal) :: alpha,beta,rz
-real(kind=kreal),dimension(0:neq) :: kp,p,p_g,r,z,z_g,r_g,f_g
+real(kind=kreal),dimension(0:neq) :: kp,p,p_g,r,z,z_g
 real(kind=kreal),dimension(nedof,nedof) :: km
 
 errtag="ERROR: unknown!"
