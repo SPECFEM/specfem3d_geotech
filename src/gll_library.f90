@@ -88,7 +88,7 @@ real(kind=kreal),dimension(ngll,ngll),intent(out) :: lagrange_gll2d
 real(kind=kreal),dimension(ndim,ngll,ngll),intent(out) :: dlagrange_gll2d
 
 real(kind=kreal),parameter :: jacobi_alpha=0.0_kreal,jacobi_beta=0.0_kreal
-integer :: i,ii,j,k,n
+integer :: i,ii,j,n
 real(kind=kreal) :: xi,eta !,zeta
 real(kind=kreal),dimension(ngllx) :: gllpx,gllwx ! gll points and weights
 real(kind=kreal),dimension(nglly) :: gllpy,gllwy ! gll points and weights
@@ -154,7 +154,7 @@ real(kind=kreal),dimension(ngll,ngll),intent(out) :: lagrange_gll1d
 real(kind=kreal),dimension(ndim,ngll,ngll),intent(out) :: dlagrange_gll1d
 
 real(kind=kreal),parameter :: jacobi_alpha=0.0_kreal,jacobi_beta=0.0_kreal
-integer :: i,ii,j,k,n
+integer :: i,ii,n
 real(kind=kreal) :: xi
 real(kind=kreal),dimension(ngllx) :: gllpx,gllwx ! gll points and weights
 real(kind=kreal),dimension(ngllx) :: lagrange_x,lagrange_dx
@@ -267,7 +267,6 @@ real(kind=kreal),dimension(nenod),intent(out) :: phi,dphi_dxi
 
 integer :: i,j,k
 real(kind=kreal),dimension(nenod) :: term,dterm,sum_term
-real(kind=kreal) :: dx
 
 do i=1,nenod
   k=0

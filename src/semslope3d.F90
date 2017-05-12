@@ -447,7 +447,7 @@ srf_loop: do i_srf=1,nsrf
     stress_global(:,inode)=stress_global(:,inode)/real(node_valency(inode),kreal)
   enddo
 
-  call save_data(ptail,format_str,i_srf,nnode,nelmt,nodalu,scf,vmeps,          &
+  call save_data(ptail,format_str,i_srf,nnode,nodalu,scf,vmeps,          &
   stress_global)
 
   if(nl_iter==nl_maxiter)exit

@@ -27,7 +27,7 @@ integer :: id,ind,ios,narg,slen
 integer :: bc_stat,preinfo_stat,mesh_stat,material_stat,control_stat,eqload_stat, &
 stress0_stat,traction_stat,water_stat,save_stat
 integer :: mat_count,nwmat
-integer :: i_elmt,ielmt,i_node,inode,i_mat,imat,mat_domain,tmp_nelmt,tmp_nnode
+integer :: ielmt,i_node,inode,imat,mat_domain,tmp_nelmt,tmp_nnode
 
 character(len=20) :: format_str,ptail
 character(len=250) :: fname

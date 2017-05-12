@@ -152,7 +152,7 @@ implicit none
 real(kind=kreal),intent(in)::stress(:)
 real(kind=kreal),intent(out)::m1(:,:),m2(:,:),m3(:,:)
 real(kind=kreal)::sx,sy,txy,tyz,tzx,sz,dx,dy,dz,sigm,  &
-r3=3.0_kreal,r6=6.0_kreal,r9=9.0_kreal
+r3=3.0_kreal,r6=6.0_kreal
 integer::nst,i,j
 
 nst=ubound(stress,1)
