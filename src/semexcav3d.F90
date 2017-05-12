@@ -662,7 +662,7 @@ excavation_stage: do i_excav=0,nexcav
     kreal)
   enddo
 
-  call save_data(ptail,format_str,i_excav,nnode_intact,nelmt_intact,           &
+  call save_data(ptail,format_str,i_excav,nnode_intact,           &
   nodalu(:,node_intact),scf(node_intact),                 &
   vmeps(node_intact),stress_global(:,node_intact))
 

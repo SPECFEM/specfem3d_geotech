@@ -48,7 +48,6 @@ function iminscal(scal) result(gmin)
 implicit none
 integer,intent(in)::scal
 integer :: gmin
-integer :: ierr
 
 gmin=scal
 
@@ -63,7 +62,6 @@ function fminscal(scal) result(gmin)
 implicit none
 real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gmin
-integer :: ierr
 
 gmin=scal
 
@@ -78,7 +76,6 @@ function imaxscal(scal) result(gmax)
 implicit none
 integer,intent(in)::scal
 integer :: gmax
-integer :: ierr
 
 gmax=scal
 
@@ -93,7 +90,6 @@ function fmaxscal(scal) result(gmax)
 implicit none
 real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gmax
-integer :: ierr
 
 gmax=scal
 
@@ -105,7 +101,6 @@ function imaxvec(vec) result(gmax)
 implicit none
 integer,intent(in)::vec(:)
 integer :: lmax,gmax ! local and global
-integer :: ierr
 
 lmax=maxval(vec)
 
@@ -119,7 +114,6 @@ function fmaxvec(vec) result(gmax)
 implicit none
 real(kind=kreal),intent(in)::vec(:)
 real(kind=kreal) :: lmax,gmax ! local and global
-integer :: ierr
 
 lmax=maxval(vec)
 
@@ -133,7 +127,6 @@ function iminvec(vec) result(gmin)
 implicit none
 integer,intent(in)::vec(:)
 integer :: lmin,gmin ! local and global
-integer :: ierr
 
 lmin=minval(vec)
 
@@ -147,7 +140,6 @@ function fminvec(vec) result(gmin)
 implicit none
 real(kind=kreal),intent(in)::vec(:)
 real(kind=kreal) :: lmin,gmin ! local and global
-integer :: ierr
 
 lmin=minval(vec)
 
@@ -164,7 +156,6 @@ function isumscal(scal) result(gsum)
 implicit none
 integer,intent(in)::scal
 integer :: gsum
-integer :: ierr
 
 gsum=scal
 
@@ -179,7 +170,6 @@ function fsumscal(scal) result(gsum)
 implicit none
 real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gsum
-integer :: ierr
 
 gsum=scal
 
@@ -194,7 +184,6 @@ function dot_product_par(vec1,vec2) result(gdot)
 implicit none
 real(kind=kreal),intent(in)::vec1(:),vec2(:)
 real(kind=kreal) :: ldot,gdot
-integer :: ierr
 
 ! find local dot
 ldot=dot_product(vec1,vec2)
