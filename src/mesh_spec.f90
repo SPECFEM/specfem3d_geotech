@@ -34,7 +34,7 @@ real(kind=kreal),dimension(nglly) :: etagll,wygll !double precision
 real(kind=kreal),dimension(ngllz) :: zetagll,wzgll !double precision
 real(kind=kreal) :: xmin,xmax
 
-integer :: ioff,ipoint,npoint
+integer :: ipoint,npoint
 integer :: istat
 integer :: ienode,inode
 
@@ -68,7 +68,7 @@ if(mod(nglly,2) /= 0) etagll((nglly-1)/2+1) = zero
 if(mod(ngllz,2) /= 0) zetagll((ngllz-1)/2+1) = zero
 
 ! get shape function for 8-noded hex
-call shape_function_hex8(ndim,ngnod,ngllx,nglly,ngllz,xigll,etagll,zetagll,shape_hex8)
+call shape_function_hex8(ngnod,ngllx,nglly,ngllz,xigll,etagll,zetagll,shape_hex8)
 
 ! compute coordinates all local gll points
 xstore=zero
@@ -117,11 +117,11 @@ deallocate(g_coord,g_num) ! no longer need these
 allocate(iglob(npoint))
 
 ! gets ibool indexing from local (gll points) to global points
-call get_global(ndim,nelmt,xstore,ystore,zstore,iglob,nnode,npoint,xmin,xmax)
+call get_global(ndim,xstore,ystore,zstore,iglob,nnode,npoint,xmin,xmax)
 
 ! now we got the new number of nodes (nnode)
 !- we can create a new indirect addressing to reduce cache misses
-call get_global_indirect_addressing(nelmt,nnode,npoint,iglob)
+call get_global_indirect_addressing(nnode,npoint,iglob)
 
 allocate(g_coord(3,nnode),g_num(ngll,nelmt)) ! alocate with new number of nodes
 ipoint=0
@@ -163,7 +163,7 @@ return
 end subroutine hex2spec
 !============================================
 
-subroutine get_global(ndim,nelmt,xold,yold,zold,iglob,nnode,npoint,xmin,xmax)
+subroutine get_global(ndim,xold,yold,zold,iglob,nnode,npoint,xmin,xmax)
 
 ! this routine must be in double precision to avoid sensitivity
 ! to roundoff errors in the coordinates of the points
@@ -173,7 +173,7 @@ subroutine get_global(ndim,nelmt,xold,yold,zold,iglob,nnode,npoint,xmin,xmax)
 ! leave the sorting subroutines in the same source file to allow for inlining
 
 implicit none
-integer :: ndim,npoint,nelmt,nnode
+integer :: ndim,npoint,nnode
 integer :: iglob(npoint)
 integer :: iloc(npoint) ! at first this is the location (indices) of all points, at the end
 !it becomes the orderd location (indices) according to the sorted rank
@@ -185,8 +185,8 @@ real(kind=kreal) :: xp(npoint),yp(npoint),zp(npoint) ! double precision. initial
 !ordered points
 real(kind=kreal) :: xmin,xmax
 
-integer :: i_spec,i,j,ier
-integer :: ieoff,ilocnum,nseg,ioff,iseg,ig
+integer :: i,j,ier
+integer :: nseg,ioff,iseg,ig
 
 integer, dimension(:), allocatable :: ind,ninseg,iwork
 real(kind=kreal), dimension(:), allocatable :: work !double precision
@@ -382,13 +382,13 @@ subroutine swap_all(ia,a,b,c,iw,w,ind,n)
 end subroutine swap_all
 !===========================================
 
-subroutine get_global_indirect_addressing(nelmt,nnode,npoint,ibool)
+subroutine get_global_indirect_addressing(nnode,npoint,ibool)
 !- we can create a new indirect addressing to reduce cache misses
 ! (put into this subroutine but compiler keeps on complaining that it can't vectorize loops...)
 
 implicit none
 
-integer :: nelmt,nnode,npoint
+integer :: nnode,npoint
 integer, dimension(npoint) :: ibool
 
 ! mask to sort ibool

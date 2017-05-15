@@ -4,17 +4,18 @@
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
 module shape_library
 use set_precision
+use global,only:ndim
 contains
 ! this subroutines computes the shape fucntions at gll
 ! points. the 8-noded hexahedra is conformed to the exodus/cubit numbering
 ! convention
-subroutine shape_function_hex8(ndim,ngnod,ngllx,nglly,ngllz,xigll,etagll,      &
+subroutine shape_function_hex8(ngnod,ngllx,nglly,ngllz,xigll,etagll,      &
 zetagll,shape_hex8)
 use set_precision
 use math_constants
 implicit none
 
-integer,intent(in) :: ndim,ngnod,ngllx,nglly,ngllz
+integer,intent(in) :: ngnod,ngllx,nglly,ngllz
 
 ! gauss-lobatto-legendre points of integration
 real(kind=kreal) :: xigll(ngllx)
@@ -99,12 +100,12 @@ end subroutine shape_function_hex8
 ! this subroutines computes derivatives of the shape fucntions at gll
 ! points. the 8-noded hexahedra is conformed to the exodus/cubit numbering
 ! convention
-subroutine dshape_function_hex8(ndim,ngnod,ngllx,nglly,ngllz,xigll,etagll,     &
+subroutine dshape_function_hex8(ngnod,ngllx,nglly,ngllz,xigll,etagll,     &
 zetagll,dshape_hex8)
 use set_precision
 use math_constants
 implicit none
-integer,intent(in) :: ndim,ngnod,ngllx,nglly,ngllz
+integer,intent(in) :: ngnod,ngllx,nglly,ngllz
 
 ! gauss-lobatto-legendre points of integration
 real(kind=kreal) :: xigll(ngllx)

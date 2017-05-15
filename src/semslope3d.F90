@@ -125,7 +125,7 @@ call zwgljd(zetagll,wzgll,ngllz,jacobi_alpha,jacobi_beta)
 
 ! get derivatives of shape functions for 8-noded hex
 allocate(dshape_hex8(ndim,ngnod,ngll))
-call dshape_function_hex8(ndim,ngnod,ngllx,nglly,ngllz,xigll,etagll,zetagll,   &
+call dshape_function_hex8(ngnod,ngllx,nglly,ngllz,xigll,etagll,zetagll,   &
 dshape_hex8)
 deallocate(xigll,wxgll,etagll,wygll,zetagll,wzgll)
 ! compute gauss-lobatto-legendre quadrature information
@@ -159,8 +159,7 @@ if (istat/=0)then
 endif
 extload=zero; gravity=.true.; pseudoeq=iseqload
 call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nu,ym,       &
-dshape_hex8,lagrange_gll,dlagrange_gll,gll_weights,storkm,dprecon,extload,     &
-gravity,pseudoeq)
+dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,pseudoeq)
 
 !print*,minval(dprecon),maxval(dprecon)
 !print*,minval(extload),maxval(extload)
@@ -268,7 +267,7 @@ srf_loop: do i_srf=1,nsrf
     ! material properties are involved
     dprecon=zero
     call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nuf,ym,  &
-    dshape_hex8,lagrange_gll,dlagrange_gll,gll_weights,storkm,dprecon)
+    dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon)
 
     ! assemble from ghost partitions
     call assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,dprecon,dprecon)

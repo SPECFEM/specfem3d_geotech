@@ -159,11 +159,11 @@ end subroutine invert
 ! Smith and Griffiths (2004): Programming the finite element method
 subroutine stress_invariant(stress,sigm,dsbar,theta)
 implicit none
-real(kind=kreal),intent(in)::stress(:)
-real(kind=kreal),intent(out),optional::sigm,dsbar,theta
-real(kind=kreal)::sx,sy,sz,txy,dx,dy,dz,xj3,sine,s1,s2,s3,s4,s5,s6,ds1,ds2,  &
+real(kind=kreal),intent(in) :: stress(:)
+real(kind=kreal),intent(out),optional :: sigm,dsbar,theta
+real(kind=kreal) :: sine,s1,s2,s3,s4,s5,s6,ds1,ds2,  &
 ds3,d2,d3,sq3,zero=0.0_kreal,small=1.e-12_kreal,one=1.0_kreal,two=2.0_kreal, &
-three=3.0_kreal,six=6.0_kreal,thpt5=13.5_kreal
+three=3.0_kreal,six=6.0_kreal
 integer :: nst
 
 ! check size
