@@ -25,8 +25,8 @@ contains
 ! this subrotine computes the stiffness matrix, diagonal preconditioner, and
 ! body loads (gravity and pseudostatic loads) optionally
 ! TODO: optional precoditioner,optional assembly of stiffness
-subroutine stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nu,ym,dshape_hex8, &
-lagrange_gll,dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,pseudoeq)
+subroutine stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nu,ym, &
+dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,pseudoeq)
 use set_precision
 use global,only:ndim,nst,ngll,nedof,nenod,ngnod,g_coord,eqkx,eqky,eqkz,nmat
 use math_library,only:determinant,invert
@@ -34,7 +34,7 @@ implicit none
 integer,intent(in) :: nelmt,neq,gnod(8) ! nelmt (only intact elements)
 integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt) ! only intact elements
 real(kind=kreal),intent(in) :: gam(nmat),nu(nmat),ym(nmat)
-real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),lagrange_gll(ngll,ngll), &
+real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),                   &
 dlagrange_gll(ndim,ngll,ngll),gll_weights(ngll)
 real(kind=kreal),intent(out) :: storkm(nedof,nedof,nelmt),dprecon(0:neq)
 real(kind=kreal),intent(inout),optional :: extload(0:neq)
