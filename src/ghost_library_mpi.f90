@@ -11,6 +11,7 @@ use set_precision_mpi
 use mpi_library
 
 private :: sort_array_coord,rank_buffers,swap_all_buffers
+integer :: ngpart,maxngnode
 
 ! ghost partitions
 type ghost_partition
@@ -24,7 +25,7 @@ type(ghost_partition),dimension(:),allocatable :: gpart
 contains
 
 !-----------------------------------------------------------
-subroutine prepare_ghost(myid,nproc,gdof,ngpart,maxngnode)
+subroutine prepare_ghost(myid,nproc,gdof)
 use global,only:ndim,nnode,nndof,ngllx,nglly,ngllz,g_num,g_coord,gfile,        &
 part_path,stdout
 use math_library, only : quick_sort
@@ -33,7 +34,6 @@ use math_library_mpi, only : maxvec
 implicit none
 integer,intent(in) :: myid,nproc
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
-integer,intent(out) :: ngpart,maxngnode
 integer :: istat
 
 integer,dimension(8) :: ign,jgn,kgn ! ith, jth, and kth GLL indices of node
@@ -242,13 +242,12 @@ end subroutine prepare_ghost
 !=======================================================
 
 ! modify ghost gdof based on the modified gdof
-subroutine modify_ghost(myid,nproc,gdof,ngpart,isnode)
+subroutine modify_ghost(myid,nproc,gdof,isnode)
 use global,only:nnode,nndof
 
 implicit none
 integer,intent(in) :: myid,nproc
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
-integer,intent(in) :: ngpart
 logical,intent(in) :: isnode(nnode)
 
 integer :: mypart ! my partition
@@ -274,11 +273,11 @@ end subroutine modify_ghost
 
 ! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
-subroutine assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,array,array_g)
+subroutine assemble_ghosts(myid,nndof,neq,array,array_g)
 !use math_library, only : maxscal_par
 use mpi
 implicit none
-integer,intent(in) :: myid,ngpart,maxngnode
+integer,intent(in) :: myid
 integer,intent(in) :: nndof,neq
 real(kind=kreal),dimension(0:neq),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
@@ -339,12 +338,12 @@ end subroutine assemble_ghosts
 
 ! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
-subroutine assemble_ghosts_nodal(myid,gdof,ngpart,maxngnode,nndof,neq,         &
+subroutine assemble_ghosts_nodal(myid,gdof,nndof,neq,         &
 ngpart_node,array,array_g)
 use mpi
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid,ngpart,maxngnode
+integer,intent(in) :: myid
 integer,intent(in) :: nndof,neq
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 ! number of active ghost partitions for a node
@@ -406,11 +405,11 @@ end subroutine assemble_ghosts_nodal
 ! interfaces.
 ! logical flag representing whether the nodes in the interfaces are intact or
 ! void has to be communicated across the processors
-subroutine count_active_nghosts(myid,ngpart,maxngnode,nndof,ngpart_node)
+subroutine count_active_nghosts(myid,nndof,ngpart_node)
 use mpi
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid,ngpart,maxngnode,nndof
+integer,intent(in) :: myid,nndof
 ! number of active ghost partitions for a node
 integer,dimension(nnode),intent(out) :: ngpart_node
 ! only the interfacial nodes can be saved for the storage (TODO)
@@ -463,12 +462,12 @@ end subroutine count_active_nghosts
 ! this subroutine distributes the excavation loads discarded by a processors due
 ! to the special geoemtry partition. it will not distribute if the load is used
 ! within the partition
-subroutine distribute2ghosts(myid,gdof,ngpart,maxngnode,nndof,neq,ngpart_node, &
+subroutine distribute2ghosts(myid,gdof,nndof,neq,ngpart_node, &
 array,array_g)
 use mpi
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid,ngpart,maxngnode
+integer,intent(in) :: myid
 integer,intent(in) :: nndof,neq
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 ! number of active ghost partitions for a node
@@ -564,9 +563,8 @@ end subroutine distribute2ghosts
 !===========================================
 
 ! deallocate ghost variables
-subroutine free_ghost(ngpart)
+subroutine free_ghost()
 implicit none
-integer,intent(in) :: ngpart
 integer :: i
 do i=1,ngpart
   deallocate(gpart(i)%node,gpart(i)%gdof)

@@ -93,7 +93,6 @@ logical,allocatable :: ismat(:),isnode(:)
 integer :: ipart !,myid,nproc
 integer :: tot_nelmt,max_nelmt,min_nelmt,tot_nnode,max_nnode,min_nnode
 integer :: tot_neq,max_neq,min_neq
-integer :: ngpart,maxngnode
 ! number of active ghost partitions for a node
 integer,allocatable :: ngpart_node(:)
 character(len=250) :: errtag ! error message
@@ -232,10 +231,10 @@ if(s0_type==0)then
   if(myid==1)write(stdout,'(a)')'--------------------------------------------'
 
   ! prepare ghost partitions for the communication
-  call prepare_ghost(myid,nproc,gdof,ngpart,maxngnode)
+  call prepare_ghost(myid,nproc,gdof)
 
   ! assemble from ghost partitions
-  call assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,dprecon,dprecon)
+  call assemble_ghosts(myid,nndof,neq,dprecon,dprecon)
   !print*,minval(dprecon),maxval(dprecon)
   !print*,minval(storkm),maxval(storkm)
   !stop
@@ -243,7 +242,7 @@ if(s0_type==0)then
 
   ! compute displacement due to graviy loading to compute initial stress
   x=zero
-  call pcg_solver(myid,ngpart,maxngnode,neq,nelmt_intact,storkm,x,extload,     &
+  call pcg_solver(myid,neq,nelmt_intact,storkm,x,extload,     &
   dprecon,gdof_elmt(:,elmt_intact),cg_iter,errcode,errtag)
   if(errcode/=0)call error_stop(errtag,stdout,myid)
   x(0)=zero
@@ -423,9 +422,9 @@ excavation_stage: do i_excav=0,nexcav
   endif
 
   ! modify ghost partitions after excavation
-  !call prepare_ghost(myid,nproc,gdof,ngpart,maxngnode)
-  call modify_ghost(myid,nproc,gdof,ngpart,isnode)
-  call count_active_nghosts(myid,ngpart,maxngnode,nndof,ngpart_node)
+  !call prepare_ghost(myid,nproc,gdof)
+  call modify_ghost(myid,nproc,gdof,isnode)
+  call count_active_nghosts(myid,nndof,ngpart_node)
 
   excavload=zero; extload=zero; ! extload1=zero
 
@@ -442,7 +441,7 @@ excavation_stage: do i_excav=0,nexcav
   ! if the excavation load is discarded by the partition (it can happens due to
   ! the special combination of partition geometry and excavation geoemtry) it
   ! should be distributed equally to the active sharing partitions.
-  call distribute2ghosts(myid,gdof,ngpart,maxngnode,nndof,neq,ngpart_node,excavload,extload)
+  call distribute2ghosts(myid,gdof,nndof,neq,ngpart_node,excavload,extload)
 !#else
 !  ! store nodal values to gdof locations
 !  do j=1,nnode
@@ -469,7 +468,7 @@ excavation_stage: do i_excav=0,nexcav
   dlagrange_gll,gll_weights,storkm,dprecon)!,extload,gravity,pseudoeq)
 
   ! assemble from ghost partitions
-  call assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,dprecon,dprecon)
+  call assemble_ghosts(myid,nndof,neq,dprecon,dprecon)
   dprecon(0)=zero; dprecon(1:)=one/dprecon(1:)
 
   ! find global dt
@@ -494,7 +493,7 @@ excavation_stage: do i_excav=0,nexcav
 
     ! pcg solver
     !x=zero
-    call pcg_solver(myid,ngpart,maxngnode,neq,nelmt_intact,storkm,x,load,      &
+    call pcg_solver(myid,neq,nelmt_intact,storkm,x,load,      &
     dprecon,gdof_elmt(:,elmt_intact),cg_iter,errcode,errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myid)
     cg_tot=cg_tot+cg_iter
@@ -677,7 +676,7 @@ enddo excavation_stage ! i_excav time stepping loop
 enddo srf_loop ! i_srf safety factor loop
 deallocate(mat_id,gam,ym,coh,nu,phi,psi,srf)
 deallocate(excavload,g_coord,g_num,isnode,nmir)
-call free_ghost(ngpart)
+call free_ghost()
 !-----------------------------------
 
 return

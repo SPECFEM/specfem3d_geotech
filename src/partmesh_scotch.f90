@@ -662,11 +662,14 @@ deallocate(ibelm_xmax,nodes_ibelm_xmax)
 deallocate(ibelm_ymin,nodes_ibelm_ymin)
 
 write(*,'(a)',advance='yes')'finding interfaces...'
-call find_interface(nspec,nnodes,part+1,elmnts+1,npart) ! I need all indices starting from 1 not 0
+call find_interface(nspec,nnodes,part+1,elmnts+1,npart)
+! I need all indices starting from 1 not 0
 write(*,'(a)')'complete!'
 deallocate(elmnts,part)
 write(*,'(a)',advance='yes')'writing interfaces...'
-call detect_ghost(out_phead,nspec,nnodes,npart,max_neighbour,glob2loc_elmnts(0:nspec-1)+1) ! I need all indices starting from 1 not 0
+call detect_ghost(out_phead,nspec,nnodes,npart,max_neighbour,                  &
+glob2loc_elmnts(0:nspec-1)+1)
+! I need all indices starting from 1 not 0
 write(*,'(a)')'complete!'
 deallocate(glob2loc_elmnts)
 
