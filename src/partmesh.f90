@@ -13,8 +13,8 @@ read_mesh_files,check_valence,scotch_partitioning, &
 write_mesh_databases,xfile,yfile,zfile,confile,idfile, &
 matfile,uxfile,uyfile,uzfile,trfile,istraction
 implicit none
-integer :: id,ind,ios,istat,narg,slen
-character(len=256) :: inp_fname,tmp_str
+integer :: ind,ios,istat,narg,slen
+character(len=256) :: inp_fname
 character(len=80) :: file_head,path,ext
 real :: cpu_tstart,cpu_tend
 

@@ -4,12 +4,10 @@
 !   HNG, Jul 12,2011; HNG, Apr 09,2010; HNG, Dec 08,2010
 ! TODO:
 !   partially saturated
-subroutine compute_pressure(ismpi,myid,nproc,wpressure,submerged_node,errcode,errtag)
+subroutine compute_pressure(wpressure,submerged_node,errcode,errtag)
 use global
 use math_library,only:determinant
 implicit none
-logical,intent(in) :: ismpi
-integer,intent(in) :: myid,nproc
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
 real(kind=kreal),dimension(nnode) :: wpressure ! water pressure
@@ -28,7 +26,6 @@ real(kind=kreal),parameter :: zero=0.0_kreal,gamw=9.81_kreal !KN/m3
 character(len=20) :: format_str,ptail
 character(len=250) :: fname
 character(len=150) :: data_path
-integer :: ipart ! partition ID
 
 logical :: wsurf_mesh
 
@@ -48,24 +45,14 @@ type (faces) :: face(6) ! hexahedral element has 6 faces
 
 errtag="ERROR: unknown!"
 errcode=-1
+
 ! set data path wsfile always stored in inp_path because no need to partition
-!if(ismpi)then
-!  data_path=trim(part_path)
-!else
-  data_path=trim(inp_path)
-!endif
+data_path=trim(inp_path)
 
 wsurf_mesh=.false.
 
-ipart=myid-1 ! partition ID starts from 0
 ! all processors read only one water file from the input folder
-!if(ismpi)then
-!  write(format_str,*)ceiling(log10(real(nproc)+1))
-!  format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-!  write(ptail, fmt=format_str)'_proc',ipart
-!else
-  ptail=""
-!endif
+ptail=""
 
 ngllxy=ngllx*nglly
 ngllyz=nglly*ngllz
