@@ -486,7 +486,7 @@ integer,dimension(nelmt),intent(in) :: part ! numbering starts from 1 only in th
 integer,dimension(esize,nelmt),intent(in) :: connect
 integer,intent(in) :: npart
 
-integer :: i,icount,istat,j
+integer :: i,icount,j
 logical,dimension(:,:),allocatable :: node_part
 
 allocate(node_part(nnode,npart))
@@ -565,9 +565,8 @@ integer,intent(in) :: nelmt,nnode
 integer,intent(in) :: npart,max_neighbour
 integer,dimension(:),intent(in) :: glob2loc_elmt
 
-integer :: i,ig,j,k,i_part,j_part
+integer :: i,j,k,i_part,j_part
 !integer,dimension(nnode) :: node_npart
-integer :: icount !,nelmt_interface
 !integer,dimension(:),allocatable :: elmt_interface
 integer,dimension(6,4) :: node_face ! local node numbers in each face
 integer,dimension(6,4) :: edge_face ! local edge numbers in each face

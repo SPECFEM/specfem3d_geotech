@@ -215,7 +215,7 @@ if(s0_type==0)then
   if(iswater)then
     if(myid==1)write(stdout,'(a)',advance='no')'computing water pressure...'
     allocate(wpressure(nnode),submerged_node(nnode))
-    call compute_pressure(ismpi,myid,nproc,wpressure,submerged_node,errcode,   &
+    call compute_pressure(wpressure,submerged_node,errcode,   &
     errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myid)
     ! write pore pressure file
