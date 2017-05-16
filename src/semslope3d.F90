@@ -80,7 +80,6 @@ logical,allocatable :: submerged_node(:)
 !logical :: ismpi !.true. : MPI, .false. : serial
 integer :: ipart !,myid,nproc
 integer :: tot_neq,max_neq,min_neq
-integer :: ngpart,maxngnode
 ! number of active ghost partitions for a node
 character(len=250) :: errtag ! error message
 integer :: errcode
@@ -197,10 +196,10 @@ endif
 if(myid==1)write(stdout,'(a)')'--------------------------------------------'
 
 ! prepare ghost partitions for the communication
-call prepare_ghost(myid,nproc,gdof,ngpart,maxngnode)
+call prepare_ghost(myid,nproc,gdof)
 
 ! assemble from ghost partitions
-call assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,dprecon,dprecon)
+call assemble_ghosts(myid,nndof,neq,dprecon,dprecon)
 !print*,minval(dprecon),maxval(dprecon)
 !print*,minval(storkm),maxval(storkm)
 !stop
@@ -270,7 +269,7 @@ srf_loop: do i_srf=1,nsrf
     dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon)
 
     ! assemble from ghost partitions
-    call assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,dprecon,dprecon)
+    call assemble_ghosts(myid,nndof,neq,dprecon,dprecon)
     dprecon(1:)=one/dprecon(1:); dprecon(0)=zero
   endif
 
@@ -300,7 +299,7 @@ srf_loop: do i_srf=1,nsrf
 
     ! pcg solver
     !x=zero
-    call pcg_solver(myid,ngpart,maxngnode,neq,nelmt,storkm,x,load,dprecon, &
+    call pcg_solver(myid,neq,nelmt,storkm,x,load,dprecon, &
     gdof_elmt,cg_iter,errcode,errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myid)
     cg_tot=cg_tot+cg_iter
@@ -455,7 +454,7 @@ enddo srf_loop ! i_srf safety factor loop
 deallocate(mat_id,gam,ym,coh,nu,phi,psi,srf)
 deallocate(g_coord,g_num)
 deallocate(load,bodyload,extload,oldx,x,dprecon,storkm,stat=istat)
-call free_ghost(ngpart)
+call free_ghost()
 !-----------------------------------
 
 return

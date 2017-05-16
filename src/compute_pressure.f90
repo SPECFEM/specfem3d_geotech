@@ -23,7 +23,7 @@ integer :: i_wsurf,nwsurf ! number of water table surfaces
 ! unit weight of water
 real(kind=kreal),parameter :: zero=0.0_kreal,gamw=9.81_kreal !KN/m3
 
-character(len=20) :: format_str,ptail
+character(len=20) :: ptail
 character(len=250) :: fname
 character(len=150) :: data_path
 

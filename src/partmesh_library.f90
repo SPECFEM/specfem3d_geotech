@@ -511,8 +511,6 @@ do j=1,npart
   endif
 enddo
 enddo
-!print*,'hello:',maxval(node_part)
-!stop
 deallocate(node_part)
 
 ! count the number of elements in the interface
@@ -539,7 +537,6 @@ allocate(connect_interface(esize,nelmt_interface))
 connect_interface=connect(:,elmt_interface)
 allocate(part_interface(nelmt_interface))
 part_interface=part(elmt_interface)
-!print*,'SUCCESS'
 return
 end subroutine find_interface
 !=======================================================
@@ -934,12 +931,12 @@ ipart_loop: do i_part=1,npart-1
       !enddo
       gadjid(1:ngelmt)=eadjid(ginterface(1:ngelmt)) !adj_elmt(ie_interface,ginterface(1:ngelmt))
       !print*,gadjid(1:ngelmt)
-      !print*,'hi',adjind(ie_interface,:)
-      !print*,'oh0',ginterface(1:ngelmt)
-      !print*,'oh1',adjelmt(ie_interface,:)
+      !print*,adjind(ie_interface,:)
+      !print*,ginterface(1:ngelmt)
+      !print*,adjelmt(ie_interface,:)
       !if(all(eadjid(ginterface(1:ngelmt))/=gadjid(1:ngelmt)))then
-      !print*,'hello0',eadjid(ginterface(1:ngelmt))
-      !print*,'hello1',gadjid(1:ngelmt)
+      !print*,eadjid(ginterface(1:ngelmt))
+      !print*,gadjid(1:ngelmt)
       !endif
       !stop
       ! count faces/edges/nodes
@@ -957,8 +954,7 @@ ipart_loop: do i_part=1,npart-1
         endif
       enddo
       ! list jpart elements
-      ! print*,'hi',adj_nface,adj_nedge,adj_nnode
-      ! print*,'hi'
+      ! print*,adj_nface,adj_nedge,adj_nnode
 
       ! we check in the order face, edge, and node to exclude redundant sharing (low level repeating)
       ! check for face/s
@@ -1233,17 +1229,10 @@ endif
 
 ! count ghost elements in the ghost partition
 
-!if(master==1 .and. ghost==2 )print*,'first0 nelmt: ',mpart(master)%gpart(ind_gpart(1))%nelmt,ind_gpart(1), &
-!mpart(master)%gpartid(ind_gpart(1))
-!print*,'hi0',mpart(master)%gpart(ind_gpart(1))%nelmt
-!stop
 mpart(master)%gpart(ind_gpart(1))%nelmt=mpart(master)%gpart(ind_gpart(1))%nelmt+1
 ind=mpart(master)%gpart(ind_gpart(1))%nelmt
-!if(master==1 .and. ghost==2 )print*,'first1 nelmt: ',mpart(master)%gpart(ind_gpart(1))%nelmt,ind_gpart(1), &
-!mpart(master)%gpartid(ind_gpart(1))
 
 ! set all ghost partition members
-!print*,'hi1',master,ind_gpart(1),ind
 mpart(master)%gpart(ind_gpart(1))%melmt(ind)=melmt
 mpart(master)%gpart(ind_gpart(1))%gelmt(ind)=gelmt
 mpart(master)%gpart(ind_gpart(1))%ecomp(ind)=ecomp
@@ -2006,16 +1995,9 @@ num_interface = 0
 
             count_faces = 0
             do k = tab_size_interfaces(num_interface), tab_size_interfaces(num_interface+1)-1
-              !print*,'hello',i,iproc
-              !stop
               if ( i == iproc ) then
                   local_elmnt = glob2loc_elmnts(tab_interfaces(k*7+0))+1
               else
-                  !print*,'what!',k,size(tab_size_interfaces)
-                  !print*,minval(tab_size_interfaces),maxval(tab_size_interfaces),num_interface
-                  !print*,size(tab_interfaces),(k*7+1)
-                  !print*,tab_interfaces(k*7+1),size(glob2loc_elmnts)
-                  !stop
                   local_elmnt = glob2loc_elmnts(tab_interfaces(k*7+1))+1
 
               end if
@@ -2076,7 +2058,6 @@ num_interface = 0
                   write(16,*) local_elmnt, tab_interfaces(k*7+2), local_nodes(1), local_nodes(2), -1, -1
               case (4)
                   ! face element
-                  print*,'hi1'
                   count_faces = count_faces + 1
                   do l = glob2loc_nodes_npart(tab_interfaces(k*7+3)), &
                       glob2loc_nodes_npart(tab_interfaces(k*7+3)+1)-1
