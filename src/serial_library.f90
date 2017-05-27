@@ -6,10 +6,10 @@ module serial_library
 use set_precision
 contains
 
-subroutine start_process(ismpi,myrank,nproc,ounit)
+subroutine start_process(ismpi,ounit)
+use global,only:myrank,nproc
 implicit none
 logical,intent(out) :: ismpi
-integer,intent(out) :: myrank,nproc
 integer,intent(in) :: ounit
 integer :: errcode
 ismpi=.false. ! serial
@@ -44,8 +44,7 @@ end subroutine error_stop
 !=======================================================
 
 ! get processor tag
-function proc_tag(myrank,nproc) result(ptag)
-integer,intent(in) :: myrank,nproc
+function proc_tag() result(ptag)
 character(len=20) :: format_str,ptag
 
 ptag=''

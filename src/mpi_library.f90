@@ -6,10 +6,10 @@ use mpi
 contains
 
 ! start MPI processes
-subroutine start_process(ismpi,myrank,nproc,ounit)
+subroutine start_process(ismpi,ounit)
+use global,only:myrank,nproc
 implicit none
 logical,intent(out) :: ismpi
-integer,intent(out) :: myrank,nproc
 integer,intent(in) :: ounit
 integer :: errcode
 ismpi=.true. ! parallel
@@ -69,9 +69,9 @@ end subroutine error_stop
 !=======================================================
 
 ! get processor tag
-function proc_tag(myrank,nproc) result(ptag)
+function proc_tag() result(ptag)
+use global,only:myrank,nproc
 implicit none
-integer,intent(in) :: myrank,nproc
 character(len=20) :: format_str,ptag
 
 write(format_str,*)ceiling(log10(real(nproc)+1.))
