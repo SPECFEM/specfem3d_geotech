@@ -2,14 +2,13 @@
 ! this routine read and applies the traction specified in the traction file
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010; HNG, Dec 08,2010
-subroutine apply_traction(ismpi,myid,gnod,gdof,neq,load,errcode,errtag)
+subroutine apply_traction(ismpi,gnod,gdof,neq,load,errcode,errtag)
 use global
 use math_constants
 use shape_library,only : dshape_function_quad4
 use gll_library,only : gll_quadrature2d,zwgljd
 implicit none
 logical,intent(in) :: ismpi
-integer,intent(in) :: myid
 integer,intent(in) :: gnod(ngnod)
 integer,intent(in) :: gdof(nndof,nnode)
 integer,intent(in) :: neq
@@ -45,7 +44,6 @@ real(kind=kreal) :: fsign(6) ! face sign or normal orientation (outward +, inwar
 character(len=20) :: format_str,ptail
 character(len=80) :: fname
 character(len=80) :: data_path
-integer :: ipart ! partition ID
 
 type faces
   integer,allocatable :: nod(:) !ngllx*nglly) !,allocatable :: nod(:)
@@ -62,16 +60,15 @@ else
   data_path=trim(inp_path)
 endif
 
-ipart=myid-1 ! partition ID starts from 0
 if(ismpi)then
   write(format_str,*)ceiling(log10(real(nproc)+1))
   format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-  write(ptail, fmt=format_str)'_proc',ipart
+  write(ptail, fmt=format_str)'_proc',myrank
 else
   ptail=""
 endif
 
-!write(fname, fmt=format_str)trim(inp_path)//trim(uxfile)//'_proc',ipart
+!write(fname, fmt=format_str)trim(inp_path)//trim(uxfile)//'_proc',myrank
 fname=trim(data_path)//trim(trfile)//trim(ptail)
 open(unit=11,file=trim(fname),status='old',action='read',iostat=ios)
 if (ios /= 0)then

@@ -6,14 +6,14 @@ module serial_library
 use set_precision
 contains
 
-subroutine start_process(ismpi,myid,nproc,ounit)
+subroutine start_process(ismpi,myrank,nproc,ounit)
 implicit none
 logical,intent(out) :: ismpi
-integer,intent(out) :: myid,nproc
+integer,intent(out) :: myrank,nproc
 integer,intent(in) :: ounit
 integer :: errcode
 ismpi=.false. ! serial
-myid=1; nproc=1
+myrank=0; nproc=1
 return
 end subroutine start_process
 !=======================================================
@@ -34,18 +34,18 @@ end subroutine sync_process
 !=======================================================
 
 ! write error and stop
-subroutine error_stop(errtag,ounit,myid)
+subroutine error_stop(errtag,ounit,myrank)
 implicit none
 character(*),intent(in) :: errtag
-integer,intent(in) :: ounit,myid
-if(myid==1)write(ounit,'(a)')errtag
+integer,intent(in) :: ounit,myrank
+if(myrank==1)write(ounit,'(a)')errtag
 stop
 end subroutine error_stop
 !=======================================================
 
 ! get processor tag
-function proc_tag(myid,nproc) result(ptag)
-integer,intent(in) :: myid,nproc
+function proc_tag(myrank,nproc) result(ptag)
+integer,intent(in) :: myrank,nproc
 character(len=20) :: format_str,ptag
 
 ptag=''
@@ -54,19 +54,17 @@ return
 end function
 !=======================================================
 
-subroutine prepare_ghost(myid,nproc,gdof)
+subroutine prepare_ghost(gdof)
 use global,only:nnode,nndof
 implicit none
-integer,intent(in) :: myid,nproc
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 return
 end subroutine prepare_ghost
 !=======================================================
 
-subroutine modify_ghost(myid,gdof,isnode)
+subroutine modify_ghost(gdof,isnode)
 use global,only:nnode,nndof
 implicit none
-integer,intent(in) :: myid
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 logical,intent(in) :: isnode(nnode)
 return

@@ -3,7 +3,7 @@
 !   HNG, Jul 07,2011; HNG, Apr 09,2010
 ! TODO:
 !   - prompt warning or error for unknown argument/s
-subroutine read_input(ismpi,myid,inp_fname,errcode,errtag)
+subroutine read_input(ismpi,inp_fname,errcode,errtag)
 use global
 use math_constants,only:zero,zerotol
 use string_library
@@ -12,7 +12,6 @@ implicit none
 integer :: i
 character(len=*),intent(in) :: inp_fname
 logical,intent(in) :: ismpi
-integer,intent(in) :: myid
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
 character(len=250) :: line
@@ -33,7 +32,7 @@ character(len=20) :: format_str,ptail
 character(len=250) :: fname
 character(len=250) :: data_path,mat_path
 
-integer :: ipart,nproc_inp ! partition ID
+integer :: nproc_inp ! partition ID
 integer :: iselastic,ismatpart,istat,ival,issave,nexcavid_all
 integer,allocatable :: ivect(:)
 real(kind=kreal) :: rval
@@ -42,17 +41,16 @@ real(kind=kreal),allocatable :: rvect(:)
 errtag="ERROR: unknown!"
 errcode=-1
 
-ipart=myid-1 ! partition ID starts from 0
 if(ismpi)then
   write(format_str,*)ceiling(log10(real(nproc)+1))
   format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-  write(ptail, fmt=format_str)'_proc',ipart
+  write(ptail, fmt=format_str)'_proc',myrank
 else
   ptail=""
 endif
 
 ! reading main input information
-if(myid==1)write(*,'(a)',advance='no')'reading main input file...'
+if(myrank==0)write(*,'(a)',advance='no')'reading main input file...'
 preinfo_stat=-1
 bc_stat=-1
 traction_stat=0
@@ -451,7 +449,7 @@ if (control_stat /= 1)then
   write(errtag,'(a)')'ERROR: cannot read control information! make sure the line with "control:" token is correct.'
   return
 endif
-if(myid==1)write(*,*)'complete!'
+if(myrank==0)write(*,*)'complete!'
 !--------------------------------------------------------
 
 ! set data path
@@ -461,14 +459,14 @@ else
   data_path=trim(inp_path)
 endif
 
-if(myid==1)write(*,'(a)',advance='no')'reading mesh & material properties...'
+if(myrank==0)write(*,'(a)',advance='no')'reading mesh & material properties...'
 !write(format_str,*)ceiling(log10(real(nproc)+1))
 !format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
 ! read coordinates information
 do i=1,ndim
   !open(unit=11,file=trim(inp_path)//trim(coordfile(i)),action='read',status='old')
   ! open output file
-  !write(fname, fmt=format_str)trim(inp_path)//trim(coordfile(i))//'_proc',ipart
+  !write(fname, fmt=format_str)trim(inp_path)//trim(coordfile(i))//'_proc',myrank
   fname=trim(data_path)//trim(coordfile(i))//trim(ptail)
   !print*,fname
   open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
@@ -500,7 +498,7 @@ close(11)
 ! read connectivity
 !open(unit=11,file=trim(inp_path)//trim(confile),action='read',status='old')
 ! open output file
-!write(fname, fmt=format_str)trim(inp_path)//trim(confile)//'_proc',ipart
+!write(fname, fmt=format_str)trim(inp_path)//trim(confile)//'_proc',myrank
 fname=trim(data_path)//trim(confile)//trim(ptail)
 !print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
@@ -526,7 +524,7 @@ close(11)
 ! read material id
 !open(unit=11,file=trim(inp_path)//trim(idfile),action='read',status='old')
 ! open output file
-!write(fname, fmt=format_str)trim(inp_path)//trim(idfile)//'_proc',ipart
+!write(fname, fmt=format_str)trim(inp_path)//trim(idfile)//'_proc',myrank
 fname=trim(data_path)//trim(idfile)//trim(ptail)
 !print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
@@ -554,7 +552,7 @@ close(11)
 
 ! read material lists
 ! open output file
-!write(fname, fmt=format_str)trim(inp_path)//trim(matfile)//'_proc',ipart
+!write(fname, fmt=format_str)trim(inp_path)//trim(matfile)//'_proc',myrank
 if(ismatpart==0)then ! material file not partitioned
   fname=trim(mat_path)//trim(matfile)
 elseif(ismatpart==1)then ! material file partitioned
@@ -596,7 +594,7 @@ rho=gam/9.81_kreal ! Kg/m3
 
 ! read bc
 errcode=0
-if(myid==1)write(*,*)'complete!'
+if(myrank==0)write(*,*)'complete!'
 
 end subroutine read_input
 
