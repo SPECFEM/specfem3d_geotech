@@ -63,19 +63,18 @@ return
 end subroutine prepare_ghost
 !=======================================================
 
-subroutine modify_ghost(myid,nproc,gdof,isnode)
+subroutine modify_ghost(myid,gdof,isnode)
 use global,only:nnode,nndof
 implicit none
-integer,intent(in) :: myid,nproc
+integer,intent(in) :: myid
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 logical,intent(in) :: isnode(nnode)
 return
 end subroutine modify_ghost
 !=======================================================
 
-subroutine assemble_ghosts(myid,nndof,neq,array,array_g)
+subroutine assemble_ghosts(nndof,neq,array,array_g)
 implicit none
-integer,intent(in) :: myid
 integer,intent(in) :: nndof,neq
 real(kind=kreal),dimension(0:neq),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
@@ -86,15 +85,11 @@ end subroutine assemble_ghosts
 
 ! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
-subroutine assemble_ghosts_nodal(myid,gdof,nndof,neq,         &
-ngpart_node,array,array_g)
+subroutine assemble_ghosts_nodal(nndof,array,array_g)
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid
-integer,intent(in) :: nndof,neq
-integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
+integer,intent(in) :: nndof
 ! number of active ghost partitions for a node
-integer,dimension(nnode),intent(in) :: ngpart_node
 real(kind=kreal),dimension(nndof,nnode),intent(in) :: array
 real(kind=kreal),dimension(nndof,nnode),intent(out) :: array_g
 array_g=array
@@ -106,10 +101,9 @@ end subroutine assemble_ghosts_nodal
 ! interfaces.
 ! logical flag representing whether the nodes in the interfaces are intact or
 ! void has to be communicated across the processors
-subroutine count_active_nghosts(myid,nndof,ngpart_node)
+subroutine count_active_nghosts(ngpart_node)
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid,nndof
 ! number of active ghost partitions for a node
 integer,dimension(nnode),intent(out) :: ngpart_node
 ! only the interfacial nodes can be saved for the storage (TODO)
@@ -121,11 +115,10 @@ end subroutine count_active_nghosts
 ! this subroutine distributes the excavation loads discarded by a processors due
 ! to the special geoemtry partition. it will not distribute if the load is used
 ! within the partition
-subroutine distribute2ghosts(myid,gdof,nndof,neq,ngpart_node, &
+subroutine distribute2ghosts(gdof,nndof,neq,ngpart_node, &
 array,array_g)
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid
 integer,intent(in) :: nndof,neq
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 ! number of active ghost partitions for a node
