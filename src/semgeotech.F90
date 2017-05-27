@@ -43,7 +43,7 @@ logical :: isopen ! flag to check whether the file is opened
 myrank=0; nproc=1;
 errtag=""; errcode=-1
 
-call start_process(ismpi,myrank,nproc,stdout)
+call start_process(ismpi,stdout)
 
 call get_command_argument(0, prog)
 !----input and initialisation----
@@ -99,7 +99,7 @@ endif
 call parse_file(inp_fname,path,file_head,ext)
 
 ! get processor tag
-ptail=proc_tag(myrank,nproc)
+ptail=proc_tag()
 
 ensight_etype='hexa8'
 ts=1 ! time set
