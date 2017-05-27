@@ -54,7 +54,6 @@ logical,dimension(nnode) :: switch_node
 integer,dimension(:),allocatable :: itmp_array ! temporary integer array
 double precision,dimension(:),allocatable :: xp,yp,zp
 integer,dimension(3) :: ngll_vec ! (/ngllx,nglly,ngllz/) in ascending order
-integer :: i,j,inum,imax
 character(len=250) :: errtag
 
 mypart=myid-1 ! partition ID starts from 0
@@ -242,16 +241,15 @@ end subroutine prepare_ghost
 !=======================================================
 
 ! modify ghost gdof based on the modified gdof
-subroutine modify_ghost(myid,nproc,gdof,isnode)
+subroutine modify_ghost(myid,gdof,isnode)
 use global,only:nnode,nndof
 
 implicit none
-integer,intent(in) :: myid,nproc
+integer,intent(in) :: myid
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 logical,intent(in) :: isnode(nnode)
 
 integer :: mypart ! my partition
-integer :: mpartid,maxngpart ! partition ID
 integer :: i,i_gpart,ncount
 
 mypart=myid-1 ! partition ID starts from 0
@@ -273,11 +271,10 @@ end subroutine modify_ghost
 
 ! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
-subroutine assemble_ghosts(myid,nndof,neq,array,array_g)
+subroutine assemble_ghosts(nndof,neq,array,array_g)
 !use math_library, only : maxscal_par
 use mpi
 implicit none
-integer,intent(in) :: myid
 integer,intent(in) :: nndof,neq
 real(kind=kreal),dimension(0:neq),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
@@ -338,29 +335,23 @@ end subroutine assemble_ghosts
 
 ! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
-subroutine assemble_ghosts_nodal(myid,gdof,nndof,neq,         &
-ngpart_node,array,array_g)
+subroutine assemble_ghosts_nodal(nndof,array,array_g)
 use mpi
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid
-integer,intent(in) :: nndof,neq
-integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
+integer,intent(in) :: nndof
 ! number of active ghost partitions for a node
-integer,dimension(nnode),intent(in) :: ngpart_node
 real(kind=kreal),dimension(nndof,nnode),intent(in) :: array
 real(kind=kreal),dimension(nndof,nnode),intent(out) :: array_g
 
-real(kind=kreal),dimension(nndof,nnode) :: tarray
 !logical,dimension(maxngnode,ngpart) :: lsend_array,lrecv_array
 real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array
-real(kind=kreal),dimension(nndof,maxngnode) :: garray
 integer,parameter :: tag=0
 integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
 !integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node
 real(kind=kreal),parameter :: zero=0.0_kreal
-integer :: i,j,ierr,i_gpart,igdof,ignode,ncount,ngnode
+integer :: ierr,i_gpart,ncount,ngnode
 
 array_g=array
 send_array=zero; recv_array=zero
@@ -405,11 +396,10 @@ end subroutine assemble_ghosts_nodal
 ! interfaces.
 ! logical flag representing whether the nodes in the interfaces are intact or
 ! void has to be communicated across the processors
-subroutine count_active_nghosts(myid,nndof,ngpart_node)
+subroutine count_active_nghosts(ngpart_node)
 use mpi
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid,nndof
 ! number of active ghost partitions for a node
 integer,dimension(nnode),intent(out) :: ngpart_node
 ! only the interfacial nodes can be saved for the storage (TODO)
@@ -418,7 +408,7 @@ logical,dimension(maxngnode,ngpart) :: lsend_array,lrecv_array
 integer,parameter :: tag=0
 integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
-integer :: i,j,ierr,i_gpart,ignode,ngnode
+integer :: i,ierr,i_gpart,ignode,ngnode
 
 ngpart_node=0
 lsend_array=.true.; lrecv_array=.true.
@@ -462,12 +452,10 @@ end subroutine count_active_nghosts
 ! this subroutine distributes the excavation loads discarded by a processors due
 ! to the special geoemtry partition. it will not distribute if the load is used
 ! within the partition
-subroutine distribute2ghosts(myid,gdof,nndof,neq,ngpart_node, &
-array,array_g)
+subroutine distribute2ghosts(gdof,nndof,neq,ngpart_node,array,array_g)
 use mpi
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid
 integer,intent(in) :: nndof,neq
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 ! number of active ghost partitions for a node

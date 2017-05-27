@@ -34,7 +34,7 @@ integer :: npart,nt,tinc,tstart,twidth,ts ! ts: time set for ensight gold
 real(kind=kreal) :: cpu_tstart,cpu_tend,telap,max_telap,mean_telap
 
 logical :: ismpi !.true. : MPI, .false. : serial
-integer :: myid,nproc
+integer :: myid
 integer :: tot_nelmt,max_nelmt,min_nelmt,tot_nnode,max_nnode,min_nnode
 
 character(len=250) :: errtag ! error message
@@ -81,7 +81,7 @@ call cpu_time(cpu_tstart)
 call get_command_argument(1, inp_fname)
 
 ! read input data
-call read_input(ismpi,myid,nproc,inp_fname,errcode,errtag)
+call read_input(ismpi,myid,inp_fname,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myid)
 !call sync_process()
 
@@ -311,10 +311,10 @@ if(myid==1)write(stdout,'(a)')'--------------------------------------------'
 ! call main routines
 if(nexcav==0)then
   ! slope stability
-  call semslope3d(ismpi,myid,nproc,gnod,sum_file,ptail,format_str)
+  call semslope3d(ismpi,myid,gnod,sum_file,ptail,format_str)
 else
   ! excavation
-  call semexcav3d(ismpi,myid,nproc,gnod,sum_file,ptail,format_str)
+  call semexcav3d(ismpi,myid,gnod,sum_file,ptail,format_str)
 endif
 !-----------------------------------
 

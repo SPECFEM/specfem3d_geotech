@@ -2,11 +2,11 @@
 ! global degrees of freedom
 ! REVISION
 !   HNG, Jul 12,2011; ; HNG, Apr 09,2010
-subroutine apply_bc(ismpi,myid,nproc,gdof,neq,errcode,errtag)
+subroutine apply_bc(ismpi,myid,gdof,neq,errcode,errtag)
 use global
 implicit none
 logical,intent(in) :: ismpi
-integer,intent(in) :: myid,nproc
+integer,intent(in) :: myid
 integer, dimension(nndof,nnode),intent(inout) :: gdof
 integer,intent(out) :: neq
 integer,intent(out) :: errcode

@@ -25,6 +25,9 @@ integer,parameter :: nndof=3 ! number of nodal degree of freedoms - ux, uy, uz
 integer :: ngllx,nglly,ngllz,ngll
 integer,parameter :: ng=8 ! number of gauss points for FEM
 
+! rank or ID of this processor (starts from 0), number of processors
+integer :: myrank,nproc
+
 integer :: nenod, nedof ! number of elemental nodes, number of elemental
 !degree of freedoms -> nedof=nndof*nenod
 integer :: ngnod ! number of geometrical nodes. usually, for FEM ngnod=nenod

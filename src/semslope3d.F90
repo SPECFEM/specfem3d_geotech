@@ -3,7 +3,7 @@
 ! method" Smith and Griffiths (2004)
 ! REVISION:
 !   HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
-subroutine semslope3d(ismpi,myid,nproc,gnod,sum_file,ptail,format_str)
+subroutine semslope3d(ismpi,myid,gnod,sum_file,ptail,format_str)
 ! import necessary libraries
 use global
 use string_library, only : parse_file
@@ -31,7 +31,7 @@ use postprocess
 
 implicit none
 logical,intent(in) :: ismpi
-integer,intent(in) :: myid,nproc
+integer,intent(in) :: myid
 integer,intent(in) :: gnod(8)
 character(len=250),intent(in) :: sum_file
 character(len=20),intent(in) :: ptail,format_str
@@ -199,7 +199,7 @@ if(myid==1)write(stdout,'(a)')'--------------------------------------------'
 call prepare_ghost(myid,nproc,gdof)
 
 ! assemble from ghost partitions
-call assemble_ghosts(myid,nndof,neq,dprecon,dprecon)
+call assemble_ghosts(nndof,neq,dprecon,dprecon)
 !print*,minval(dprecon),maxval(dprecon)
 !print*,minval(storkm),maxval(storkm)
 !stop
@@ -269,7 +269,7 @@ srf_loop: do i_srf=1,nsrf
     dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon)
 
     ! assemble from ghost partitions
-    call assemble_ghosts(myid,nndof,neq,dprecon,dprecon)
+    call assemble_ghosts(nndof,neq,dprecon,dprecon)
     dprecon(1:)=one/dprecon(1:); dprecon(0)=zero
   endif
 
@@ -299,7 +299,7 @@ srf_loop: do i_srf=1,nsrf
 
     ! pcg solver
     !x=zero
-    call pcg_solver(myid,neq,nelmt,storkm,x,load,dprecon, &
+    call pcg_solver(neq,nelmt,storkm,x,load,dprecon, &
     gdof_elmt,cg_iter,errcode,errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myid)
     cg_tot=cg_tot+cg_iter

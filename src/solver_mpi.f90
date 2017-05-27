@@ -12,11 +12,11 @@ use ghost_library_mpi
 contains
 
 ! diagonally preconditioned conjuate-gradient solver
-subroutine pcg_solver(myid,neq,nelmt,k,u_g,f,dprecon_g,       &
+subroutine pcg_solver(neq,nelmt,k,u_g,f,dprecon_g,       &
 gdof_elmt,cg_iter,errcode,errtag)
 !use math_library
 implicit none
-integer,intent(in) :: myid,neq,nelmt ! nelmt (for intact) may not be same as global nelmt
+integer,intent(in) :: neq,nelmt ! nelmt (for intact) may not be same as global nelmt
 real(kind=kreal),dimension(nedof,nedof,nelmt),intent(in) :: k ! only for intact elements
 real(kind=kreal),dimension(0:neq),intent(inout) :: u_g
 real(kind=kreal),dimension(0:neq),intent(in) :: f,dprecon_g
@@ -48,12 +48,12 @@ endif
 r=f-kp
 z=dprecon_g*r
 
-call assemble_ghosts(myid,nndof,neq,z,z_g) !,gdof)
+call assemble_ghosts(nndof,neq,z,z_g) !,gdof)
 
 p=z
 !----pcg iteration----
 pcg: do cg_iter=1,cg_maxiter
-  call assemble_ghosts(myid,nndof,neq,p,p_g) !,gdof)
+  call assemble_ghosts(nndof,neq,p,p_g) !,gdof)
   kp=zero
   do i_elmt=1,nelmt
     egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,i_elmt)),(/nedof/))
@@ -73,7 +73,7 @@ pcg: do cg_iter=1,cg_maxiter
   !if(myid==1)print*,abs(alpha)*maxvec(abs(p_g))/maxvec(abs(u_g))
   r=r-alpha*kp
   z=dprecon_g*r
-  call assemble_ghosts(myid,nndof,neq,z,z_g) !,gdof)
+  call assemble_ghosts(nndof,neq,z,z_g) !,gdof)
   beta=dot_product_par(r,z_g)/rz
   p=z+beta*p
   !if(myid==1)write(*,'(i3,f25.18,f25.18,f25.18)')cg_iter,alpha,beta,rz

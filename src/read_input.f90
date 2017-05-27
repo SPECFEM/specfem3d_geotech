@@ -3,7 +3,7 @@
 !   HNG, Jul 07,2011; HNG, Apr 09,2010
 ! TODO:
 !   - prompt warning or error for unknown argument/s
-subroutine read_input(ismpi,myid,nproc,inp_fname,errcode,errtag)
+subroutine read_input(ismpi,myid,inp_fname,errcode,errtag)
 use global
 use math_constants,only:zero,zerotol
 use string_library
@@ -12,7 +12,7 @@ implicit none
 integer :: i
 character(len=*),intent(in) :: inp_fname
 logical,intent(in) :: ismpi
-integer,intent(in) :: myid,nproc
+integer,intent(in) :: myid
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
 character(len=250) :: line
