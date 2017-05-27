@@ -34,28 +34,26 @@ integer :: npart,nt,tinc,tstart,twidth,ts ! ts: time set for ensight gold
 real(kind=kreal) :: cpu_tstart,cpu_tend,telap,max_telap,mean_telap
 
 logical :: ismpi !.true. : MPI, .false. : serial
-integer :: myid
 integer :: tot_nelmt,max_nelmt,min_nelmt,tot_nnode,max_nnode,min_nnode
 
 character(len=250) :: errtag ! error message
 integer :: errcode
 logical :: isopen ! flag to check whether the file is opened
 
-myid=1; nproc=1;
+myrank=0; nproc=1;
 errtag=""; errcode=-1
 
-call start_process(ismpi,myid,nproc,stdout)
-!ipart=myid-1 ! partition id starts from 0
+call start_process(ismpi,myrank,nproc,stdout)
 
 call get_command_argument(0, prog)
 !----input and initialisation----
 if (command_argument_count() <= 0) then
-  call error_stop('ERROR: no input file!',stdout,myid)
+  call error_stop('ERROR: no input file!',stdout,myrank)
 endif
 
 call get_command_argument(1, arg1)
 if(trim(arg1)==('--help'))then
-  if(myid==1)then
+  if(myrank==0)then
     write(stdout,'(a)')'Usage: '//trim(prog)//' [Options] [input_file]'
     write(stdout,'(a)')'Options:'
     write(stdout,'(a)')'    --help        : Display this information.'
@@ -64,7 +62,7 @@ if(trim(arg1)==('--help'))then
   !call sync_process
   call close_process()
 elseif(trim(arg1)==('--version'))then
-  if(myid==1)then
+  if(myrank==0)then
     write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.2 Beta'
     write(stdout,'(a)')'This is free software; see the source for copying '
     write(stdout,'(a)')'conditions.  There is NO warranty; not even for '
@@ -81,27 +79,27 @@ call cpu_time(cpu_tstart)
 call get_command_argument(1, inp_fname)
 
 ! read input data
-call read_input(ismpi,myid,inp_fname,errcode,errtag)
-if(errcode/=0)call error_stop(errtag,stdout,myid)
+call read_input(ismpi,myrank,inp_fname,errcode,errtag)
+if(errcode/=0)call error_stop(errtag,stdout,myrank)
 !call sync_process()
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
 min_nelmt=minscal(nelmt); min_nnode=minscal(nnode)
-if(myid==1)then
+if(myrank==0)then
 write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',min_nelmt
 write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',min_nnode
 endif
 
 if (trim(method)/='sem')then
   write(errtag,'(a)')'ERROR: wrong input for sem3d!'
-  call error_stop(errtag,stdout,myid)
+  call error_stop(errtag,stdout,myrank)
 endif
 
 call parse_file(inp_fname,path,file_head,ext)
 
 ! get processor tag
-ptail=proc_tag(myid,nproc)
+ptail=proc_tag(myrank,nproc)
 
 ensight_etype='hexa8'
 ts=1 ! time set
@@ -122,7 +120,7 @@ geo_file=trim(file_head)//'_original'//trim(ptail)//'.geo'
 open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
-  call error_stop(errtag,stdout,myid)
+  call error_stop(errtag,stdout,myrank)
 endif
 
 write(11,'(a)')'FORMAT'
@@ -142,15 +140,15 @@ call write_ensight_geo(geo_file,ensight_etype,destag,npart,nelmt,nnode,        &
 real(g_coord),g_num)
 
 ! create spectral elements
-if(myid==1)write(stdout,'(a)',advance='no')'creating spectral elements...'
+if(myrank==0)write(stdout,'(a)',advance='no')'creating spectral elements...'
 call hex2spec(ndim,ngnod,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
-if(errcode/=0)call error_stop(errtag,stdout,myid)
-if(myid==1)write(stdout,*)'complete!'
+if(errcode/=0)call error_stop(errtag,stdout,myrank)
+if(myrank==0)write(stdout,*)'complete!'
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
 min_nelmt=minscal(nelmt); min_nnode=minscal(nnode)
-if(myid==1)then
+if(myrank==0)then
 write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',min_nelmt
 write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',min_nnode
 endif
@@ -183,7 +181,7 @@ case_file=trim(out_path)//trim(file_head)//trim(ptail)//'.case'
 open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
-  call error_stop(errtag,stdout,myid)
+  call error_stop(errtag,stdout,myrank)
 endif
 
 write(11,'(a)')'FORMAT'
@@ -306,15 +304,15 @@ write(10,*)'Result summary produced by SPECFEM3D_GEOTECH'
 write(10,*)'--------------------------------------------'
 close(10)
 
-if(myid==1)write(stdout,'(a)')'--------------------------------------------'
+if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 
 ! call main routines
 if(nexcav==0)then
   ! slope stability
-  call semslope3d(ismpi,myid,gnod,sum_file,ptail,format_str)
+  call semslope3d(ismpi,gnod,sum_file,ptail,format_str)
 else
   ! excavation
-  call semexcav3d(ismpi,myid,gnod,sum_file,ptail,format_str)
+  call semexcav3d(ismpi,gnod,sum_file,ptail,format_str)
 endif
 !-----------------------------------
 
@@ -332,7 +330,7 @@ write(10,fmt=format_str)telap,max_telap,mean_telap
 close(10)
 !-----------------------------------
 
-if(myid==1)then
+if(myrank==0)then
   write(stdout,*) ! write new line
   write(stdout,'(a)')'--------------------------------------------'
   inquire(stdout,opened=isopen)

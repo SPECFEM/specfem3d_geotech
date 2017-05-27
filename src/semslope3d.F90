@@ -3,7 +3,7 @@
 ! method" Smith and Griffiths (2004)
 ! REVISION:
 !   HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
-subroutine semslope3d(ismpi,myid,gnod,sum_file,ptail,format_str)
+subroutine semslope3d(ismpi,gnod,sum_file,ptail,format_str)
 ! import necessary libraries
 use global
 use string_library, only : parse_file
@@ -31,7 +31,6 @@ use postprocess
 
 implicit none
 logical,intent(in) :: ismpi
-integer,intent(in) :: myid
 integer,intent(in) :: gnod(8)
 character(len=250),intent(in) :: sum_file
 character(len=20),intent(in) :: ptail,format_str
@@ -78,7 +77,6 @@ real(kind=kreal),allocatable :: wpressure(:) ! water pressure
 logical,allocatable :: submerged_node(:)
 
 !logical :: ismpi !.true. : MPI, .false. : serial
-integer :: ipart !,myid,nproc
 integer :: tot_neq,max_neq,min_neq
 ! number of active ghost partitions for a node
 character(len=250) :: errtag ! error message
@@ -86,19 +84,17 @@ integer :: errcode
 
 errtag=""; errcode=-1
 
-ipart=myid-1 ! partition id starts from 0
-
 ! apply displacement boundary conditions
-if(myid==1)write(stdout,'(a)',advance='no')'applying BC...'
+if(myrank==0)write(stdout,'(a)',advance='no')'applying BC...'
 allocate(gdof(nndof,nnode),stat=istat)
 if (istat/=0)then
   write(stdout,*)'ERROR: cannot allocate memory!'
   stop
 endif
 gdof=1
-call apply_bc(ismpi,myid,nproc,gdof,neq,errcode,errtag)
-if(errcode/=0)call error_stop(errtag,stdout,myid)
-if(myid==1)write(stdout,*)'complete!'
+call apply_bc(ismpi,gdof,neq,errcode,errtag)
+if(errcode/=0)call error_stop(errtag,stdout,myrank)
+if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
 
 allocate(num(nenod),evpt(nst,ngll,nelmt),coord(ngnod,ndim),jac(ndim,ndim),     &
@@ -110,7 +106,7 @@ if (istat/=0)then
 endif
 
 tot_neq=sumscal(neq); max_neq=maxscal(neq); min_neq=minscal(neq)
-if(myid==1)then
+if(myrank==0)then
   write(stdout,*)'degrees of freedoms => total:',tot_neq,' max:',max_neq,      &
   ' min:',min_neq
 endif
@@ -144,7 +140,7 @@ enddo
 !-------------------------------
 
 ! compute stiffness and body load
-if(myid==1)write(stdout,'(a)',advance='no')'preprocessing...'
+if(myrank==0)write(stdout,'(a)',advance='no')'preprocessing...'
 
 allocate(stress_local(nst,ngll,nelmt))
 ! compute initial stress assuming elastic domain
@@ -164,24 +160,24 @@ dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,pseudoeq)
 !print*,minval(extload),maxval(extload)
 !print*,minval(storkm),maxval(storkm)
 !stop
-if(myid==1)write(stdout,*)'complete!'
+if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------
 
 ! apply traction boundary conditions
 if(istraction)then
-  if(myid==1)write(*,'(a)',advance='no')'applying traction...'
-  call apply_traction(ismpi,myid,nproc,gnod,gdof,neq,extload,errcode,errtag)
-  if(errcode/=0)call error_stop(errtag,stdout,myid)
-  if(myid==1)write(*,*)'complete!'
+  if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
+  call apply_traction(ismpi,gnod,gdof,neq,extload,errcode,errtag)
+  if(errcode/=0)call error_stop(errtag,stdout,myrank)
+  if(myrank==0)write(*,*)'complete!'
 endif
 !-------------------------------
 
 ! compute water pressure
 if(iswater)then
-  if(myid==1)write(stdout,'(a)',advance='no')'computing water pressure...'
+  if(myrank==0)write(stdout,'(a)',advance='no')'computing water pressure...'
   allocate(wpressure(nnode),submerged_node(nnode))
   call compute_pressure(wpressure,submerged_node,errcode,errtag)
-  if(errcode/=0)call error_stop(errtag,stdout,myid)
+  if(errcode/=0)call error_stop(errtag,stdout,myrank)
   ! write pore pressure file
 
   ! open Ensight Gold data file to store data
@@ -189,14 +185,14 @@ if(iswater)then
   npart=1;
   destag='Pore pressure'
   call write_ensight_pernode(out_fname,destag,npart,1,nnode,real(wpressure))
-  if(myid==1)write(stdout,*)'complete!'
+  if(myrank==0)write(stdout,*)'complete!'
 endif
 !-------------------------------
 
-if(myid==1)write(stdout,'(a)')'--------------------------------------------'
+if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 
 ! prepare ghost partitions for the communication
-call prepare_ghost(myid,nproc,gdof)
+call prepare_ghost(gdof)
 
 ! assemble from ghost partitions
 call assemble_ghosts(nndof,neq,dprecon,dprecon)
@@ -235,7 +231,7 @@ endif
 
 allocate(cohf(nmat),nuf(nmat),phif(nmat),psif(nmat),ymf(nmat))
 
-if(myid==1)then
+if(myrank==0)then
   write(stdout,'(a,e12.4,a,i5)')'CG_TOL:',cg_tol,' CG_MAXITER:',cg_maxiter
   write(stdout,'(a,e12.4,a,i5)')'NL_TOL:',nl_tol,' NL_MAXITER:',nl_maxiter
   write(stdout,'(a)',advance='no')'SRFs:'
@@ -247,7 +243,7 @@ endif
 
 ! strength reduction (factor of safety) loop
 srf_loop: do i_srf=1,nsrf
-  if(myid==1)write(stdout,'(/,a,f7.4)')'SRF:',srf(i_srf)
+  if(myrank==0)write(stdout,'(/,a,f7.4)')'SRF:',srf(i_srf)
 
    ! initialize
   nodalu=zero; vmeps=zero
@@ -281,7 +277,7 @@ srf_loop: do i_srf=1,nsrf
 
   cg_tot=0; nl_tot=0
   ! load incremental loop
-  !if(myid==1)write(stdout,'(a,i10)')' total load increments:',ninc
+  !if(myrank==0)write(stdout,'(a,i10)')' total load increments:',ninc
   !extload=extload/ninc
   !load_increment: do i_inc=1,ninc
 
@@ -301,7 +297,7 @@ srf_loop: do i_srf=1,nsrf
     !x=zero
     call pcg_solver(neq,nelmt,storkm,x,load,dprecon, &
     gdof_elmt,cg_iter,errcode,errtag)
-    if(errcode/=0)call error_stop(errtag,stdout,myid)
+    if(errcode/=0)call error_stop(errtag,stdout,myrank)
     cg_tot=cg_tot+cg_iter
     x(0)=zero
 
@@ -393,7 +389,7 @@ srf_loop: do i_srf=1,nsrf
     bodyload(0)=zero
     fmax=maxscal(fmax)
     uxmax=maxvec(abs(x))
-    if(myid==1)then
+    if(myrank==0)then
       write(stdout,'(a,a,i4,a,f12.6,a,f12.6,a,f12.6)',advance='no')CR, &
       ' nl_iter:',nl_iter,' f_max:',fmax,' uerr:',uerr,' umax:',uxmax
     endif
@@ -406,7 +402,7 @@ srf_loop: do i_srf=1,nsrf
   endif
 
   nl_tot=nl_tot+nl_iter
-  !if(myid==1)print*,cg_tot,nl_tot
+  !if(myrank==0)print*,cg_tot,nl_tot
   ! nodal displacement
   do i=1,nndof
     do j=1,nnode

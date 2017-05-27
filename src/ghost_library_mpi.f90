@@ -9,7 +9,7 @@
 module ghost_library_mpi
 use set_precision_mpi
 use mpi_library
-
+use global,only : myrank,nproc
 private :: sort_array_coord,rank_buffers,swap_all_buffers
 integer :: ngpart,maxngnode
 
@@ -25,14 +25,13 @@ type(ghost_partition),dimension(:),allocatable :: gpart
 contains
 
 !-----------------------------------------------------------
-subroutine prepare_ghost(myid,nproc,gdof)
+subroutine prepare_ghost(gdof)
 use global,only:ndim,nnode,nndof,ngllx,nglly,ngllz,g_num,g_coord,gfile,        &
 part_path,stdout
 use math_library, only : quick_sort
 use math_library_mpi, only : maxvec
 
 implicit none
-integer,intent(in) :: myid,nproc
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 integer :: istat
 
@@ -45,7 +44,6 @@ integer,dimension(12,2) :: node_edge ! local node numbers in each edge
 character(len=20) :: format_str
 character(len=80) :: fname
 
-integer :: mypart ! my partition
 integer :: mpartid,maxngpart ! partition ID
 integer :: i_elmt,i_gpart,gpartid,melmt,ngelmt,igllp,inode,maxngelmt
 integer :: etype,eid
@@ -55,8 +53,6 @@ integer,dimension(:),allocatable :: itmp_array ! temporary integer array
 double precision,dimension(:),allocatable :: xp,yp,zp
 integer,dimension(3) :: ngll_vec ! (/ngllx,nglly,ngllz/) in ascending order
 character(len=250) :: errtag
-
-mypart=myid-1 ! partition ID starts from 0
 
 ! find maximum ngll points in a face
 ! this is needed only for memory allocation
@@ -98,21 +94,21 @@ ngllxy=ngllx*nglly
 ! open appropriate ghost file
 write(format_str,*)ceiling(log10(real(nproc)+1))
 format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-write(fname, fmt=format_str)trim(part_path)//trim(gfile)//'_proc',mypart
+write(fname, fmt=format_str)trim(part_path)//trim(gfile)//'_proc',myrank
 !print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = istat)
 if( istat /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
-  call error_stop(errtag,stdout,myid)
+  call error_stop(errtag,stdout,myrank)
 endif
 
 read(11,*) ! skip 1 line
 read(11,*)mpartid ! master partition ID
 !print*,'mpart',mpartid
 
-if(mpartid/=mypart)then
+if(mpartid/=myrank)then
   write(errtag,*)'ERROR: wrong gpart file partition ',mpartid,' !'
-  call error_stop(errtag,stdout,myid)
+  call error_stop(errtag,stdout,myrank)
 endif
 
 read(11,*) ! skip 1 line
@@ -161,7 +157,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
       kg0=minval(kgn(node_face(eid,:))); kg1=maxval(kgn(node_face(eid,:)))
     else
       write(errtag,*)'ERROR: wrong etype:',etype,' for ghost partition ',mpartid,'!'
-      call error_stop(errtag,stdout,myid)
+      call error_stop(errtag,stdout,myrank)
     endif
 
     !print*,ig0,ig1,jg0,jg1,kg0,kg1
@@ -191,7 +187,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
   !gpart(i_gpart)%gdof=-1
   !print*,'i_gpart',i_gpart
   !print*,gpart_node(i_gpart,:)
-  !if (mypart==2 .and. i_gpart==1)then
+  !if (myrank==2 .and. i_gpart==1)then
   !  print*,gpart_nnode(1)
   !  print*,gpart_node(1,:)
   !  print*,itmp_array
@@ -199,13 +195,13 @@ do i_gpart=1,ngpart ! ghost partitions loop
   !endif
 
   gpart(i_gpart)%node=itmp_array(1:ncount)
-  !if (mypart==2 .and. i_gpart==1)then
+  !if (myrank==2 .and. i_gpart==1)then
   !  print*,gpart_nnode(1)
   !  print*,gpart_node(1,:)
   !  print*,itmp_array
   !  call error_stop(errtag,stdout)
   !endif
-  !print*,'myid',myid,ncount,size(gpart(i_gpart)%order)
+  !print*,'myrank',myrank,ncount,size(gpart(i_gpart)%order)
 
   !order nodal array to match with ghost partitions
   !extract coordinates
@@ -223,13 +219,13 @@ do i_gpart=1,ngpart ! ghost partitions loop
   deallocate(xp,yp,zp)
   if(ncount/=new_ncount)then
     write(errtag,*)'ERROR: number of ghost nodes mismatched after sorting!'
-    call error_stop(errtag,stdout,myid)
+    call error_stop(errtag,stdout,myrank)
   endif
 
   ! find ghost gdof
   gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
   !print*,gpart(i_gpart)%gdof
-  !print*,'Total 0s:',myid,ncount,count(gpart(i_gpart)%gdof==0)
+  !print*,'Total 0s:',myrank,ncount,count(gpart(i_gpart)%gdof==0)
 
 enddo ! do i_gpart
 close(11)
@@ -241,29 +237,25 @@ end subroutine prepare_ghost
 !=======================================================
 
 ! modify ghost gdof based on the modified gdof
-subroutine modify_ghost(myid,gdof,isnode)
+subroutine modify_ghost(gdof,isnode)
 use global,only:nnode,nndof
 
 implicit none
-integer,intent(in) :: myid
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 logical,intent(in) :: isnode(nnode)
 
-integer :: mypart ! my partition
 integer :: i,i_gpart,ncount
-
-mypart=myid-1 ! partition ID starts from 0
 
 ! modify ghost gdof based on the modified gdof
 do i_gpart=1,ngpart
   ncount=gpart(i_gpart)%nnode
   gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
   !print*,gpart(i_gpart)%gdof
-  !print*,'Total 0s:',myid,ncount,count(gpart(i_gpart)%gdof==0)
+  !print*,'Total 0s:',myrank,ncount,count(gpart(i_gpart)%gdof==0)
   do i=1,ncount
     gpart(i_gpart)%isnode(i)=isnode(gpart(i_gpart)%node(i))
   enddo
-  !print*,mypart,i_gpart,gpart(i_gpart)%isnode
+  !print*,myrank,i_gpart,gpart(i_gpart)%isnode
 enddo ! do i_gpart
 return
 end subroutine modify_ghost
@@ -287,7 +279,7 @@ real(kind=kreal),parameter :: zero=0.0_kreal
 integer :: ierr,i_gpart,ncount
 !call sync_process()
 !if(array(0)>zero)then
-!print*,'From:',myid,array(0)
+!print*,'From:',myrank,array(0)
 !endif
 array_g=array
 send_array=zero; recv_array=zero
@@ -505,7 +497,7 @@ do i_gpart=1,ngpart
       endif
     enddo
   enddo
-  !print*,'ID:',myid,minval(garray),maxval(garray)
+  !print*,'ID:',myrank,minval(garray),maxval(garray)
   send_array(1:ncount,i_gpart)=reshape(garray(:,1:ngnode),(/ncount/))
 
   ! send
@@ -545,7 +537,7 @@ do j=1,nnode
 enddo
 array_g(0)=zero
 return
-!if(myid==1)print*,minval(array_g),maxval(array_g),minval(array),maxval(array)
+!if(myrank==0)print*,minval(array_g),maxval(array_g),minval(array),maxval(array)
 !call error_stop(errtag,stdout)
 end subroutine distribute2ghosts
 !===========================================

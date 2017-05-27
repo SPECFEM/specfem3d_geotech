@@ -70,13 +70,13 @@ pcg: do cg_iter=1,cg_maxiter
     errcode=0
     return
   endif
-  !if(myid==1)print*,abs(alpha)*maxvec(abs(p_g))/maxvec(abs(u_g))
+  !if(myrank==0)print*,abs(alpha)*maxvec(abs(p_g))/maxvec(abs(u_g))
   r=r-alpha*kp
   z=dprecon_g*r
   call assemble_ghosts(nndof,neq,z,z_g) !,gdof)
   beta=dot_product_par(r,z_g)/rz
   p=z+beta*p
-  !if(myid==1)write(*,'(i3,f25.18,f25.18,f25.18)')cg_iter,alpha,beta,rz
+  !if(myrank==0)write(*,'(i3,f25.18,f25.18,f25.18)')cg_iter,alpha,beta,rz
 end do pcg
 write(errtag,'(a)')'ERROR: PCG solver doesn''t converge!'
 return
