@@ -122,7 +122,6 @@ do
     trfile=get_string('trfile',args,narg)
     traction_stat=0
     istraction=.true.
-    !print*,trfile
     cycle
   endif
 

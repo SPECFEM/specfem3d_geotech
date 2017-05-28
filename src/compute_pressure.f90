@@ -173,8 +173,6 @@ nodal: do i_node=1,nnode
         rx1=wsurf(i_wsurf)%rx1
         rx2=wsurf(i_wsurf)%rx2
         z=wsurf(i_wsurf)%z1
-        !print*,rdir,rx1,rx2,z,xp(3)
-        !stop
         if(xp(rdir)>=rx1 .and. xp(rdir)<=rx2 .and. xp(3)<=z)then
           ! point lies below this water surface
           ! compute pressure
@@ -194,8 +192,6 @@ nodal: do i_node=1,nnode
           ! point lies below this water surface
           !compute z
           z=z1+(z2-z1)*(xp(rdir)-rx1)/(rx2-rx1)
-          !print*,rdir,rx1,rx2,z1,z2,z,xp(rdir),xp(3)
-          !stop
           ! compute pressure
           if(z>xp(3))then
             wpressure(i_node)=gamw*(z-xp(3))

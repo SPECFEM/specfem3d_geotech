@@ -49,8 +49,6 @@ xmin=minval(g_coord(1,:))
 xmax=maxval(g_coord(1,:))
 
 npoint=nelmt*(ngllx*nglly*ngllz)
-!print*,ngllx,nglly,ngllz,ngnod
-!stop
 allocate(xstore(npoint),ystore(npoint),zstore(npoint),stat=istat)
 if(istat/=0)then
   write(errtag,'(a)')'ERROR: cannot allocate memory!'

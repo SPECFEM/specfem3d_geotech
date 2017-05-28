@@ -124,7 +124,6 @@ do k=1,ngllz
     enddo
   enddo
 enddo
-!print*,i1,i2,i3,i4,i5,i6
 ! find corners nodes
 do i_face=1,6 ! there are 6 faces in a hexahedron
   if(i_face==1 .or. i_face==3)then ! ZX plane
@@ -181,7 +180,6 @@ trac_stat=.true. ! necessary for empty trfile
 count_trac=0
 traction: do ! i_trac=1,ntrac
   read(11,*,iostat=ios)tractype
-  !print*,ios,ntrac,tractype
   if(ios/=0)exit traction
   count_trac=count_trac+1
   trac_stat=.false.
@@ -197,7 +195,6 @@ traction: do ! i_trac=1,ntrac
     enddo
     trac_stat=.true.
   elseif(tractype==1)then ! uniform loading
-    !print*,tractype
     read(11,*)q ! vector
     read(11,*)nface
     do i_face=1,nface
@@ -233,8 +230,6 @@ traction: do ! i_trac=1,ntrac
         ! compute d(area)
         dx_dxi=matmul(coord,dshape_quad4(1,:,i_gll))
         dx_deta=matmul(coord,dshape_quad4(2,:,i_gll))
-        !print*,'dx_dxi',dx_dxi
-        !print*,'dx_deta',dx_deta
         ! Normal
         face_normal(1)=dx_dxi(2)*dx_deta(3)-dx_deta(2)*dx_dxi(3)
         face_normal(2)=dx_deta(1)*dx_dxi(3)-dx_dxi(1)*dx_deta(3)
@@ -242,7 +237,6 @@ traction: do ! i_trac=1,ntrac
 
         detjac=sqrt(dot_product(face_normal,face_normal))
         face_normal=fsign(iface)*face_normal/detjac
-        !print*,face_normal
         !stop
 
         ! TODO:for constant q this can be computed only once!!
@@ -303,8 +297,6 @@ traction: do ! i_trac=1,ntrac
 
         detjac=sqrt(dot_product(face_normal,face_normal))
         face_normal=fsign(iface)*face_normal/detjac
-        !print*,face_normal
-        !stop
 
         ftracload(1:nfdof:3)=ftracload(1:nfdof:3)+ &
         q(1)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll) ! *face_normal(1) !only in X direction

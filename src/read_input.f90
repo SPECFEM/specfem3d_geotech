@@ -133,8 +133,6 @@ do
 
   ! read pre information
   if (trim(token)=='preinfo:')then
-    !print*,preinfo_stat
-    !stop
     if(preinfo_stat==1)then
       write(errtag,*)'ERROR: copy of line type preinfo: not permitted!'
       return
@@ -254,7 +252,6 @@ do
     trfile=get_string('trfile',args,narg)
     traction_stat=1
     istraction=.true.
-    !print*,trfile
     cycle
   endif
 
@@ -277,15 +274,6 @@ do
     matfile=get_string('matfile',args,narg)
     call seek_integer('allelastic',iselastic,args,narg,istat)
     if(istat==0 .and. iselastic==1)allelastic=.true.
-    !print*,matfile
-    !mat_count=mat_count+1
-    !id=get_integer('id',args,narg)
-    !gam(id)=get_real('gamma',args,narg)
-    !ym(id)=get_real('ym',args,narg)
-    !nu(id)=get_real('nu',args,narg)
-    !phi(id)=get_real('phi',args,narg)
-    !coh(id)=get_real('coh',args,narg)
-    !psi(id)=get_real('psi',args,narg)
 
     material_stat=1
     cycle
@@ -468,7 +456,6 @@ do i=1,ndim
   ! open output file
   !write(fname, fmt=format_str)trim(inp_path)//trim(coordfile(i))//'_proc',myrank
   fname=trim(data_path)//trim(coordfile(i))//trim(ptail)
-  !print*,fname
   open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
   if( ios /= 0 ) then
     write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -500,7 +487,6 @@ close(11)
 ! open output file
 !write(fname, fmt=format_str)trim(inp_path)//trim(confile)//'_proc',myrank
 fname=trim(data_path)//trim(confile)//trim(ptail)
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -508,7 +494,6 @@ if( ios /= 0 ) then
 endif
 read(11,*)nelmt
 allocate(g_num(nenod,nelmt))
-!print*,nenod,nelmt,ismpi,fname
 if(ismpi)then
   do i=1,nelmt
     read(11,*)ielmt,g_num(:,ielmt)
@@ -526,7 +511,6 @@ close(11)
 ! open output file
 !write(fname, fmt=format_str)trim(inp_path)//trim(idfile)//'_proc',myrank
 fname=trim(data_path)//trim(idfile)//trim(ptail)
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -561,7 +545,6 @@ else
   write(errtag,'(a)')'ERROR: illegal ismatpart value!'
   return
 endif
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'

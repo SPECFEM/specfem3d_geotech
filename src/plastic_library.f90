@@ -77,11 +77,6 @@ do i_mat=1,nmat
     if(beta_nuphi<one)beta_nuphi=one+zerotol
     nuf(i_mat)=half*(one-snphif/beta_nuphi)
     istat=1 ! material properties has changed
-    !print*,phi,phif
-    !print*,nu,nuf
-    !print*,snphif,one-two*nuf
-    !print*,beta_nuphi
-    !stop
   endif
 enddo
 return
