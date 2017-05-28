@@ -50,7 +50,7 @@ logical :: nl_isconv ! logical variable to check convergence of
 real(kind=kreal) :: cmat(nst,nst),devp(nst),eps(nst),erate(nst),evp(nst),      &
 flow(nst,nst),m1(nst,nst),m2(nst,nst),m3(nst,nst),effsigma(nst),sigma(nst)
 ! dynamic arrays
-integer,allocatable::gdof(:,:),gdof_elmt(:,:),num(:),node_valency(:)
+integer,allocatable::gdof_elmt(:,:),num(:),node_valency(:)
 ! factored parameters
 real(kind=kreal),allocatable :: cohf(:),nuf(:),phif(:),psif(:),ymf(:)
 real(kind=kreal),allocatable::bodyload(:),bmat(:,:),bload(:),coord(:,:),      &
@@ -115,7 +115,7 @@ if (istat/=0)then
   stop
 endif
 gdof=1
-call apply_bc(ismpi,nproc,gdof,neq,errcode,errtag)
+call apply_bc(ismpi,neq,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
@@ -200,7 +200,7 @@ if(s0_type==0)then
   ! apply traction boundary conditions
   if(istraction)then
     if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
-    call apply_traction(ismpi,nproc,gnod,gdof,neq,extload,errcode,errtag)
+    call apply_traction(ismpi,gnod,neq,extload,errcode,errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myrank)
     if(myrank==0)write(*,*)'complete!'
   endif
@@ -227,10 +227,10 @@ if(s0_type==0)then
   if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 
   ! prepare ghost partitions for the communication
-  call prepare_ghost(gdof)
+  call prepare_ghost()
 
   ! assemble from ghost partitions
-  call assemble_ghosts(nndof,neq,dprecon,dprecon)
+  call assemble_ghosts(neq,dprecon,dprecon)
   !print*,minval(dprecon),maxval(dprecon)
   !print*,minval(storkm),maxval(storkm)
   !stop
@@ -419,7 +419,7 @@ excavation_stage: do i_excav=0,nexcav
 
   ! modify ghost partitions after excavation
   !call prepare_ghost(gdof)
-  call modify_ghost(gdof,isnode)
+  call modify_ghost(isnode)
   call count_active_nghosts(ngpart_node)
 
   excavload=zero; extload=zero; ! extload1=zero
@@ -464,7 +464,7 @@ excavation_stage: do i_excav=0,nexcav
   dlagrange_gll,gll_weights,storkm,dprecon)!,extload,gravity,pseudoeq)
 
   ! assemble from ghost partitions
-  call assemble_ghosts(nndof,neq,dprecon,dprecon)
+  call assemble_ghosts(neq,dprecon,dprecon)
   dprecon(0)=zero; dprecon(1:)=one/dprecon(1:)
 
   ! find global dt

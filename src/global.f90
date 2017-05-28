@@ -34,6 +34,7 @@ integer :: ngnod ! number of geometrical nodes. usually, for FEM ngnod=nenod
 integer :: nnode,nelmt
 integer,allocatable :: mat_id(:)
 integer,allocatable :: g_num(:,:)
+integer,allocatable :: gdof(:,:)
 ! acceleration due to gravity
 real(kind=kreal),parameter :: mtokm=0.001_kreal,agrav=9.81_kreal
 real(kind=kreal),allocatable :: g_coord(:,:)

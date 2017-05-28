@@ -48,7 +48,7 @@ logical :: nl_isconv ! logical variable to check convergence of
 real(kind=kreal) :: cmat(nst,nst),devp(nst),eps(nst),erate(nst),evp(nst),      &
 flow(nst,nst),m1(nst,nst),m2(nst,nst),m3(nst,nst),effsigma(nst),sigma(nst)
 ! dynamic arrays
-integer,allocatable::gdof(:,:),gdof_elmt(:,:),num(:),node_valency(:)
+integer,allocatable::gdof_elmt(:,:),num(:),node_valency(:)
 ! factored parameters
 real(kind=kreal),allocatable :: cohf(:),nuf(:),phif(:),psif(:),ymf(:)
 real(kind=kreal),allocatable::bodyload(:),bmat(:,:),bload(:),coord(:,:),       &
@@ -92,7 +92,7 @@ if (istat/=0)then
   stop
 endif
 gdof=1
-call apply_bc(ismpi,gdof,neq,errcode,errtag)
+call apply_bc(ismpi,neq,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
@@ -166,7 +166,7 @@ if(myrank==0)write(stdout,*)'complete!'
 ! apply traction boundary conditions
 if(istraction)then
   if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
-  call apply_traction(ismpi,gnod,gdof,neq,extload,errcode,errtag)
+  call apply_traction(ismpi,gnod,neq,extload,errcode,errtag)
   if(errcode/=0)call error_stop(errtag,stdout,myrank)
   if(myrank==0)write(*,*)'complete!'
 endif
@@ -192,10 +192,10 @@ endif
 if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 
 ! prepare ghost partitions for the communication
-call prepare_ghost(gdof)
+call prepare_ghost()
 
 ! assemble from ghost partitions
-call assemble_ghosts(nndof,neq,dprecon,dprecon)
+call assemble_ghosts(neq,dprecon,dprecon)
 !print*,minval(dprecon),maxval(dprecon)
 !print*,minval(storkm),maxval(storkm)
 !stop
@@ -265,7 +265,7 @@ srf_loop: do i_srf=1,nsrf
     dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon)
 
     ! assemble from ghost partitions
-    call assemble_ghosts(nndof,neq,dprecon,dprecon)
+    call assemble_ghosts(neq,dprecon,dprecon)
     dprecon(1:)=one/dprecon(1:); dprecon(0)=zero
   endif
 
