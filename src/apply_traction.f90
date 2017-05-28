@@ -2,7 +2,7 @@
 ! this routine read and applies the traction specified in the traction file
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010; HNG, Dec 08,2010
-subroutine apply_traction(ismpi,gnod,gdof,neq,load,errcode,errtag)
+subroutine apply_traction(ismpi,gnod,neq,load,errcode,errtag)
 use global
 use math_constants
 use shape_library,only : dshape_function_quad4
@@ -10,7 +10,6 @@ use gll_library,only : gll_quadrature2d,zwgljd
 implicit none
 logical,intent(in) :: ismpi
 integer,intent(in) :: gnod(ngnod)
-integer,intent(in) :: gdof(nndof,nnode)
 integer,intent(in) :: neq
 real(kind=kreal),intent(inout) :: load(0:neq)
 integer,intent(out) :: errcode

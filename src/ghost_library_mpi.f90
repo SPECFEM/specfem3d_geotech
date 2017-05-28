@@ -25,14 +25,13 @@ type(ghost_partition),dimension(:),allocatable :: gpart
 contains
 
 !-----------------------------------------------------------
-subroutine prepare_ghost(gdof)
-use global,only:ndim,nnode,nndof,ngllx,nglly,ngllz,g_num,g_coord,gfile,        &
+subroutine prepare_ghost()
+use global,only:ndim,nnode,nndof,ngllx,nglly,ngllz,g_num,g_coord,gdof,gfile,   &
 part_path,stdout
 use math_library, only : quick_sort
 use math_library_mpi, only : maxvec
 
 implicit none
-integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 integer :: istat
 
 integer,dimension(8) :: ign,jgn,kgn ! ith, jth, and kth GLL indices of node
@@ -237,11 +236,10 @@ end subroutine prepare_ghost
 !=======================================================
 
 ! modify ghost gdof based on the modified gdof
-subroutine modify_ghost(gdof,isnode)
-use global,only:nnode,nndof
+subroutine modify_ghost(isnode)
+use global,only:nnode,nndof,gdof
 
 implicit none
-integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 logical,intent(in) :: isnode(nnode)
 
 integer :: i,i_gpart,ncount
@@ -263,11 +261,12 @@ end subroutine modify_ghost
 
 ! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
-subroutine assemble_ghosts(nndof,neq,array,array_g)
+subroutine assemble_ghosts(neq,array,array_g)
+use global,only:nndof
 !use math_library, only : maxscal_par
 use mpi
 implicit none
-integer,intent(in) :: nndof,neq
+integer,intent(in) :: neq
 real(kind=kreal),dimension(0:neq),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
 real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array

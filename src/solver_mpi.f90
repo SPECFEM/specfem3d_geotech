@@ -48,12 +48,12 @@ endif
 r=f-kp
 z=dprecon_g*r
 
-call assemble_ghosts(nndof,neq,z,z_g) !,gdof)
+call assemble_ghosts(neq,z,z_g) !,gdof)
 
 p=z
 !----pcg iteration----
 pcg: do cg_iter=1,cg_maxiter
-  call assemble_ghosts(nndof,neq,p,p_g) !,gdof)
+  call assemble_ghosts(neq,p,p_g) !,gdof)
   kp=zero
   do i_elmt=1,nelmt
     egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,i_elmt)),(/nedof/))
@@ -73,7 +73,7 @@ pcg: do cg_iter=1,cg_maxiter
   !if(myrank==0)print*,abs(alpha)*maxvec(abs(p_g))/maxvec(abs(u_g))
   r=r-alpha*kp
   z=dprecon_g*r
-  call assemble_ghosts(nndof,neq,z,z_g) !,gdof)
+  call assemble_ghosts(neq,z,z_g) !,gdof)
   beta=dot_product_par(r,z_g)/rz
   p=z+beta*p
   !if(myrank==0)write(*,'(i3,f25.18,f25.18,f25.18)')cg_iter,alpha,beta,rz

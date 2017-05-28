@@ -11,7 +11,6 @@ use global,only:myrank,nproc
 implicit none
 logical,intent(out) :: ismpi
 integer,intent(in) :: ounit
-integer :: errcode
 ismpi=.false. ! serial
 myrank=0; nproc=1
 return
@@ -20,7 +19,6 @@ end subroutine start_process
 
 subroutine close_process()
 implicit none
-integer :: errcode
 stop
 return
 end subroutine close_process
@@ -28,7 +26,6 @@ end subroutine close_process
 
 subroutine sync_process()
 implicit none
-integer :: errcode
 return
 end subroutine sync_process
 !=======================================================
@@ -45,7 +42,7 @@ end subroutine error_stop
 
 ! get processor tag
 function proc_tag() result(ptag)
-character(len=20) :: format_str,ptag
+character(len=20) :: ptag
 
 ptag=''
 
@@ -53,26 +50,23 @@ return
 end function
 !=======================================================
 
-subroutine prepare_ghost(gdof)
-use global,only:nnode,nndof
+subroutine prepare_ghost()
 implicit none
-integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 return
 end subroutine prepare_ghost
 !=======================================================
 
-subroutine modify_ghost(gdof,isnode)
+subroutine modify_ghost(isnode)
 use global,only:nnode,nndof
 implicit none
-integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 logical,intent(in) :: isnode(nnode)
 return
 end subroutine modify_ghost
 !=======================================================
 
-subroutine assemble_ghosts(nndof,neq,array,array_g)
+subroutine assemble_ghosts(neq,array,array_g)
 implicit none
-integer,intent(in) :: nndof,neq
+integer,intent(in) :: neq
 real(kind=kreal),dimension(0:neq),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
 array_g=array
