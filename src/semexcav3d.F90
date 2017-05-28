@@ -190,10 +190,6 @@ if(s0_type==0)then
   dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,       &
   pseudoeq)
 
-  !print*,minval(dprecon),maxval(dprecon)
-  !print*,minval(extload),maxval(extload)
-  !print*,minval(storkm),maxval(storkm)
-  !stop
   if(myrank==0)write(stdout,*)'complete!'
   !-------------------------------
 
@@ -231,9 +227,6 @@ if(s0_type==0)then
 
   ! assemble from ghost partitions
   call assemble_ghosts(neq,dprecon,dprecon)
-  !print*,minval(dprecon),maxval(dprecon)
-  !print*,minval(storkm),maxval(storkm)
-  !stop
   dprecon(1:)=one/dprecon(1:); dprecon(0)=zero
 
   ! compute displacement due to graviy loading to compute initial stress
@@ -315,8 +308,6 @@ excavation_stage: do i_excav=0,nexcav
 
   ! disable excavated material id
   ismat(excavid(id0:id1))=off !ismat(excavid(i_excav))=off
-  !print*,id0,id1
-  !stop
   ! count intact and void elements after excavation
   nelmt_void=0
   do i=id0,id1
@@ -496,7 +487,6 @@ excavation_stage: do i_excav=0,nexcav
     x(0)=zero
 
     if(allelastic)then
-      !print*,size(stress_local)
       call elastic_stress_intact(nelmt_intact,neq,gnod,elmt_intact,            &
       g_num(:,elmt_intact),gdof_elmt(:,elmt_intact),mat_id(elmt_intact),       &
       dshape_hex8,dlagrange_gll,x,stress_local(:,:,:))
@@ -524,8 +514,6 @@ excavation_stage: do i_excav=0,nexcav
       coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
       egdof=gdof_elmt(:,ielmt) !reshape(gdof(:,g_num(:,ielmt)),(/nedof/))
       eld=x(egdof)
-      !print*,egdof
-      !stop
       bload=zero
       do i=1,ngll ! loop over integration points
         jac=matmul(dshape_hex8(:,:,i),coord)
@@ -556,7 +544,6 @@ excavation_stage: do i_excav=0,nexcav
         if(f>=zero)then !.or.(nl_isconv.or.nl_iter==nl_maxiter))then
           call mohcouq(psif(imat),dsbar,lode_theta,dq1,dq2,dq3)
           call formm(effsigma,m1,m2,m3)
-          !if(dsbar<=zerotol)print*,m1*dq1+m2*dq2+m3*dq3
           flow=f*(m1*dq1+m2*dq2+m3*dq3)
 
           erate=matmul(flow,effsigma)
@@ -581,12 +568,6 @@ excavation_stage: do i_excav=0,nexcav
           sqrt(r3)-sin(lode_theta)*sin(phifr)/r3))
           if(sf<scf(num(i)))scf(num(i))=sf
         endif
-        !if(i_elmt==1.and.i==1)then
-        !  print*,'s',sigma
-        !  print*,'e',eld
-        !  print*,'ev',maxval(abs(evpt))
-        !  stop
-        !endif
       end do ! i_gll
 
       if(nl_isconv .or. nl_iter==nl_maxiter)cycle
@@ -609,7 +590,6 @@ excavation_stage: do i_excav=0,nexcav
     write(stdout,*)'desired tolerance:',nl_tol,' achieved tolerance:',uerr
   endif
   nl_tot=nl_tot+nl_iter
-  !if(myrank==0)print*,cg_tot,nl_tot
   ! nodal displacement
   do i=1,nndof
     do j=1,nnode

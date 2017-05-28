@@ -90,7 +90,6 @@ enddo
 
 !write(fname, fmt=format_str)trim(inp_path)//trim(uxfile)//'_proc',myrank
 fname=trim(data_path)//trim(uxfile)//trim(ptail)
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -109,12 +108,8 @@ do
   gdof(1,g_num(face(iface)%nod,ielmt))=0
 enddo
 close(11)
-!sync all
-!call stop_all()
 
-!write(fname, fmt=format_str)trim(inp_path)//trim(uyfile)//'_proc',myrank
 fname=trim(data_path)//trim(uyfile)//trim(ptail)
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -136,7 +131,6 @@ close(11)
 
 !write(fname, fmt=format_str)trim(inp_path)//trim(uzfile)//'_proc',myrank
 fname=trim(data_path)//trim(uzfile)//trim(ptail)
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'

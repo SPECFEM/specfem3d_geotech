@@ -94,7 +94,6 @@ ngllxy=ngllx*nglly
 write(format_str,*)ceiling(log10(real(nproc)+1))
 format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
 write(fname, fmt=format_str)trim(part_path)//trim(gfile)//'_proc',myrank
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = istat)
 if( istat /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -103,7 +102,6 @@ endif
 
 read(11,*) ! skip 1 line
 read(11,*)mpartid ! master partition ID
-!print*,'mpart',mpartid
 
 if(mpartid/=myrank)then
   write(errtag,*)'ERROR: wrong gpart file partition ',mpartid,' !'
@@ -111,7 +109,7 @@ if(mpartid/=myrank)then
 endif
 
 read(11,*) ! skip 1 line
-read(11,*)ngpart,maxngpart,maxngelmt; !print*,'ngpart',ngpart
+read(11,*)ngpart,maxngpart,maxngelmt
 
 ! allocate gpart
 allocate(gpart(ngpart))
@@ -126,16 +124,13 @@ do i_gpart=1,ngpart ! ghost partitions loop
   gpartid=gpartid+1 ! index coarray starts from 1
 
   read(11,*) ! skip 1 line
-  read(11,*)ngelmt; !print*,'ngelmt',ngelmt
+  read(11,*)ngelmt
   allocate(itmp_array(ngelmt*maxngll_face)) ! I don't know why this doesn't work!
   itmp_array=-1
-  !print*,ngelmt,ngelmt*maxngll_face,'istat=',istat
   switch_node=.false.
   ncount=0
-  !call error_stop(errtag,stdout)
-  !if(this_image()==6)print*,'what0!',i_gpart,' of ',ngpart
   do i_elmt=1,ngelmt ! ghost elements loop
-    read(11,*)melmt,etype,eid; !print*,'melmt',melmt,etype,eid
+    read(11,*)melmt,etype,eid
 
     ! initialize
     ig0=-1; ig1=-1
@@ -159,9 +154,6 @@ do i_gpart=1,ngpart ! ghost partitions loop
       call error_stop(errtag,stdout,myrank)
     endif
 
-    !print*,ig0,ig1,jg0,jg1,kg0,kg1
-    !sync all
-    !call error_stop(errtag,stdout)
     do k_g=kg0,kg1
       do j_g=jg0,jg1
         do i_g=ig0,ig1
@@ -180,27 +172,10 @@ do i_gpart=1,ngpart ! ghost partitions loop
   gpart(i_gpart)%nnode=ncount
   gpart(i_gpart)%id=gpartid
   allocate(gpart(i_gpart)%node(ncount),gpart(i_gpart)%isnode(ncount))
-  !gpart(i_gpart)%node=-1
   gpart(i_gpart)%isnode=.true. ! all nodes are active
   allocate(gpart(i_gpart)%gdof(ncount*nndof))
-  !gpart(i_gpart)%gdof=-1
-  !print*,'i_gpart',i_gpart
-  !print*,gpart_node(i_gpart,:)
-  !if (myrank==2 .and. i_gpart==1)then
-  !  print*,gpart_nnode(1)
-  !  print*,gpart_node(1,:)
-  !  print*,itmp_array
-  !  call error_stop(errtag,stdout)
-  !endif
 
   gpart(i_gpart)%node=itmp_array(1:ncount)
-  !if (myrank==2 .and. i_gpart==1)then
-  !  print*,gpart_nnode(1)
-  !  print*,gpart_node(1,:)
-  !  print*,itmp_array
-  !  call error_stop(errtag,stdout)
-  !endif
-  !print*,'myrank',myrank,ncount,size(gpart(i_gpart)%order)
 
   !order nodal array to match with ghost partitions
   !extract coordinates
@@ -223,8 +198,6 @@ do i_gpart=1,ngpart ! ghost partitions loop
 
   ! find ghost gdof
   gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
-  !print*,gpart(i_gpart)%gdof
-  !print*,'Total 0s:',myrank,ncount,count(gpart(i_gpart)%gdof==0)
 
 enddo ! do i_gpart
 close(11)
@@ -248,12 +221,9 @@ integer :: i,i_gpart,ncount
 do i_gpart=1,ngpart
   ncount=gpart(i_gpart)%nnode
   gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
-  !print*,gpart(i_gpart)%gdof
-  !print*,'Total 0s:',myrank,ncount,count(gpart(i_gpart)%gdof==0)
   do i=1,ncount
     gpart(i_gpart)%isnode(i)=isnode(gpart(i_gpart)%node(i))
   enddo
-  !print*,myrank,i_gpart,gpart(i_gpart)%isnode
 enddo ! do i_gpart
 return
 end subroutine modify_ghost
@@ -276,10 +246,6 @@ integer,dimension(ngpart) :: send_req,recv_req
 real(kind=kreal),parameter :: zero=0.0_kreal
 
 integer :: ierr,i_gpart,ncount
-!call sync_process()
-!if(array(0)>zero)then
-!print*,'From:',myrank,array(0)
-!endif
 array_g=array
 send_array=zero; recv_array=zero
 !do i_gpart=1,ngpart
@@ -310,8 +276,6 @@ do i_gpart=1,ngpart
   ncount=gpart(i_gpart)%nnode*nndof
   array_g(gpart(i_gpart)%gdof)=array_g(gpart(i_gpart)%gdof)+ &
   recv_array(1:ncount,i_gpart)
-  !print*,recv_array(1:ncount,i_gpart)
-  !print*
 enddo
 
 ! wait for send communications completion (send)
@@ -371,7 +335,6 @@ do i_gpart=1,ngpart
   ncount=ngnode*nndof
   array_g(:,gpart(i_gpart)%node)=array_g(:,gpart(i_gpart)%node)+ &
   reshape(recv_array(1:ncount,i_gpart),(/nndof,ngnode/))
-  !print*,recv_array(1:ncount,i_gpart)
 enddo
 
 ! wait for send communications completion (send)
@@ -496,7 +459,6 @@ do i_gpart=1,ngpart
       endif
     enddo
   enddo
-  !print*,'ID:',myrank,minval(garray),maxval(garray)
   send_array(1:ncount,i_gpart)=reshape(garray(:,1:ngnode),(/ncount/))
 
   ! send
@@ -518,7 +480,6 @@ do i_gpart=1,ngpart
   ncount=ngnode*nndof
   tarray(:,gpart(i_gpart)%node)=tarray(:,gpart(i_gpart)%node)+ &
   reshape(recv_array(1:ncount,i_gpart),(/nndof,ngnode/))
-  !print*,recv_array(1:ncount,i_gpart)
 enddo
 
 ! wait for send communications completion (send)
@@ -536,8 +497,6 @@ do j=1,nnode
 enddo
 array_g(0)=zero
 return
-!if(myrank==0)print*,minval(array_g),maxval(array_g),minval(array),maxval(array)
-!call error_stop(errtag,stdout)
 end subroutine distribute2ghosts
 !===========================================
 

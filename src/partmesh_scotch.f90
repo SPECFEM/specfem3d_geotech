@@ -179,17 +179,6 @@ do ispec = 1, nspec
 
   read(98,*)elmnts(:,ispec)
 
-  !outputs info for each element to see ordering
-  !print*,'ispec: ',ispec
-  !print*,'  ',num_elmnt, elmnts(5,num_elmnt), elmnts(1,num_elmnt),elmnts(4,num_elmnt), elmnts(8,num_elmnt), &
-  !      elmnts(6,num_elmnt), elmnts(2,num_elmnt), elmnts(3,num_elmnt), elmnts(7,num_elmnt)
-  !print*,'elem:',num_elmnt
-  !do i=1,8
-  !  print*,' i ',i,'val :',elmnts(i,num_elmnt),&
-  !    nodes_coords(1,elmnts(i,num_elmnt)),nodes_coords(2,elmnts(i,num_elmnt)),nodes_coords(3,elmnts(i,num_elmnt))
-  !enddo
-  !print*
-
 end do
 close(98)
 print*, 'total elements:', nspec
@@ -205,7 +194,6 @@ if( istat /= 0 ) then
 endif
 
 read(98,*) nspec
-!print*,nspec; stop
 allocate(matid(2,nspec))
 
 do ispec = 1, nspec
@@ -451,8 +439,6 @@ call mesh2dual_ncommonnodes(nspec,nnodes,nsize,sup_neighbour,elmnts,xadj,      &
 adjncy,nnodes_elmnts,nodes_elmnts,max_neighbour,1)
 print*, 'mesh2dual: '
 print*, '  max_neighbour = ',max_neighbour
-!print*,xadj
-!print*,adjncy
 nb_edges = xadj(nspec+1)
 
 ! allocates & initializes partioning of elements
@@ -571,10 +557,6 @@ subroutine write_mesh_databases
 
 allocate(my_interfaces(0:ninterfaces-1))
 allocate(my_nb_interfaces(0:ninterfaces-1))
-
-!write(format_str,*)ceiling(log10(real(npart)+1))
-!format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//',a)'
-!print*,format_str; stop
 
 ! writes out Database file for each partition
 do ipart = 0, npart-1

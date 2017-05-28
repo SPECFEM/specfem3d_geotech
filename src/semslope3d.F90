@@ -156,10 +156,6 @@ extload=zero; gravity=.true.; pseudoeq=iseqload
 call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nu,ym,       &
 dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,pseudoeq)
 
-!print*,minval(dprecon),maxval(dprecon)
-!print*,minval(extload),maxval(extload)
-!print*,minval(storkm),maxval(storkm)
-!stop
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------
 
@@ -196,9 +192,6 @@ call prepare_ghost()
 
 ! assemble from ghost partitions
 call assemble_ghosts(neq,dprecon,dprecon)
-!print*,minval(dprecon),maxval(dprecon)
-!print*,minval(storkm),maxval(storkm)
-!stop
 dprecon(1:)=one/dprecon(1:); dprecon(0)=zero
 
 allocate(stress_global(nst,nnode),vmeps(nnode))
@@ -269,9 +262,6 @@ srf_loop: do i_srf=1,nsrf
     dprecon(1:)=one/dprecon(1:); dprecon(0)=zero
   endif
 
-  !print*,nsrf,srf(i_srf),nuf,phif,dt
-  !print*,sin(phif*deg2rad),one-two*nuf
-
   ! find global dt
   dt=minscal(dt)
 
@@ -283,8 +273,6 @@ srf_loop: do i_srf=1,nsrf
 
   bodyload=zero; evpt=zero
   x=zero; oldx=zero
-
-  !print*,maxval(abs(bodyload)),maxval(abs(extload)),maxval(abs(dprecon))
 
   ! plastic iteration loop
   plastic: do nl_iter=1,nl_maxiter
@@ -402,7 +390,6 @@ srf_loop: do i_srf=1,nsrf
   endif
 
   nl_tot=nl_tot+nl_iter
-  !if(myrank==0)print*,cg_tot,nl_tot
   ! nodal displacement
   do i=1,nndof
     do j=1,nnode

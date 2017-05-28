@@ -57,21 +57,17 @@ storkm=zero; dprecon=zero
 do i_elmt=1,nelmt
   call compute_cmat(cmat,ym(mat_id(i_elmt)),nu(mat_id(i_elmt)))
   num=g_num(:,i_elmt)
-  coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
-  !print*,ngllx,nglly,ngllz,ngll,nndof,nenod ,gdof(:,g_num(:,ielmt))
-  egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,ielmt)),(/nndof*nenod/)) !g=g_g(:,ielmt)
+  coord=transpose(g_coord(:,num(gnod)))
+  egdof=gdof_elmt(:,i_elmt)
   km=zero; eld=zero; eqload=zero
   idof=0
   do i=1,ngll
-    !call shape_function(fun,gll_points(i))
-    ! compute Jacobian at GLL point using 20 noded element
-    !call shape_derivative(der,gll_points(:,i))
-    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord)
+    jac=matmul(dshape_hex8(:,:,i),coord)
     detjac=determinant(jac)
     call invert(jac)
 
-    deriv=matmul(jac,dlagrange_gll(:,i,:)) ! use der for gll
-    call compute_bmat(bmat,deriv) !!! gll bmat matrix
+    deriv=matmul(jac,dlagrange_gll(:,i,:))
+    call compute_bmat(bmat,deriv)
     km=km+matmul(matmul(transpose(bmat),cmat),bmat)*detjac*gll_weights(i)
     idof=idof+3
     ! interpolation functions are orthogonal, hence it is simple

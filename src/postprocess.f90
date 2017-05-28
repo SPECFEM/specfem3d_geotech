@@ -93,14 +93,11 @@ do i_elmt=1,nelmt_intact
   ielmt=elmt_intact(i_elmt)
   call compute_cmat(cmat,ym(mat_id(i_elmt)),nu(mat_id(i_elmt)))
   num=g_num(:,i_elmt)
-  coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
-  egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,i_elmt)),(/nedof/)) !g=g_g(:,i_elmt)
+  coord=transpose(g_coord(:,num(gnod)))
+  egdof=gdof_elmt(:,i_elmt)
   eld=x(egdof)
-  !print*,egdof
-  !stop
   do i=1,ngll ! loop over integration points
-    !call shape_derivative(der,gll_points(:,i))
-    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord)
+    jac=matmul(dshape_hex8(:,:,i),coord)
     detjac=determinant(jac)
     call invert(jac)!
 
@@ -109,12 +106,6 @@ do i_elmt=1,nelmt_intact
     eps=matmul(bmat,eld)
     sigma=matmul(cmat,eps)
     stress_local(:,i,ielmt)=stress_local(:,i,ielmt)+sigma
-    !if(i_elmt==1.and.i==1)then
-    !      print*,'s',sigma
-    !      print*,'e',eld
-    !      !print*,'ev',evpt
-    !     stop
-    !    endif
   end do ! i GLL
 end do ! i_elmt
 !print*,size(stress_local)

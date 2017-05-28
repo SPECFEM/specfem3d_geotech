@@ -667,8 +667,6 @@ edge_face(6,1)=9; edge_face(6,2)=10; edge_face(6,3)=11; edge_face(6,4)=12;
 !  enddo
 
 !  deallocate(node_part)
-!  !print*,minval(node_npart),maxval(node_npart)
-!  !stop
 
 !  !node_npart=0
 !  ! determine the number of partitions for all nodes
@@ -721,9 +719,6 @@ do i=1,nelmt_interface-1
     ! test
     ! connect_adj(1:nenode)=connect_interface(:,i);
     ! connect_adj(nenode+1:2*nenode)=connect_interface(:,j);
-    ! print*,connect_adj
-    ! stop
-    ! test
 
     ! we are only interested in the part of i and j
     indadj(connect_interface(:,i))=0
@@ -794,7 +789,6 @@ do i=1,nelmt_interface-1
       stop
     endif
   enddo
-  !print*,i,nelmt_interface
 enddo
 write(*,*)'complete!'
 
@@ -889,7 +883,6 @@ do i_part=1,npart
     mpart(i_part)%gpart(j_part)%nelmt=0
   enddo
 enddo
-!print*,max_nelmt
 allocate(list_gpart(max_ngpart),stat=istat)
 if(istat/=0)then
   print*,'ERROR: out of memory!'
@@ -915,13 +908,11 @@ ipart_loop: do i_part=1,npart-1
       ie_interface=mpart(i_part)%eid_interface(i)
       elmt_face=.false.; elmt_edge=.false.; elmt_node=.false.
 
-      !print*,adj_elmt(ie_interface,
       ngelmt=mpart(j_part)%nelmt
       gelmt(1:ngelmt)=mpart(j_part)%elmt(:)
       ginterface(1:ngelmt)=mpart(j_part)%eid_interface(:)
 
       gadjid=0
-      !print*,size(adjid),ie_interface,minval(ginterface(1:ngelmt)),maxval(ginterface(1:ngelmt))
       eadjid=0 ! elemental adjacency indicators
       eadjid(adj_elmt(ie_interface,1:adj_nelmt(ie_interface)))= &
       adj_ind(ie_interface,1:adj_nelmt(ie_interface))
@@ -930,15 +921,7 @@ ipart_loop: do i_part=1,npart-1
       !  if(ind>0)gadjid(ind)=adjind(ie_interface,ig)
       !enddo
       gadjid(1:ngelmt)=eadjid(ginterface(1:ngelmt)) !adj_elmt(ie_interface,ginterface(1:ngelmt))
-      !print*,gadjid(1:ngelmt)
-      !print*,adjind(ie_interface,:)
-      !print*,ginterface(1:ngelmt)
-      !print*,adjelmt(ie_interface,:)
-      !if(all(eadjid(ginterface(1:ngelmt))/=gadjid(1:ngelmt)))then
-      !print*,eadjid(ginterface(1:ngelmt))
-      !print*,gadjid(1:ngelmt)
-      !endif
-      !stop
+      
       ! count faces/edges/nodes
       adj_nface=0; adj_nedge=0; adj_nnode=0
       do ia=1,ngelmt !mpart(j_part)%nelmt
@@ -954,7 +937,6 @@ ipart_loop: do i_part=1,npart-1
         endif
       enddo
       ! list jpart elements
-      ! print*,adj_nface,adj_nedge,adj_nnode
 
       ! we check in the order face, edge, and node to exclude redundant sharing (low level repeating)
       ! check for face/s
@@ -1047,12 +1029,8 @@ ipart_loop: do i_part=1,npart-1
         elmt_node(ie)=.true.
       enddo
     enddo ! i
-    !print*,'total:',ipart
-    !print*,mpart(i_part)%nelmt,mpart(j_part)%nelmt
-    !stop
   enddo jpart_loop ! j_part
 enddo ipart_loop ! i_part
-!print*,'total',ipart
 if(.not.all(mpart(1:npart)%igpart==mpart(1:npart)%ngpart))then
   print*,'ERROR: total number of ghost partitions mismatched!'
   print*,'Total number of ghost partitions'
@@ -1085,8 +1063,6 @@ do i_part=1,npart
   write(16,*)'this partition'
   write(16,*)i_part-1
   write(16,*)'number of ghost partitions, max ngpart, max number of elements'
-  !print*,mpart(i_part)%gpart(1:mpart(i_part)%ngpart)%nelmt
-  !print*,'max',maxval(mpart(i_part)%gpart(1:mpart(i_part)%ngpart)%nelmt)
   write(16,*)mpart(i_part)%ngpart,max_ngpart,maxval(mpart(i_part)%gpart(1:mpart(i_part)%ngpart)%nelmt)
   do j_part=1,mpart(i_part)%ngpart
     gpartid=mpart(i_part)%gpartid(j_part)
@@ -1541,8 +1517,6 @@ character(len=80) :: out_fname
 
 write(format_str,*)ceiling(log10(real(npart)+1.))
 format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-!print*,format_str
-!print*,trim(out_path)//trim(xfile)//'_proc',iproc
 ! open output file
 write(out_fname, fmt=format_str)trim(out_path)//trim(xfile)//'_proc',iproc
 open(unit=16,file=trim(out_fname),&
@@ -1667,7 +1641,6 @@ end do
 ! write water properties if any
 write(16,*)nwmat
 do i=1,nwmat
-  !print*,nwmat,i,waterid(i)
   write(16,*)waterid(i)
 enddo
 close(16)
@@ -1980,7 +1953,6 @@ num_interface = 0
 
     ! writes out MPI interfaces elements
     write(16,*) my_ninterface, maxval(my_nb_interfaces)
-    !print*,'hi'
 
 !else
 ! writes out MPI interface elements
@@ -2089,10 +2061,6 @@ num_interface = 0
                   print *, "error in write_interfaces_database!", tab_interfaces(k*7+2), iproc
               end select
             end do
-
-            ! outputs infos
-            !print*,'  partition MPI interface:',iproc,num_interface
-            !print*,'    element faces: ',count_faces
 
         end if
 
