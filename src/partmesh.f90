@@ -174,23 +174,23 @@ write(*,*)'partition directory: ',out_path
 call cpu_time(cpu_tstart)
 
 ! reads in (CUBIT) mesh files: mesh_file,nodes_coord_file, ...
-  call read_mesh_files()
+call read_mesh_files()
 
 ! checks valence of nodes
-  call check_valence()
+call check_valence()
 
 ! partitions mesh
-  call scotch_partitioning()
+call scotch_partitioning()
 
 ! writes out database files
-  call write_mesh_databases()
+call write_mesh_databases()
 
-  write(*,*)'mesh partitioning finished successfully!'
+write(*,*)'mesh partitioning finished successfully!'
 
 ! elapsed time
-  call cpu_time(cpu_tend)
-  write(*,*)'total elapsed time: ',cpu_tend-cpu_tstart,'s'
-  write(*,*)'-----------------------------------------'
+call cpu_time(cpu_tend)
+write(*,*)'total elapsed time: ',cpu_tend-cpu_tstart,'s'
+write(*,*)'-----------------------------------------'
 
 end program partmesh
 !=======================================================
