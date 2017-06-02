@@ -1695,7 +1695,6 @@ integer,dimension(1:nelmnts) :: part
 
 ! local parameters
 integer :: i
-integer :: loc_node1,loc_node2,loc_node3,loc_node4
 integer :: loc_nspec2D_xmin,loc_nspec2D_xmax,loc_nspec2D_ymin,loc_nspec2D_ymax,&
 loc_nspec2D_bottom,loc_nspec2D_top
 

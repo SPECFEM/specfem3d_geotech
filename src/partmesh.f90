@@ -48,8 +48,8 @@ traction_stat=-1
 mesh_stat=-1
 material_stat=-1
 
-inp_path='../input/'
-out_path='../partition/'
+inp_path='./input/'
+out_path='./partition/'
 
 istraction=.false.
 write(*,'(a)',advance='no')'reading main input file...'

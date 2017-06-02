@@ -80,13 +80,10 @@ PARTMESH = $(BIN)/partmesh
 
 default: semgeotech psemgeotech
 
-test:
-	@echo $(FPFLAGS)
-
 clean:
 	rm -f *.mod $(BIN)/*.o core
 
-all: clean partmesh semgeotech psemgeotech
+all: partmesh semgeotech psemgeotech
 
 semgeotech: $(OBJ_semgeotech)
 	$(FC_COMPILE) -o $(semgeotech) $(OBJ_semgeotech) $(LIB)

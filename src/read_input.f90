@@ -87,14 +87,14 @@ mat_count=0
 ! default value
 method='sem'
 if(ismpi)then
-  inp_path='../partition/'
-  part_path='../partition/'
-  mat_path='../partition/'
+  inp_path='./partition/'
+  part_path='./partition/'
+  mat_path='./partition/'
 else
-  inp_path='../input/'
-  mat_path='../input/'
+  inp_path='./input/'
+  mat_path='./input/'
 endif
-out_path='../output/'
+out_path='./output/'
 
 eqkx=0.0_kreal
 eqky=0.0_kreal
@@ -265,8 +265,8 @@ do
     call split_string(tag,',',args,narg)
     call seek_integer('ispart',ival,args,narg,istat)
     if(istat==0)ismatpart=ival
-    ! if not partitioned default location is ../input
-    if(ismatpart==0)mat_path='../input/'
+    ! if not partitioned default location is ./input
+    if(ismatpart==0)mat_path='./input/'
     call seek_string('matpath',strval,args,narg)
     if (.not. isblank(strval))mat_path=trim(strval)
     slen=len_trim(mat_path)
