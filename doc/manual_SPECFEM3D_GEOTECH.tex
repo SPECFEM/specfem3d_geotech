@@ -282,9 +282,9 @@ Legitimate input lines have the format\\
 
 Example:\\
 \texttt{preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
-inp\_path=\sq{../input}, part\_path=\sq{../partition}, out\_path=\sq{../output/}}\\
+inp\_path=\sq{./input}, part\_path=\sq{./partition}, out\_path=\sq{./output/}}\\
 
-All legitimate input lines should be written in lower case. Line type and argument-value pairs must be separated by a space. Each argument-value pair must be separated by a comma(,) and a space/s. No space/s are recommended before line type and in between argument name and "=" or "=" and argument value. If argument value is a string, the FORTRAN 90 string (i.e., enclosed within single quotes) should be used, for example, \texttt{inp\_path=\sq{../input}}. If the argument value is a vector (i.e., multi-valued), a list of values separated by space (no comma!) shoud be used, e.g, \texttt{srf=1.0 1.2 1.3 1.4}.
+All legitimate input lines should be written in lower case. Line type and argument-value pairs must be separated by a space. Each argument-value pair must be separated by a comma(,) and a space/s. No space/s are recommended before line type and in between argument name and "=" or "=" and argument value. If argument value is a string, the FORTRAN 90 string (i.e., enclosed within single quotes) should be used, for example, \texttt{inp\_path=\sq{./input}}. If the argument value is a vector (i.e., multi-valued), a list of values separated by space (no comma!) shoud be used, e.g, \texttt{srf=1.0 1.2 1.3 1.4}.
 
 \subsection{Line types}
 
@@ -314,9 +314,9 @@ Only the following arguments under the specified line types are permitted.\\
   \item[nglly] : number of GLL points along $y$-axis [integer > 1].
   \item[ngllz] : number of GLL points along $z$-axis [integer > 1]. \\\\
   {\emph{Note: Although the program can use different values of}} \texttt{ngllx}, \texttt{nglly}, {\emph{and}} \texttt{ngllz}, {\emph{it is recommended to use same number of GLL points along all axes.}}
-  \item[inp\_path]  : input path where the input data are located [string, optional, default $\Rightarrow$ \texttt{\sq{../input}}].
-  \item[part\_path] : partition path where the partitioned data will be or are located [string, optional, default $\Rightarrow$ \texttt{\sq{../partition}}]. Only required for parallel processing.
-  \item[out\_path]  : output path where the output data will be stored [string, optional, default $\Rightarrow$ \texttt{\sq{../output}}].\\
+  \item[inp\_path]  : input path where the input data are located [string, optional, default $\Rightarrow$ \texttt{\sq{./input}}].
+  \item[part\_path] : partition path where the partitioned data will be or are located [string, optional, default $\Rightarrow$ \texttt{\sq{./partition}}]. Only required for parallel processing.
+  \item[out\_path]  : output path where the output data will be stored [string, optional, default $\Rightarrow$ \texttt{\sq{./output}}].\\
 \end{adescription}
 
 
@@ -355,7 +355,7 @@ Only the following arguments under the specified line types are permitted.\\
 \begin{adescription}{nl\_maxiter}
   \item[matfile]: file name of material list [string].
   \item[ispart]: flag to indicate whether the material file is partitioned [integer, optional, 0 = No, 1 = Yes, default $\Rightarrow$ 1]. Only required for parallel processing.
-  \item[matpath]: path to material file [string, optional, default $\Rightarrow$ \texttt{\sq{../input}} for serial or unpartitioned material file in parallel and \texttt{\sq{../partition}} for partitioned material file in parallel].
+  \item[matpath]: path to material file [string, optional, default $\Rightarrow$ \texttt{\sq{./input}} for serial or unpartitioned material file in parallel and \texttt{\sq{./partition}} for partitioned material file in parallel].
   \item[allelastic]: assume all entire domain as elastic [integer, optional, 0 = No, 1 = Yes, default $\Rightarrow$ 0].\\
 \end{adescription}
 
@@ -408,7 +408,7 @@ Only the following arguments under the specified line types are permitted.\\
 \#input file elastic.sem\\
 \#pre information\\
 preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
-inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
 zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
@@ -431,7 +431,7 @@ control: cg\_tol=1e-8, cg\_maxiter=5000\\
 \#input file validation1.sem\\
 \#pre information\\
 preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
-inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
 zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
@@ -455,7 +455,7 @@ nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20\\
 \#input file validation1.psem\\
 \#pre information\\
 preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, \& \\
-ngnod=8, inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+ngnod=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
 zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
@@ -479,7 +479,7 @@ nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20\\
 \#input file excavation\_3d.sem\\
 \#pre information\\
 preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
-inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{excavation\_3d\_coord\_x}, yfile=\sq{excavation\_3d\_coord\_y}, \& \\
 zfile=\sq{excavation\_3d\_coord\_z}, confile=\sq{excavation\_3d\_connectivity}, \& \\
@@ -505,7 +505,7 @@ nexcav=3, excavid=2 3 4, ninc=10\\
 \#input file excavation\_3d.psem\\
 \#pre information\\
 preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, \& \\
-ngnod=8, inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+ngnod=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{excavation\_3d\_coord\_x}, yfile=\sq{excavation\_3d\_coord\_y}, \& \\
 zfile=\sq{excavation\_3d\_coord\_z}, confile=\sq{excavation\_3d\_connectivity}, \& \\

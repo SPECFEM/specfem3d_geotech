@@ -1,5 +1,5 @@
 #pre information
-preinfo: nproc=32, method='sem', ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, inp_path='../input', out_path='../output/'
+preinfo: nproc=32, method='sem', ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, inp_path='./input', out_path='./output/'
 
 #mesh information
 mesh: xfile='excavation_mine_coord_x', yfile='excavation_mine_coord_y', zfile='excavation_mine_coord_z', &

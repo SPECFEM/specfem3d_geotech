@@ -1,5 +1,5 @@
 #pre information
-preinfo: method='sem', ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, inp_path='../input', out_path='../output/'
+preinfo: method='sem', ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, inp_path='./input', out_path='./output/'
 
 #mesh information
 mesh: xfile='validation3_size2_sem_coord_x', yfile='validation3_size2_sem_coord_y', zfile='validation3_size2_sem_coord_z', &
