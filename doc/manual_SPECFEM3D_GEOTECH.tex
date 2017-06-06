@@ -101,7 +101,7 @@ and supported by industry partners BP, Statoil, and Total. Some of the routines 
 \chapter{Introduction}
 \section{Background}
 
-\pack\ is a free and open-source command-driven software for 3D slope stability analysis~\citep[for more details see][]{gharti2012b} and simulation of 3D multistage excavation~\citep[for more details see][]{gharti2012a} based on the spectral-element method~\citep[e.g.,][]{patera1984,canuto1988,seriani1994,faccioli1997,komatitsch1998,komatitsch1999,peter2011}. The slope stability and the excavation routines were originally started from the routines found in the book ``Programming the finite element method''~\citep{smith2004}. The software can run on a single processor as well as multi-core machines or large clusters. It is written mainly in FORTRAN 90, and parallelized using
+\pack\ is a free and open-source command-driven software for 3D slope stability analysis~\citep[for more details see][]{gharti2012a} and simulation of 3D multistage excavation~\citep[for more details see][]{gharti2012b} based on the spectral-element method~\citep[e.g.,][]{patera1984,canuto1988,seriani1994,faccioli1997,komatitsch1998,komatitsch1999,peter2011}. The slope stability and the excavation routines were originally started from the routines found in the book ``Programming the finite element method''~\citep{smith2004}. The software can run on a single processor as well as multi-core machines or large clusters. It is written mainly in FORTRAN 90, and parallelized using
 MPI~\citep{gropp1994,pacheco1997} based on domain decomposition. For the domain decomposition, the open-source graph partitioning library SCOTCH~\citep{pellegrini1996} is used. The element-by-element preconditioned conjugate-gradient method~\citep[e.g.,][]{hughes1983,law1986,king1987,barragy1988} is implemented to solve the linear equations. For elastoplastic failure,
 a Mohr-coulomb failure criterion is used with a viscoplastic strain method~ \citep{zienkiewicz1974}.\\
 
@@ -151,8 +151,11 @@ or using, for example, \texttt{7-zip (www.7-zip.org)} under WINDOWS. The package
 
 \section{Prerequisites}
 \begin{itemize}[-]
-  \item \underline{CMake build system}. The CMake version $\ge$ 2.8.4 is necessary to configure the software. It is free and open-source, and can be downloaded from \texttt{www.cmake.org}.
-  \item \underline{Make utility}. The make utility is necessary to build the software using Makefile. This utility is usually installed by default in most LINUX systems. Under WINDOWS, one can use Cygwin (\texttt{www.cygwin.com}) or MinGW (\texttt{www.mingw.org}) to install the make utility.
+  \item \underline{CMake build system}. The CMake version $\ge$ 2.8.4 is necessary to configure the software. It is free and open-source, and can be downloaded from \texttt{www.cmake.org}. In order to check if the CMake is already installed, type\\
+  \texttt{cmake -{}-version}
+  
+  \item \underline{Make utility}. The make utility is necessary to build the software using Makefile. This utility is usually installed by default in most LINUX systems. Under WINDOWS, one can use Cygwin (\texttt{www.cygwin.com}) or MinGW (\texttt{www.mingw.org}) to install the make utility.  In order to check if the CMake is already installed, type\\
+  \texttt{make -{}-version}
   \item \underline{A recent FORTRAN compiler}. The software is written mainly in FORTRAN 90, but it also uses a few FORTRAN 2003 features (e.g., streaming IO). These features are already available in most of the FORTRAN compilers, e.g., gfortran version $\ge$ 4.2 (\texttt{gcc.gnu.org/wiki/GFortran}) and g95 (\texttt{www.g95.org}).
 \end{itemize}
   Following libraries are necessary for parallel processing.
@@ -169,7 +172,7 @@ or using, for example, \texttt{7-zip (www.7-zip.org)} under WINDOWS. The package
 \section{Configure}
 \label{sec:configure}
 
-Software package \pack\ is configured using CMake, and the package uses an out-of-source build. Hence, \underline{DO NOT} build in the same source directory. Let's say the full path to the package (source directory) is \texttt{\$HOME/download/\pack}.
+Software package \pack\ is configured using CMake, and the package uses an out-of-source build. Hence, \underline{DO NOT} build in the same source directory. Let's say the full path to the package (source directory) is \texttt{\$HOME/projects/\pack}.
 
 \begin{itemize}
 \item Create a separate build directory, e.g.,\\
@@ -794,7 +797,7 @@ This is an EnSight Gold CASE file written in ASCII format. This file contain the
 
 \subsection{SOS file}
 
-This is an EnSight Gold server-of-server file for parallel visualization. The \texttt{write\_sos.f90} program provided in the \texttt{/utilities/} may be used to generate this file. See Chapter~\ref{chap:utilities}, Section~\ref{sec:sos} for more detail.
+This is an EnSight Gold server-of-server file for parallel visualization. The \texttt{write\_sos.f90} program provided in the \texttt{/util/} may be used to generate this file. See Chapter~\ref{chap:utilities}, Section~\ref{sec:sos} for more detail.
 
 All above EnSight Gold files correspond to the model with spectral-element mesh. Additionally, the CASE file/s and mesh file/s are written for the original model. These file names follow the similar conventions and they have the tag \texttt{\sq{original}} in the file name headers.
 
@@ -841,7 +844,7 @@ The program \texttt{exodus2sem.c} contained in the utilities directory can be us
 \texttt{gcc -o exodus2sem exodus2sem.c}
 \subsubsection*{Run}
  \texttt{exodus2sem} {\emph{EXODUS\_mesh\_file}} {\emph{OPTIONS}}\\
- For more details, see \texttt{/utilities/README\_exodus2sem}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
+ For more details, see \texttt{/util/README\_exodus2sem}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
 
 \section{Generate SOS file}
 \label{sec:sos}
@@ -852,7 +855,7 @@ The program \texttt{write\_sos.f90} contained in the utilities directory can be 
 \subsubsection*{Run}
 \texttt{exodus2sem} {\it{input\_file}}\\
 
-For more details, see \texttt{/utilities/README\_write\_sos}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
+For more details, see \texttt{/util/README\_write\_sos}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
 
 \bibliographystyle{chicago}
 \bibliography{manual_SPECFEM3D_GEOTECH}
