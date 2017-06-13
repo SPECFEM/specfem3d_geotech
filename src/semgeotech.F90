@@ -5,7 +5,6 @@ program semgeotech
 ! import necessary libraries
 use global
 use string_library, only : parse_file
-!use math_constants
 use mesh_spec
 #if (USE_MPI)
 use mpi_library
@@ -46,7 +45,6 @@ errtag=""; errcode=-1
 call start_process(ismpi,stdout)
 
 call get_command_argument(0, prog)
-!----input and initialisation----
 if (command_argument_count() <= 0) then
   call error_stop('ERROR: no input file!',stdout,myrank)
 endif
@@ -81,7 +79,6 @@ call get_command_argument(1, inp_fname)
 ! read input data
 call read_input(ismpi,myrank,inp_fname,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
-!call sync_process()
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
@@ -149,13 +146,12 @@ tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
 min_nelmt=minscal(nelmt); min_nnode=minscal(nnode)
 if(myrank==0)then
-write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',min_nelmt
-write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',min_nnode
+write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',      &
+min_nelmt
+write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',      &
+min_nnode
 endif
 
-!call sync_process
-
-!stop
 nenod=ngll !(ngllx*nglly*ngllz) ! number of elemental nodes (nodes per element)
 ! number of elemental degrees of freedom
 nedof=nndof*nenod
@@ -192,21 +188,18 @@ write(11,'(a)')'GEOMETRY'
 if(nexcav==0)then
   write(11,'(a,a/)')'model:    ',trim(file_head)//trim(ptail)//'.geo'
 else
-  write(11,'(a,i10,a,a/)')'model:    ',ts,' ',trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.geo'
+  write(11,'(a,i10,a,a/)')'model:    ',ts,' ',trim(file_head)//'_step'//      &
+  wild_char(1:twidth)//trim(ptail)//'.geo'
 endif
 
 write(11,'(a)')'VARIABLE'
-!write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' displacement ', &
-!trim(file_head)//'_step'//wild_char(1:twidth)//'.dis'
-!write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' principal_stress ', &
-!trim(file_head)//'_step'//wild_char(1:twidth)//'.sig'
 
 if(savedata%disp)then
-  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','displacement',' ',  &
+  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','displacement',' ', &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.dis'
 endif
 if(savedata%stress)then
-  write(11,'(a,i10,a,a,a,a,/)')'tensor symm per node: ',ts,' ','stress',' ',   &
+  write(11,'(a,i10,a,a,a,a,/)')'tensor symm per node: ',ts,' ','stress',' ',  &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.sig'
 endif
 if(savedata%psigma)then
