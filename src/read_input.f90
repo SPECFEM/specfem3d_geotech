@@ -115,7 +115,8 @@ if (ios /= 0)then
   return
 endif
 do
-  read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
+  ! This will read a line and proceed to next line
+  read(11,'(a)',iostat=ios)line
   if (ios/=0)exit
   ! check for blank and comment line
   if (isblank(line) .or. iscomment(line,'#'))cycle
@@ -126,7 +127,8 @@ do
   if (tmp_char=='&')then
     slen=len(line)
     tag=trim(line(1:ind-1))
-    read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
+    ! This will read a line and proceed to next line
+    read(11,'(a)',iostat=ios)line
     tag=trim(tag)//trim(line)
   endif
   call first_token(tag,token)
@@ -145,7 +147,6 @@ do
         write(errtag,*)'ERROR: number of processors and images must be equal!'
         return
       endif
-      !phead=get_string('phead',args,narg)
     endif
     call seek_string('method',strval,args,narg)
     if (.not. isblank(strval))method=trim(strval)
@@ -314,10 +315,6 @@ do
       return
     endif
     call split_string(tag,',',args,narg)
-    !cg_tol=get_real('cg_tol',args,narg)
-    !cg_maxiter=get_integer('cg_maxiter',args,narg)
-    !nl_tol=get_real('nl_tol',args,narg)
-    !nl_maxiter=get_integer('nl_maxiter',args,narg)
     call seek_real('cg_tol',rval,args,narg,istat)
     if(istat==0)cg_tol=rval
     call seek_integer('cg_maxiter',ival,args,narg,istat)
@@ -332,7 +329,8 @@ do
     srf=1.0_kreal
     call seek_real_vect('srf',rvect,nsrf,args,narg,istat)
     if(nsrf>1 .and. istat/=0)then
-      write(errtag,'(a)')'ERROR: argument "srf" not found or insufficient list for "srf"!'
+      write(errtag,'(a)')'ERROR: argument "srf" not found or insufficient list&
+      & for "srf"!'
       return
     endif
     if(istat==0)srf=rvect
@@ -356,7 +354,8 @@ do
       excavid=get_integer_vect('excavid',nexcavid_all,args,narg)
     endif
     if(nsrf>1 .and. nexcav>1)then
-      write(errtag,'(a)')'ERROR: cannot run slope stabiliy and excavation simultaneously!'
+      write(errtag,'(a)')'ERROR: cannot run slope stabiliy and excavation&
+      & simultaneously!'
       return
     endif
     !---------------------------
@@ -402,43 +401,43 @@ do
 
 enddo ! do
 if(.not.iswater)savedata%porep=.false.
-! check for material list
-!if (mat_count/=nmat)then
-!  write(*,'(/,a)')'ERROR: number of materials doesn''t match with total number!'
-!  return
-!endif
 
 ! check input status
 if (preinfo_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read pre information! make sure the line with "preinfo:" token is correct.'
+  write(errtag,'(a)')'ERROR: cannot read pre information! make sure the line&
+  & with "preinfo:" token is correct.'
   return
 endif
 
 ! check input status
 if (mesh_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read mesh information! make sure the line with "mesh:" token is correct.'
+  write(errtag,'(a)')'ERROR: cannot read mesh information! make sure the line&
+  & with "mesh:" token is correct.'
   return
 endif
 
 ! check output status
 if (bc_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read BC information! make sure the line with "bc:" token is correct.'
+  write(errtag,'(a)')'ERROR: cannot read BC information! make sure the line&
+  & with "bc:" token is correct.'
   return
 endif
 
 ! check material status
 if (material_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read material information! make sure the line with "material:" token is correct.'
+  write(errtag,'(a)')'ERROR: cannot read material information! make sure the&
+  & line with "material:" token is correct.'
   return
 endif
 
 ! check control status
 if (control_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read control information! make sure the line with "control:" token is correct.'
+  write(errtag,'(a)')'ERROR: cannot read control information! make sure the&
+  & line with "control:" token is correct.'
   return
 endif
 if(myrank==0)write(*,*)'complete!'
-!--------------------------------------------------------
+!-------------------------------------------------------------------------------
 
 ! set data path
 if(ismpi)then
@@ -448,13 +447,8 @@ else
 endif
 
 if(myrank==0)write(*,'(a)',advance='no')'reading mesh & material properties...'
-!write(format_str,*)ceiling(log10(real(nproc)+1))
-!format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
 ! read coordinates information
 do i=1,ndim
-  !open(unit=11,file=trim(inp_path)//trim(coordfile(i)),action='read',status='old')
-  ! open output file
-  !write(fname, fmt=format_str)trim(inp_path)//trim(coordfile(i))//'_proc',myrank
   fname=trim(data_path)//trim(coordfile(i))//trim(ptail)
   open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
   if( ios /= 0 ) then
@@ -481,11 +475,7 @@ do i=1,ndim
   endif
 enddo
 close(11)
-!sync all
 ! read connectivity
-!open(unit=11,file=trim(inp_path)//trim(confile),action='read',status='old')
-! open output file
-!write(fname, fmt=format_str)trim(inp_path)//trim(confile)//'_proc',myrank
 fname=trim(data_path)//trim(confile)//trim(ptail)
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
@@ -507,9 +497,6 @@ close(11)
 
 
 ! read material id
-!open(unit=11,file=trim(inp_path)//trim(idfile),action='read',status='old')
-! open output file
-!write(fname, fmt=format_str)trim(inp_path)//trim(idfile)//'_proc',myrank
 fname=trim(data_path)//trim(idfile)//trim(ptail)
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
@@ -535,8 +522,6 @@ endif
 close(11)
 
 ! read material lists
-! open output file
-!write(fname, fmt=format_str)trim(inp_path)//trim(matfile)//'_proc',myrank
 if(ismatpart==0)then ! material file not partitioned
   fname=trim(mat_path)//trim(matfile)
 elseif(ismatpart==1)then ! material file partitioned
@@ -558,7 +543,8 @@ do i=1,nmat
   read(11,*)imat,mat_domain,gam(i),ym(i),nu(i),phi(i),coh(i),psi(i)
 enddo
 if(minval(mat_id)<1 .or. maxval(mat_id)>nmat)then
-  write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined material regions!'
+  write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined&
+  & material regions!'
   return
 endif
 water=.false.
