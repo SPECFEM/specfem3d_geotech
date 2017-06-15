@@ -27,7 +27,8 @@ There will be several output files:
 *_coord_? : total number of nodes followed by nodal coordinate ? (? -> x, y, z)
 *_connectivity : total number of elements followed by connectivity list
 *_material_id : total number of elements followed by material IDs
-*_??bcu? : node IDs which have u? = 0 as the boundary conditions (?? -> ns or ss, ? -> x, y, z)
+*_??bcu? : node IDs which have u? = 0 as the boundary conditions
+(?? -> ns or ss, ? -> x, y, z)
 ------------------------------------------------------
 DEVELOPER:
   Hom Nath Gharti
@@ -46,10 +47,10 @@ OPTIONS:
   -fac: use this option to multiply coordinates. this is importantn for unit
         conversion, e.g., to convert m to km use -fac=0.001
   -bin: use this option if you want to convert exodus binary directly, provided
-        that the command ncdump is in the path. ncdump is a part of netCDF library
-        that can be downloaded freely from
-        http://www.unidata.ucar.edu/downloads/netcdf/index.jsp. use -bin=1 for binary
-        or -bin=0 for ascii file.
+        that the command ncdump is in the path. ncdump is a part of netCDF
+        library that can be downloaded freely from
+        http://www.unidata.ucar.edu/downloads/netcdf/index.jsp. 
+        use -bin=1 for binary or -bin=0 for ascii file.
 HISTORY:
   HNG,Apr 23,2010;HNG,Apr 17,2010;HNG,Feb 08,2009
 TODO:
@@ -82,7 +83,8 @@ int blk_count,ns_count,ss_count; /* block, node set count */
 int ns_nbc; /* number of bc types in each node set */
 int ss_nbc; /* number of bc types in each side set */
 int dim_stat,ns_stat,ss_stat,con_stat,coord_stat,mat_stat; /* status */
-int *blk_nelmt,*blk_nenod; /* number of elements, number of nodes per element in each node */
+int *blk_nelmt,*blk_nenod;
+/* number of elements, number of nodes per element in each node */
 int *ns_nnode,*ss_nside; /* number of nodes in each node set */
 
 double fac,ftmp; /* multiplication factor for coordinates, temporary float */
@@ -152,7 +154,8 @@ if (isbin){
   /* convert binary netCDF file to ascii file */
   sprintf(dumc,"ncdump %s > %s.txt",argv[1],fonly);
   if (system(dumc)!=0){
-  printf("ERROR: command \"%s\" cannot be executed! use -bin=0 or no option for ascii input file! \n",dumc);
+  printf("ERROR: command \"%s\" cannot be executed! use -bin=0 or no option \
+  for ascii input file! \n",dumc);
   exit(-1);
   }
   printf("complete!\n");
