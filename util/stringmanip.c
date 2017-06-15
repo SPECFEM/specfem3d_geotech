@@ -16,7 +16,8 @@ void extractFileonly(char *filename, char *fileonly)
   nchar=strlen(filename);
   nslash=0; /* Default value */
   for(i=0; i<nchar; i++){
-    if(filename[nchar-i]=='/' || filename[nchar-i]=='\\'){ /* Integer epression! */
+    if(filename[nchar-i]=='/' || filename[nchar-i]=='\\'){
+    /* Integer epression! */
       nslash=nchar-i+1;
       break;
     }
@@ -32,7 +33,7 @@ void removeExtension(char *filename, char *noextfile)
 {
   int i, nchar, ndot;
   /* Extract file name without directory path */
-  nchar=strlen(filename);/*printf("%s\n",filename);*//*printf("%s\n",noextfile);*/
+  nchar=strlen(filename);
   ndot=nchar; /* Default value */
   for(i=0; i<nchar; i++){
     if(filename[nchar-i]=='.'){ /* Integer epression! */
@@ -40,10 +41,8 @@ void removeExtension(char *filename, char *noextfile)
       break;
     }
   }
-  /* printf("%d %d\n",nchar,ndot); */
   strncpy(noextfile,filename,ndot);
   noextfile[ndot]='\0'; /* This is usually requred for srncpy and srncat */
-  /* printf("%s\n",noextfile); */
 }
 /*======================================*/
 
@@ -55,7 +54,6 @@ int number, max;
   int digits;
   char ext[10], format[20];
 
-  /* printf("Hi\n"); */
   /* determine number of digits */
   digits = 1;
   if (max < 1) max = 1;
@@ -96,7 +94,8 @@ char **argv;
 }
 /*======================================*/
 
-/*  This function returns the position of last character of string s2 if s2 is found in string s1 */
+/* This function returns the position of last character of string s2 if s2 is
+ * found in string s1 */
 int stringpos(char *s1, char *s2)
 {
   int nchar1,nchar2,i1,i2,ipos,spos,stat;
@@ -125,8 +124,8 @@ int stringpos(char *s1, char *s2)
 }
 /*======================================*/
 
-/*  This function returns 1 if string s contains '#' as the first non-white space character
-  otherwise 0 */
+/* This function returns 1 if string s contains '#' as the first non-white
+ * space character otherwise 0 */
 int commentline(char *s)
 {
   int i,nchar,stat; /* stat = 1:yes, 0: No */
@@ -231,8 +230,9 @@ return(0);
 }
 /*======================================*/
 
-/*  This function assigns the corresponding value immediately after the '=' or ':' sign following
-  the string arg to var, and exits the execution if no such arg is found in string s
+/* This function assigns the corresponding value immediately after the '=' or
+ * ':' sign following the string arg to var, and exits the execution if no 
+ * such arg is found in string s
 
   May 16,2008,HNG: Now the argument name can be a part of other word in the line
   for eg vfile and file can not be problem!*/
@@ -293,9 +293,9 @@ int getvalue(char *s, char *arg, char *type, int *var)
 }
 /*======================================*/
 
-/*  This function assigns the corresponding value immediately after the '=' or ':' sign following
-  the string arg to var, and returns (-1) if no such arg is found in string s, otherwise this
-  function is exactly same as getvalue */
+/* This function assigns the corresponding value immediately after the '=' or
+ * ':' sign following the string arg to var, and returns (-1) if no such arg is
+ * found in string s, otherwise this function is exactly same as getvalue */
 #define nsymb 4
 int getvaluestat(char *s, char *arg, char *type, int *var)
 {
@@ -319,7 +319,6 @@ int getvaluestat(char *s, char *arg, char *type, int *var)
 
   if(pos == 0){
     /* Variable not found */
-    /* printf("Variable \"%s\" not found!\n",arg); */
     return(-1);
   }
 
@@ -354,13 +353,13 @@ int getvaluestat(char *s, char *arg, char *type, int *var)
 }
 /*======================================*/
 
-/*  This function returns the position of last character of string s2 in s1 if s2 is found in string s1 */
+/* This function returns the position of last character of string s2 in s1 if 
+ * s2 is found in string s1 */
 int matchfirstword(char *s1, char *s2)
 {
   int nchar1,nchar2,i1,i2,ipos,stat,match;
   nchar1=strlen(s1);
   nchar2=strlen(s2);
-  /*printf("%d %d\n",nchar1,nchar2);*/
   match=0;
   if(nchar2>nchar1)return(match); /* No match */
 
@@ -492,7 +491,8 @@ int uppercase(char *s){
 
 /* This function determines the byte order of the processor architecture
 source: http://www.ibm.com/developerworks/aix/library/au-endianc/index.html?ca=drs-
-Use a character pointer to the bytes of an int and then check its first byte to see if it is 0 or 1.
+Use a character pointer to the bytes of an int and then check its first byte
+to see if it is 0 or 1. 
 Mar 18,2009 (Princeton University) */
 #define LE 0 /* Little Endian */
 #define BE 1 /* Big Endian */
