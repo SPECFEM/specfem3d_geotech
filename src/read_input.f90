@@ -149,7 +149,6 @@ do
         write(errtag,*)'ERROR: number of processors and images must be equal!'
         return
       endif
-      !phead=get_string('phead',args,narg)
     endif
     call seek_string('method',strval,args,narg)
     if (.not. isblank(strval))method=trim(strval)
@@ -331,8 +330,8 @@ do
     srf=1.0_kreal
     call seek_real_vect('srf',rvect,nsrf,args,narg,istat)
     if(nsrf>1 .and. istat/=0)then
-      write(errtag,'(a)')'ERROR: argument "srf" not found or insufficient &
-      & list for "srf"!'
+      write(errtag,'(a)')'ERROR: argument "srf" not found or insufficient list&
+      & for "srf"!'
       return
     endif
     if(istat==0)srf=rvect
@@ -356,7 +355,7 @@ do
       excavid=get_integer_vect('excavid',nexcavid_all,args,narg)
     endif
     if(nsrf>1 .and. nexcav>1)then
-      write(errtag,'(a)')'ERROR: cannot run slope stabiliy and excavation &
+      write(errtag,'(a)')'ERROR: cannot run slope stabiliy and excavation&
       & simultaneously!'
       return
     endif
@@ -406,40 +405,40 @@ if(.not.iswater)savedata%porep=.false.
 
 ! check input status
 if (preinfo_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read pre information! make sure the line &
+  write(errtag,'(a)')'ERROR: cannot read pre information! make sure the line&
   & with "preinfo:" token is correct.'
   return
 endif
 
 ! check input status
 if (mesh_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read mesh information! make sure the line &
+  write(errtag,'(a)')'ERROR: cannot read mesh information! make sure the line&
   & with "mesh:" token is correct.'
   return
 endif
 
 ! check output status
 if (bc_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read BC information! make sure the line &
+  write(errtag,'(a)')'ERROR: cannot read BC information! make sure the line&
   & with "bc:" token is correct.'
   return
 endif
 
 ! check material status
 if (material_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read material information! make sure the &
+  write(errtag,'(a)')'ERROR: cannot read material information! make sure the&
   & line with "material:" token is correct.'
   return
 endif
 
 ! check control status
 if (control_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read control information! make sure the &
+  write(errtag,'(a)')'ERROR: cannot read control information! make sure the&
   & line with "control:" token is correct.'
   return
 endif
 if(myrank==0)write(*,*)'complete!'
-!--------------------------------------------------------
+!-------------------------------------------------------------------------------
 
 ! set data path
 if(ismpi)then
@@ -497,6 +496,7 @@ else
 endif
 close(11)
 
+! read material id
 fname=trim(data_path)//trim(idfile)//trim(ptail)
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
@@ -542,7 +542,7 @@ do i=1,nmat
   read(11,*)imat,mat_domain,gam(i),ym(i),nu(i),phi(i),coh(i),psi(i)
 enddo
 if(minval(mat_id)<1 .or. maxval(mat_id)>nmat)then
-  write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined &
+  write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined&
   & material regions!'
   return
 endif

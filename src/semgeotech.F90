@@ -146,9 +146,9 @@ tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
 min_nelmt=minscal(nelmt); min_nnode=minscal(nnode)
 if(myrank==0)then
-write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',      &
+write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',       &
 min_nelmt
-write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',      &
+write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',       &
 min_nnode
 endif
 
@@ -184,7 +184,6 @@ write(11,'(a)')'FORMAT'
 write(11,'(a,/)')'type:  ensight gold'
 
 write(11,'(a)')'GEOMETRY'
-!write(11,'(a,a,/)')'model:    ',trim(geo_file)
 if(nexcav==0)then
   write(11,'(a,a/)')'model:    ',trim(file_head)//trim(ptail)//'.geo'
 else
@@ -203,8 +202,8 @@ if(savedata%stress)then
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.sig'
 endif
 if(savedata%psigma)then
-  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','principal_stress',' ', &
-  trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.psig'
+  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','principal_stress',  &
+  ' ',trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.psig'
 endif
 if(savedata%porep)then
    write(11,'(a,a,a,a,a,/)')'scalar per node: ',' ','pore_pressure',' ', &
@@ -215,12 +214,13 @@ if(savedata%vmeps)then
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.eps'
 endif
 if(savedata%scf)then
-  write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','stress_concentration_factor',' ', &
-  trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.scf'
+  write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ',                     &
+  'stress_concentration_factor',' ',trim(file_head)//'_step'//                 &
+  wild_char(1:twidth)//trim(ptail)//'.scf'
 endif
 if(savedata%maxtau)then
-  write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','max_shear_stress',' ', &
-  trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.mtau'
+  write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','max_shear_stress',  &
+  ' ',trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.mtau'
 endif
 if(savedata%nsigma)then
   write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','normal_stress',' ', &
@@ -246,14 +246,17 @@ close(11)
 
 ! Format string
 write(format_str,*)twidth
-format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//',a)'
+format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))// &
+',a)'
 
 ! write geo file for inital stage (original)
 ! open Ensight Gold geo file to store mesh data
 if(nexcav==0)then
-  write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//trim(ptail)//'.geo'
+  write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//trim(ptail)// &
+  '.geo'
 else
-  write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//'_step',0,trim(ptail)//'.geo'
+  write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//'_step',0,    &
+  trim(ptail)//'.geo'
 endif
 npart=1
 destag='unstructured meshes'
@@ -307,7 +310,7 @@ else
   ! excavation
   call semexcav3d(ismpi,gnod,sum_file,ptail,format_str)
 endif
-!-----------------------------------
+!-------------------------------------------------------------------------------
 
 ! compute elapsed time
 call cpu_time(cpu_tend)
@@ -321,7 +324,7 @@ open(10,file=trim(sum_file),status='old',position='append',action='write')
 write(10,*)'ELAPSED TIME, MAX ELAPSED TIME, MEAN ELAPSED TIME'
 write(10,fmt=format_str)telap,max_telap,mean_telap
 close(10)
-!-----------------------------------
+!-------------------------------------------------------------------------------
 
 if(myrank==0)then
   write(stdout,*) ! write new line
@@ -334,5 +337,5 @@ call sync_process
 call close_process()
 
 end program semgeotech
-!===========================================
+!===============================================================================
 
