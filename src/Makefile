@@ -30,8 +30,7 @@ OBJ = $(BIN)/global.o           \
       $(BIN)/string_library.o   \
       $(BIN)/math_library.o     \
       $(BIN)/shape_library.o    \
-      $(BIN)/compute_bmat.o     \
-      $(BIN)/compute_cmat.o     \
+      $(BIN)/elastic.o     \
       $(BIN)/read_input.o       \
       $(BIN)/gll_library.o      \
       $(BIN)/mesh_spec.o        \
@@ -131,11 +130,8 @@ $(BIN)/mesh_spec.o: mesh_spec.f90
 $(BIN)/shape_library.o: shape_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/shape_library.o shape_library.f90
 
-$(BIN)/compute_bmat.o: compute_bmat.f90
-	$(FC_COMPILE) -c -o $(BIN)/compute_bmat.o compute_bmat.f90
-
-$(BIN)/compute_cmat.o: compute_cmat.f90
-	$(FC_COMPILE) -c -o $(BIN)/compute_cmat.o compute_cmat.f90
+$(BIN)/elastic.o: elastic.f90
+	$(FC_COMPILE) -c -o $(BIN)/elastic.o elastic.f90
 
 $(BIN)/gauss_library.o: gauss_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/gauss_library.o gauss_library.f90
