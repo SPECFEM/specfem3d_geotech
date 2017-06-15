@@ -8,8 +8,7 @@ SET(srcsem
    string_library.f90
    math_library.f90
    shape_library.f90
-   compute_bmat.f90
-   compute_cmat.f90
+   elastic.f90
    read_input.f90
    gll_library.f90
    mesh_spec.f90

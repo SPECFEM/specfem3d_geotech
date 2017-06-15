@@ -13,6 +13,7 @@ use gll_library
 !use mesh_spec
 use shape_library
 use math_library
+use elastic
 use preprocess
 !use gauss_library
 use excavation

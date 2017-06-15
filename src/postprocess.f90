@@ -33,7 +33,8 @@ end subroutine overburden_stress
 ! this subroutine computes elastic stress from the known displacement
 subroutine elastic_stress(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,dlagrange_gll,x,stress_local)
 use global,only:ndim,nedof,nenod,ngnod,ngll,nst,g_coord,ym,nu
-use preprocess,only:compute_bmat,compute_cmat
+use elastic,only:compute_cmat
+use preprocess,only:compute_bmat
 use math_library,only:determinant,invert
 implicit none
 integer,intent(in) :: nelmt,neq,gnod(8)
@@ -74,7 +75,8 @@ end subroutine elastic_stress
 subroutine elastic_stress_intact(nelmt_intact,neq,gnod,elmt_intact,g_num,gdof_elmt, &
 mat_id,dshape_hex8,dlagrange_gll,x,stress_local)
 use global,only:ndim,nedof,nelmt,nenod,ngnod,ngll,nst,g_coord,ym,nu
-use preprocess,only:compute_bmat,compute_cmat
+use elastic,only:compute_cmat
+use preprocess,only:compute_bmat
 use math_library,only:determinant,invert
 implicit none
 integer,intent(in) :: nelmt_intact,neq,gnod(8)
