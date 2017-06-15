@@ -77,11 +77,6 @@ do i_mat=1,nmat
     if(beta_nuphi<one)beta_nuphi=one+zerotol
     nuf(i_mat)=half*(one-snphif/beta_nuphi)
     istat=1 ! material properties has changed
-    !print*,phi,phif
-    !print*,nu,nuf
-    !print*,snphif,one-two*nuf
-    !print*,beta_nuphi
-    !stop
   endif
 enddo
 return
@@ -152,7 +147,7 @@ implicit none
 real(kind=kreal),intent(in)::stress(:)
 real(kind=kreal),intent(out)::m1(:,:),m2(:,:),m3(:,:)
 real(kind=kreal)::sx,sy,txy,tyz,tzx,sz,dx,dy,dz,sigm,  &
-r3=3.0_kreal,r6=6.0_kreal,r9=9.0_kreal
+r3=3.0_kreal,r6=6.0_kreal
 integer::nst,i,j
 
 nst=ubound(stress,1)

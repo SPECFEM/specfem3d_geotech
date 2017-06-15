@@ -6,20 +6,19 @@ use mpi
 contains
 
 ! start MPI processes
-subroutine start_process(ismpi,myid,nproc,ounit)
+subroutine start_process(ismpi,ounit)
+use global,only:myrank,nproc
 implicit none
 logical,intent(out) :: ismpi
-integer,intent(out) :: myid,nproc
 integer,intent(in) :: ounit
 integer :: errcode
 ismpi=.true. ! parallel
 call MPI_INIT(errcode)
 if(errcode /= 0) call mpierror('ERROR: cannot initialize MPI!',errcode,ounit)
-call MPI_COMM_RANK(MPI_COMM_WORLD,myid,errcode)
+call MPI_COMM_RANK(MPI_COMM_WORLD,myrank,errcode)
 if(errcode /= 0) call mpierror('ERROR: cannot find processor ID (rank)!',errcode,ounit)
 call MPI_COMM_SIZE(MPI_COMM_WORLD,nproc,errcode)
 if(errcode /= 0) call mpierror('ERROR: cannot find number of processors!',errcode,ounit)
-myid=myid+1
 return
 end subroutine start_process
 !=======================================================
@@ -55,12 +54,12 @@ end subroutine sync_process
 !=======================================================
 
 ! write error and stop
-subroutine error_stop(errtag,ounit,myid)
+subroutine error_stop(errtag,ounit,myrank)
 implicit none
 character(*),intent(in) :: errtag
-integer,intent(in) :: ounit,myid
+integer,intent(in) :: ounit,myrank
 integer :: errcode,ierr
-if(myid==1)write(ounit,'(a)')errtag
+if(myrank==0)write(ounit,'(a)')errtag
 call close_process
 ! stop all the MPI processes, and exit
 write(ounit,'(a)')'aborting MPI...'
@@ -70,15 +69,15 @@ end subroutine error_stop
 !=======================================================
 
 ! get processor tag
-function proc_tag(myid,nproc) result(ptag)
+function proc_tag() result(ptag)
+use global,only:myrank,nproc
 implicit none
-integer,intent(in) :: myid,nproc
 character(len=20) :: format_str,ptag
 
 write(format_str,*)ceiling(log10(real(nproc)+1.))
 format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
 
-write(ptag,fmt=format_str)'_proc',myid-1
+write(ptag,fmt=format_str)'_proc',myrank
 
 return
 end function

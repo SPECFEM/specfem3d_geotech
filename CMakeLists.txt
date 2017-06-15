@@ -1,7 +1,7 @@
 # cmake file for the cross-platform configure of the
 # software package SPECFEM3D_GEOTECH
 # REVISION:
-#   HNG, Sep 06,2011;
+#   HNG, Apr,2017; HNG, Sep 06,2011;
 
 # required cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4 FATAL_ERROR)

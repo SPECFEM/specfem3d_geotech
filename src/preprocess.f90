@@ -25,8 +25,8 @@ contains
 ! this subrotine computes the stiffness matrix, diagonal preconditioner, and
 ! body loads (gravity and pseudostatic loads) optionally
 ! TODO: optional precoditioner,optional assembly of stiffness
-subroutine stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nu,ym,dshape_hex8, &
-lagrange_gll,dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,pseudoeq)
+subroutine stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nu,ym, &
+dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,pseudoeq)
 use set_precision
 use global,only:ndim,nst,ngll,nedof,nenod,ngnod,g_coord,eqkx,eqky,eqkz,nmat
 use math_library,only:determinant,invert
@@ -34,7 +34,7 @@ implicit none
 integer,intent(in) :: nelmt,neq,gnod(8) ! nelmt (only intact elements)
 integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt) ! only intact elements
 real(kind=kreal),intent(in) :: gam(nmat),nu(nmat),ym(nmat)
-real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),lagrange_gll(ngll,ngll), &
+real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),                   &
 dlagrange_gll(ndim,ngll,ngll),gll_weights(ngll)
 real(kind=kreal),intent(out) :: storkm(nedof,nedof,nelmt),dprecon(0:neq)
 real(kind=kreal),intent(inout),optional :: extload(0:neq)
@@ -57,21 +57,17 @@ storkm=zero; dprecon=zero
 do i_elmt=1,nelmt
   call compute_cmat(cmat,ym(mat_id(i_elmt)),nu(mat_id(i_elmt)))
   num=g_num(:,i_elmt)
-  coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
-  !print*,ngllx,nglly,ngllz,ngll,nndof,nenod ,gdof(:,g_num(:,ielmt))
-  egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,ielmt)),(/nndof*nenod/)) !g=g_g(:,ielmt)
+  coord=transpose(g_coord(:,num(gnod)))
+  egdof=gdof_elmt(:,i_elmt)
   km=zero; eld=zero; eqload=zero
   idof=0
   do i=1,ngll
-    !call shape_function(fun,gll_points(i))
-    ! compute Jacobian at GLL point using 20 noded element
-    !call shape_derivative(der,gll_points(:,i))
-    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord)
+    jac=matmul(dshape_hex8(:,:,i),coord)
     detjac=determinant(jac)
     call invert(jac)
 
-    deriv=matmul(jac,dlagrange_gll(:,i,:)) ! use der for gll
-    call compute_bmat(bmat,deriv) !!! gll bmat matrix
+    deriv=matmul(jac,dlagrange_gll(:,i,:))
+    call compute_bmat(bmat,deriv)
     km=km+matmul(matmul(transpose(bmat),cmat),bmat)*detjac*gll_weights(i)
     idof=idof+3
     ! interpolation functions are orthogonal, hence it is simple

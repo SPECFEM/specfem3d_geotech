@@ -126,7 +126,7 @@ integer,intent(in) :: npart,ncomp,n
 real,dimension(ncomp,n),intent(in) :: var
 
 character(len=80) :: buffer ! this must be 80 characters long
-integer :: i,ios,j
+integer :: i,ios
 
 if(ncomp/=1 .and. ncomp/=3 .and. ncomp/=6)then
   write(*,'(/,a)')'ERROR: invalid ncomp for ensight per_node variable!'

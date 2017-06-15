@@ -109,8 +109,7 @@ ngnod = esize
 ! reads node coordinates
 ! open file to read
 inp_fname=trim(inp_path)//trim(xfile)
-open(unit=98, file=trim(inp_fname),&
-  status='old', form='formatted', iostat = istat)
+open(unit=98, file=trim(inp_fname),status='old',form='formatted',iostat = istat)
 if( istat /= 0 ) then
   print*,'could not open file:',trim(inp_fname)
   stop
@@ -124,8 +123,7 @@ close(98)
 
 ! open file to read
 inp_fname=trim(inp_path)//trim(yfile)
-open(unit=98, file=trim(inp_fname),&
-  status='old', form='formatted', iostat = istat)
+open(unit=98, file=trim(inp_fname),status='old',form='formatted',iostat = istat)
 if( istat /= 0 ) then
   print*,'could not open file:',trim(inp_fname)
   stop
@@ -136,8 +134,7 @@ close(98)
 
 ! open file to read
 inp_fname=trim(inp_path)//trim(zfile)
-open(unit=98, file=trim(inp_fname),&
-  status='old', form='formatted', iostat = istat)
+open(unit=98, file=trim(inp_fname),status='old',form='formatted',iostat = istat)
 if( istat /= 0 ) then
   print*,'could not open file:',trim(inp_fname)
   stop
@@ -154,8 +151,7 @@ print*, 'total nodes:', nnodes
 ! tell you which point is connected with others)
 ! open file to read
 inp_fname=trim(inp_path)//trim(confile)
-open(unit=98, file=trim(inp_fname),&
-  status='old', form='formatted', iostat = istat)
+open(unit=98, file=trim(inp_fname),status='old',form='formatted',iostat = istat)
 if( istat /= 0 ) then
   print*,'could not open file:',trim(inp_fname)
   stop
@@ -179,17 +175,6 @@ do ispec = 1, nspec
 
   read(98,*)elmnts(:,ispec)
 
-  !outputs info for each element to see ordering
-  !print*,'ispec: ',ispec
-  !print*,'  ',num_elmnt, elmnts(5,num_elmnt), elmnts(1,num_elmnt),elmnts(4,num_elmnt), elmnts(8,num_elmnt), &
-  !      elmnts(6,num_elmnt), elmnts(2,num_elmnt), elmnts(3,num_elmnt), elmnts(7,num_elmnt)
-  !print*,'elem:',num_elmnt
-  !do i=1,8
-  !  print*,' i ',i,'val :',elmnts(i,num_elmnt),&
-  !    nodes_coords(1,elmnts(i,num_elmnt)),nodes_coords(2,elmnts(i,num_elmnt)),nodes_coords(3,elmnts(i,num_elmnt))
-  !enddo
-  !print*
-
 end do
 close(98)
 print*, 'total elements:', nspec
@@ -197,15 +182,13 @@ print*, 'total elements:', nspec
 ! reads material associations
 ! open file to read
 inp_fname=trim(inp_path)//trim(idfile)
-open(unit=98, file=trim(inp_fname),&
-  status='old', form='formatted', iostat = istat)
+open(unit=98, file=trim(inp_fname),status='old',form='formatted',iostat = istat)
 if( istat /= 0 ) then
   print*,'could not open file:',trim(inp_fname)
   stop
 endif
 
 read(98,*) nspec
-!print*,nspec; stop
 allocate(matid(2,nspec))
 
 do ispec = 1, nspec
@@ -234,8 +217,7 @@ close(98)
 count_undef_mat = 0
 ! open file to read
 inp_fname=trim(inp_path)//trim(matfile)
-open(unit=98, file=trim(inp_fname),&
-  status='old', form='formatted', iostat = istat)
+open(unit=98, file=trim(inp_fname),status='old',form='formatted',iostat = istat)
 if( istat /= 0 ) then
   print*,'could not open file:',trim(inp_fname)
   stop
@@ -273,29 +255,29 @@ allocate(undef_mat_prop(6,count_undef_mat),undef_mat_domain(count_def_mat))
 !      status='old', form='formatted')
 !read(98,*) ! skip one line
 do imat=1,count_def_mat
-    ! material definitions
-    !
-    ! format: note that we save the arguments in a slightly different order in
-    ! mat_prop(:,:)
-    ! #(6) material_domain_id #(0) material_id  #(1) gam #(2) ym #(3) nu #(4)
-    ! phi #(5) anisotropy_flag
-    !
-    ! idomain_id,gam,ym,nu,phi,coh,psi
-    read(98,*) num_mat,mat_domain(num_mat),mat_prop(:,num_mat)
-    !read(98,*) num_mat, mat_prop(1,num_mat),mat_prop(2,num_mat),&
-    !           mat_prop(3,num_mat),mat_prop(4,num_mat),mat_prop(5,num_mat)
-    !mat_domian(num_mat) = idomain_id
-    !mat_prop(1,num_mat) = gam
-    !mat_prop(2,num_mat) = ym
-    !mat_prop(3,num_mat) = nu
-    !mat_prop(4,num_mat) = phi
-    !mat_prop(5,num_mat) = coh
-    !mat_prop(6,num_mat) = psi
+  ! material definitions
+  !
+  ! format: note that we save the arguments in a slightly different order in
+  ! mat_prop(:,:)
+  ! #(6) material_domain_id #(0) material_id  #(1) gam #(2) ym #(3) nu #(4)
+  ! phi #(5) anisotropy_flag
+  !
+  ! idomain_id,gam,ym,nu,phi,coh,psi
+  read(98,*) num_mat,mat_domain(num_mat),mat_prop(:,num_mat)
+  !read(98,*) num_mat, mat_prop(1,num_mat),mat_prop(2,num_mat),&
+  !           mat_prop(3,num_mat),mat_prop(4,num_mat),mat_prop(5,num_mat)
+  !mat_domian(num_mat) = idomain_id
+  !mat_prop(1,num_mat) = gam
+  !mat_prop(2,num_mat) = ym
+  !mat_prop(3,num_mat) = nu
+  !mat_prop(4,num_mat) = phi
+  !mat_prop(5,num_mat) = coh
+  !mat_prop(6,num_mat) = psi
 
-    if(num_mat < 0 .or. num_mat > count_def_mat)then
-      print*,"ERROR: Invalid nummaterial_velocity_file file."
-      stop
-    endif
+  if(num_mat < 0 .or. num_mat > count_def_mat)then
+    print*,"ERROR: Invalid nummaterial_velocity_file file."
+    stop
+  endif
 
 end do
 ! reads in undefined material properties
@@ -318,8 +300,7 @@ close(98)
 ! reads in absorbing boundary files
 ! open file to read
 inp_fname=trim(inp_path)//trim(uxfile)
-open(unit=98, file=trim(inp_fname),&
-  status='old', form='formatted', iostat = istat)
+open(unit=98, file=trim(inp_fname),status='old',form='formatted',iostat = istat)
 if( istat /= 0 ) then
   print*,'WARNING: could not open file:',trim(inp_fname)
   !stop
@@ -358,8 +339,7 @@ print*, '  nspec2D_xmin = ', nspec2D_xmin
 
 ! reads in absorbing boundary files
 inp_fname=trim(inp_path)//trim(uyfile)
-open(unit=98, file=trim(inp_fname),&
-  status='old', form='formatted', iostat = istat)
+open(unit=98, file=trim(inp_fname),status='old',form='formatted',iostat = istat)
 if( istat /= 0 ) then
   print*,'WARNING: could not open file:',trim(inp_fname)
   !stop
@@ -381,8 +361,7 @@ print*, '  nspec2D_xmax = ', nspec2D_xmax
 
 ! reads in absorbing boundary files
 inp_fname=trim(inp_path)//trim(uzfile)
-open(unit=98, file=trim(inp_fname),&
-  status='old', form='formatted', iostat = istat)
+open(unit=98, file=trim(inp_fname),status='old',form='formatted',iostat = istat)
 if( istat /= 0 ) then
   print*,'WARNING: could not open file:',trim(inp_fname)
   !stop
@@ -451,8 +430,6 @@ call mesh2dual_ncommonnodes(nspec,nnodes,nsize,sup_neighbour,elmnts,xadj,      &
 adjncy,nnodes_elmnts,nodes_elmnts,max_neighbour,1)
 print*, 'mesh2dual: '
 print*, '  max_neighbour = ',max_neighbour
-!print*,xadj
-!print*,adjncy
 nb_edges = xadj(nspec+1)
 
 ! allocates & initializes partioning of elements
@@ -471,8 +448,8 @@ call acoustic_elastic_load(elmnts_load,nspec,count_def_mat,matid(2,:),mat_prop)
 
 ! SCOTCH partitioning
 call scotchfstratinit (scotchstrat(1), istat)
-  if (istat /= 0) then
-    stop 'ERROR : MAIN : Cannot initialize strat'
+if (istat /= 0) then
+  stop 'ERROR : MAIN : Cannot initialize strat'
 endif
 
 ! no need to use this for default strategy
@@ -483,7 +460,7 @@ endif
 
 call scotchfgraphinit (scotchgraph(1), istat)
 if (istat /= 0) then
-    stop 'ERROR : MAIN : Cannot initialize graph'
+  stop 'ERROR : MAIN : Cannot initialize graph'
 endif
 
 ! fills graph structure : see user manual (scotch_user5.1.pdf, page 72/73)
@@ -492,11 +469,8 @@ endif
 !                    #(6) vertex_load_array (optional) #(7) vertex_label_array
 !                    #(7) number_of_arcs                    #(8) adjacency_array
 !                    #(9) arc_load_array (optional)      #(10) istator
-call scotchfgraphbuild (scotchgraph(1), 0, nspec, &
-                      xadj(1), xadj(1), &
-                      elmnts_load (1), xadj (1), &
-                      nb_edges, adjncy(1), &
-                      adjncy(1), istat)
+call scotchfgraphbuild(scotchgraph(1),0,nspec,xadj(1),xadj(1),elmnts_load(1),  &
+                       xadj(1),nb_edges,adjncy(1),adjncy(1),istat)
 
 ! w/out element load, but adjacency array
 !call scotchfgraphbuild (scotchgraph (1), 0, nspec, &
@@ -507,27 +481,27 @@ call scotchfgraphbuild (scotchgraph(1), 0, nspec, &
 
 
 if (istat /= 0) then
-    stop 'ERROR : MAIN : Cannot build graph'
+  stop 'ERROR : MAIN : Cannot build graph'
 endif
 
 call scotchfgraphcheck (scotchgraph (1), istat)
 if (istat /= 0) then
-    stop 'ERROR : MAIN : Invalid check'
+  stop 'ERROR : MAIN : Invalid check'
 endif
 
 call scotchfgraphpart (scotchgraph (1), npart, scotchstrat(1),part(1),istat)
 if (istat /= 0) then
-    stop 'ERROR : MAIN : Cannot part graph'
+  stop 'ERROR : MAIN : Cannot part graph'
 endif
 
 call scotchfgraphexit (scotchgraph (1), istat)
 if (istat /= 0) then
-    stop 'ERROR : MAIN : Cannot destroy graph'
+  stop 'ERROR : MAIN : Cannot destroy graph'
 endif
 
 call scotchfstratexit (scotchstrat(1), istat)
 if (istat /= 0) then
-    stop 'ERROR : MAIN : Cannot destroy strat'
+  stop 'ERROR : MAIN : Cannot destroy strat'
 endif
 
 
@@ -545,7 +519,7 @@ call Construct_glob2loc_elmnts(nspec, part, glob2loc_elmnts,npart)
 
 ! local number of each node for each partition
 call Construct_glob2loc_nodes(nspec,nnodes,nsize,nnodes_elmnts,nodes_elmnts,   &
-part,glob2loc_nodes_npart,glob2loc_nodes_parts,glob2loc_nodes,npart)
+     part,glob2loc_nodes_npart,glob2loc_nodes_parts,glob2loc_nodes,npart)
 
 ! mpi interfaces
 
@@ -554,7 +528,7 @@ part,glob2loc_nodes_npart,glob2loc_nodes_parts,glob2loc_nodes,npart)
 ! acoustic/elastic boundaries WILL BE SEPARATED into different MPI partitions
 ! TODO:WARNING:call below may not be necessary
 call Construct_interfaces(nspec,sup_neighbour,part,elmnts,xadj,adjncy,         &
-tab_interfaces,tab_size_interfaces,ninterfaces,npart)
+     tab_interfaces,tab_size_interfaces,ninterfaces,npart)
 
 !or: uncomment if you want acoustic/elastic boundaries NOT to be separated into
 !different MPI partitions
@@ -571,10 +545,6 @@ subroutine write_mesh_databases
 
 allocate(my_interfaces(0:ninterfaces-1))
 allocate(my_nb_interfaces(0:ninterfaces-1))
-
-!write(format_str,*)ceiling(log10(real(npart)+1))
-!format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//',a)'
-!print*,format_str; stop
 
 ! writes out Database file for each partition
 do ipart = 0, npart-1
@@ -662,11 +632,14 @@ deallocate(ibelm_xmax,nodes_ibelm_xmax)
 deallocate(ibelm_ymin,nodes_ibelm_ymin)
 
 write(*,'(a)',advance='yes')'finding interfaces...'
-call find_interface(nspec,nnodes,part+1,elmnts+1,npart) ! I need all indices starting from 1 not 0
+call find_interface(nspec,nnodes,part+1,elmnts+1,npart)
+! I need all indices starting from 1 not 0
 write(*,'(a)')'complete!'
 deallocate(elmnts,part)
 write(*,'(a)',advance='yes')'writing interfaces...'
-call detect_ghost(out_phead,nspec,nnodes,npart,max_neighbour,glob2loc_elmnts(0:nspec-1)+1) ! I need all indices starting from 1 not 0
+call detect_ghost(out_phead,nspec,nnodes,npart,max_neighbour,                  &
+glob2loc_elmnts(0:nspec-1)+1)
+! I need all indices starting from 1 not 0
 write(*,'(a)')'complete!'
 deallocate(glob2loc_elmnts)
 

@@ -59,7 +59,8 @@ User Manual}}
 Dimitri Komatitsch, Aix-Marseille University, France\\
 Volker Oye, NORSAR, Norway \\
 Roland Martin, University of Toulouse, France \\
-Jeroen Tromp, Princeton University, USA}
+Jeroen Tromp, Princeton University, USA \\
+Zhenzhen Yan, China}
 
 \maketitle
 
@@ -101,13 +102,13 @@ and supported by industry partners BP, Statoil, and Total. Some of the routines 
 \chapter{Introduction}
 \section{Background}
 
-\pack\ is a free and open-source command-driven software for 3D slope stability analysis~\citep[for more details see][]{gharti2012b} and simulation of 3D multistage excavation~\citep[for more details see][]{gharti2012a} based on the spectral-element method~\citep[e.g.,][]{patera1984,canuto1988,seriani1994,faccioli1997,komatitsch1998,komatitsch1999,peter2011}. The slope stability and the excavation routines were originally started from the routines found in the book ``Programming the finite element method''~\citep{smith2004}. The software can run on a single processor as well as multi-core machines or large clusters. It is written mainly in FORTRAN 90, and parallelized using
+\pack\ is a free and open-source command-driven software for 3D slope stability analysis~\citep[for more details see][]{gharti2012a} and simulation of 3D multistage excavation~\citep[for more details see][]{gharti2012b} based on the spectral-element method~\citep[e.g.,][]{patera1984,canuto1988,seriani1994,faccioli1997,komatitsch1998,komatitsch1999,peter2011}. The slope stability and the excavation routines were originally started from the routines found in the book ``Programming the finite element method''~\citep{smith2004}. The software can run on a single processor as well as multi-core machines or large clusters. It is written mainly in FORTRAN 90, and parallelized using
 MPI~\citep{gropp1994,pacheco1997} based on domain decomposition. For the domain decomposition, the open-source graph partitioning library SCOTCH~\citep{pellegrini1996} is used. The element-by-element preconditioned conjugate-gradient method~\citep[e.g.,][]{hughes1983,law1986,king1987,barragy1988} is implemented to solve the linear equations. For elastoplastic failure,
 a Mohr-coulomb failure criterion is used with a viscoplastic strain method~ \citep{zienkiewicz1974}.\\
 
 This program does not automatically determine the factor of safety of slope stability. Simulations can be performed for a series of safety factors. After plotting the safety factor verses maximum displacement curve, one can determine the factor of safety of the given slope. Although the software is optimized for slope stability analysis and multistage excavation, other relevant simulations of quasistatic problems in solid (geo)mechanics can also be performed with this software.\\
 
-The software currently does not include an inbuilt mesher. Existing tools, such as Gmsh~\citep{geuzaine2009}, CUBIT~\citep{cubit2011}, TrueGrid~\citep{truegrid2006}, etc., can be used for hexahedral meshing, and the resulting mesh file can be converted to the input files required by \pack. Output data can be visualized and processed using the open-source visualization application ParaView (\texttt{www.paraview.org}).
+The software currently does not include an inbuilt mesher. Existing tools, such as Gmsh~\citep{geuzaine2009}, CUBIT/Trelis~\citep{cubit2011}, TrueGrid~\citep{truegrid2006}, etc., can be used for hexahedral meshing, and the resulting mesh file can be converted to the input files required by \pack. Output data can be visualized and processed using the open-source visualization application ParaView (\texttt{www.paraview.org}).
 
 \section{Status summary}
 \begin{desclist}{Pseudo-static earthquake loading}
@@ -122,7 +123,7 @@ The software currently does not include an inbuilt mesher. Existing tools, such 
 
 \section*{Revisions}
 
-HNG, Jan 12, 2012; HNG, Sep 08, 2011; HNG, Jul 12, 2011; HNG, May 20, 2011; HNG, Jan 17, 2011
+HNG, Apr 22, 2017; HNG, Jan 12, 2012; HNG, Sep 08, 2011; HNG, Jul 12, 2011; HNG, May 20, 2011; HNG, Jan 17, 2011
 
 
 \chapter{Getting started}
@@ -146,12 +147,16 @@ or using, for example, \texttt{7-zip (www.7-zip.org)} under WINDOWS. The package
 \item[~~partition/]            : contains partition files for parallel processing.
 \item[~~output/]               : default output folder. All output files are stored in this folder unless the different output path is defined in the main input file.
 \item[~~src/]                  : contains all source files.
+\item[~~util/]                  : contains several utilities source files.
 \end{adescription}
 
 \section{Prerequisites}
 \begin{itemize}[-]
-  \item \underline{CMake build system}. The CMake version $\ge$ 2.8.4 is necessary to configure the software. It is free and open-source, and can be downloaded from \texttt{www.cmake.org}.
-  \item \underline{Make utility}. The make utility is necessary to build the software using Makefile. This utility is usually installed by default in most LINUX systems. Under WINDOWS, one can use Cygwin (\texttt{www.cygwin.com}) or MinGW (\texttt{www.mingw.org}) to install the make utility.
+  \item \underline{CMake build system}. The CMake version $\ge$ 2.8.4 is necessary to configure the software. It is free and open-source, and can be downloaded from \texttt{www.cmake.org}. In order to check if the CMake is already installed, type\\
+  \texttt{cmake -{}-version}
+  
+  \item \underline{Make utility}. The make utility is necessary to build the software using Makefile. This utility is usually installed by default in most LINUX systems. Under WINDOWS, one can use Cygwin (\texttt{www.cygwin.com}) or MinGW (\texttt{www.mingw.org}) to install the make utility.  In order to check if the CMake is already installed, type\\
+  \texttt{make -{}-version}
   \item \underline{A recent FORTRAN compiler}. The software is written mainly in FORTRAN 90, but it also uses a few FORTRAN 2003 features (e.g., streaming IO). These features are already available in most of the FORTRAN compilers, e.g., gfortran version $\ge$ 4.2 (\texttt{gcc.gnu.org/wiki/GFortran}) and g95 (\texttt{www.g95.org}).
 \end{itemize}
   Following libraries are necessary for parallel processing.
@@ -168,7 +173,7 @@ or using, for example, \texttt{7-zip (www.7-zip.org)} under WINDOWS. The package
 \section{Configure}
 \label{sec:configure}
 
-Software package \pack\ is configured using CMake, and the package uses an out-of-source build. Hence, \underline{DO NOT} build in the same source directory. Let's say the full path to the package (source directory) is \texttt{\$HOME/download/\pack}.
+Software package \pack\ is configured using CMake, and the package uses an out-of-source build. Hence, \underline{DO NOT} build in the same source directory. Let's say the full path to the package (source directory) is \texttt{\$HOME/projects/\pack}.
 
 \begin{itemize}
 \item Create a separate build directory, e.g.,\\
@@ -281,9 +286,9 @@ Legitimate input lines have the format\\
 
 Example:\\
 \texttt{preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
-inp\_path=\sq{../input}, part\_path=\sq{../partition}, out\_path=\sq{../output/}}\\
+inp\_path=\sq{./input}, part\_path=\sq{./partition}, out\_path=\sq{./output/}}\\
 
-All legitimate input lines should be written in lower case. Line type and argument-value pairs must be separated by a space. Each argument-value pair must be separated by a comma(,) and a space/s. No space/s are recommended before line type and in between argument name and "=" or "=" and argument value. If argument value is a string, the FORTRAN 90 string (i.e., enclosed within single quotes) should be used, for example, \texttt{inp\_path=\sq{../input}}. If the argument value is a vector (i.e., multi-valued), a list of values separated by space (no comma!) shoud be used, e.g, \texttt{srf=1.0 1.2 1.3 1.4}.
+All legitimate input lines should be written in lower case. Line type and argument-value pairs must be separated by a space. Each argument-value pair must be separated by a comma(,) and a space/s. No space/s are recommended before line type and in between argument name and "=" or "=" and argument value. If argument value is a string, the FORTRAN 90 string (i.e., enclosed within single quotes) should be used, for example, \texttt{inp\_path=\sq{./input}}. If the argument value is a vector (i.e., multi-valued), a list of values separated by space (no comma!) shoud be used, e.g, \texttt{srf=1.0 1.2 1.3 1.4}.
 
 \subsection{Line types}
 
@@ -313,9 +318,9 @@ Only the following arguments under the specified line types are permitted.\\
   \item[nglly] : number of GLL points along $y$-axis [integer > 1].
   \item[ngllz] : number of GLL points along $z$-axis [integer > 1]. \\\\
   {\emph{Note: Although the program can use different values of}} \texttt{ngllx}, \texttt{nglly}, {\emph{and}} \texttt{ngllz}, {\emph{it is recommended to use same number of GLL points along all axes.}}
-  \item[inp\_path]  : input path where the input data are located [string, optional, default $\Rightarrow$ \texttt{\sq{../input}}].
-  \item[part\_path] : partition path where the partitioned data will be or are located [string, optional, default $\Rightarrow$ \texttt{\sq{../partition}}]. Only required for parallel processing.
-  \item[out\_path]  : output path where the output data will be stored [string, optional, default $\Rightarrow$ \texttt{\sq{../output}}].\\
+  \item[inp\_path]  : input path where the input data are located [string, optional, default $\Rightarrow$ \texttt{\sq{./input}}].
+  \item[part\_path] : partition path where the partitioned data will be or are located [string, optional, default $\Rightarrow$ \texttt{\sq{./partition}}]. Only required for parallel processing.
+  \item[out\_path]  : output path where the output data will be stored [string, optional, default $\Rightarrow$ \texttt{\sq{./output}}].\\
 \end{adescription}
 
 
@@ -354,7 +359,7 @@ Only the following arguments under the specified line types are permitted.\\
 \begin{adescription}{nl\_maxiter}
   \item[matfile]: file name of material list [string].
   \item[ispart]: flag to indicate whether the material file is partitioned [integer, optional, 0 = No, 1 = Yes, default $\Rightarrow$ 1]. Only required for parallel processing.
-  \item[matpath]: path to material file [string, optional, default $\Rightarrow$ \texttt{\sq{../input}} for serial or unpartitioned material file in parallel and \texttt{\sq{../partition}} for partitioned material file in parallel].
+  \item[matpath]: path to material file [string, optional, default $\Rightarrow$ \texttt{\sq{./input}} for serial or unpartitioned material file in parallel and \texttt{\sq{./partition}} for partitioned material file in parallel].
   \item[allelastic]: assume all entire domain as elastic [integer, optional, 0 = No, 1 = Yes, default $\Rightarrow$ 0].\\
 \end{adescription}
 
@@ -407,7 +412,7 @@ Only the following arguments under the specified line types are permitted.\\
 \#input file elastic.sem\\
 \#pre information\\
 preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
-inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
 zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
@@ -430,7 +435,7 @@ control: cg\_tol=1e-8, cg\_maxiter=5000\\
 \#input file validation1.sem\\
 \#pre information\\
 preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
-inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
 zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
@@ -454,7 +459,7 @@ nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20\\
 \#input file validation1.psem\\
 \#pre information\\
 preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, \& \\
-ngnod=8, inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+ngnod=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
 zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
@@ -478,7 +483,7 @@ nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20\\
 \#input file excavation\_3d.sem\\
 \#pre information\\
 preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
-inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{excavation\_3d\_coord\_x}, yfile=\sq{excavation\_3d\_coord\_y}, \& \\
 zfile=\sq{excavation\_3d\_coord\_z}, confile=\sq{excavation\_3d\_connectivity}, \& \\
@@ -504,7 +509,7 @@ nexcav=3, excavid=2 3 4, ninc=10\\
 \#input file excavation\_3d.psem\\
 \#pre information\\
 preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, \& \\
-ngnod=8, inp\_path=\sq{../input}, out\_path=\sq{../output/}\\\\
+ngnod=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{excavation\_3d\_coord\_x}, yfile=\sq{excavation\_3d\_coord\_y}, \& \\
 zfile=\sq{excavation\_3d\_coord\_z}, confile=\sq{excavation\_3d\_connectivity}, \& \\
@@ -793,7 +798,7 @@ This is an EnSight Gold CASE file written in ASCII format. This file contain the
 
 \subsection{SOS file}
 
-This is an EnSight Gold server-of-server file for parallel visualization. The \texttt{write\_sos.f90} program provided in the \texttt{/utilities/} may be used to generate this file. See Chapter~\ref{chap:utilities}, Section~\ref{sec:sos} for more detail.
+This is an EnSight Gold server-of-server file for parallel visualization. The \texttt{write\_sos.f90} program provided in the \texttt{/util/} may be used to generate this file. See Chapter~\ref{chap:utilities}, Section~\ref{sec:sos} for more detail.
 
 All above EnSight Gold files correspond to the model with spectral-element mesh. Additionally, the CASE file/s and mesh file/s are written for the original model. These file names follow the similar conventions and they have the tag \texttt{\sq{original}} in the file name headers.
 
@@ -840,7 +845,7 @@ The program \texttt{exodus2sem.c} contained in the utilities directory can be us
 \texttt{gcc -o exodus2sem exodus2sem.c}
 \subsubsection*{Run}
  \texttt{exodus2sem} {\emph{EXODUS\_mesh\_file}} {\emph{OPTIONS}}\\
- For more details, see \texttt{/utilities/README\_exodus2sem}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
+ For more details, see \texttt{/util/README\_exodus2sem}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
 
 \section{Generate SOS file}
 \label{sec:sos}
@@ -851,7 +856,7 @@ The program \texttt{write\_sos.f90} contained in the utilities directory can be 
 \subsubsection*{Run}
 \texttt{exodus2sem} {\it{input\_file}}\\
 
-For more details, see \texttt{/utilities/README\_write\_sos}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
+For more details, see \texttt{/util/README\_write\_sos}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
 
 \bibliographystyle{chicago}
 \bibliography{manual_SPECFEM3D_GEOTECH}

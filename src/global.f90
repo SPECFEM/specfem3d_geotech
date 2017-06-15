@@ -16,14 +16,12 @@ logical,parameter :: off=.false., on=.true.
 character(len=3) :: method
 integer,parameter :: ndim=3
 integer,parameter :: nndof=3 ! number of nodal degree of freedoms - ux, uy, uz
-!integer,parameter :: ngllx=3 ! number of gauss-lobatto-legendre points along x
-!integer,parameter :: nglly=3 ! number of gauss-lobatto-legendre points along y
-!integer,parameter :: ngllz=3 ! number of gauss-lobatto-legendre points along z
-! we always take ngllx=nglly=ngllz for the simplicity
-!integer,parameter :: ngll=ngllx*nglly*ngllz ! total number of GLL points
 ! number of gauss-lobatto-legendre points
 integer :: ngllx,nglly,ngllz,ngll
 integer,parameter :: ng=8 ! number of gauss points for FEM
+
+! rank or ID of this processor (starts from 0), number of processors
+integer :: myrank,nproc
 
 integer :: nenod, nedof ! number of elemental nodes, number of elemental
 !degree of freedoms -> nedof=nndof*nenod
@@ -31,6 +29,7 @@ integer :: ngnod ! number of geometrical nodes. usually, for FEM ngnod=nenod
 integer :: nnode,nelmt
 integer,allocatable :: mat_id(:)
 integer,allocatable :: g_num(:,:)
+integer,allocatable :: gdof(:,:)
 ! acceleration due to gravity
 real(kind=kreal),parameter :: mtokm=0.001_kreal,agrav=9.81_kreal
 real(kind=kreal),allocatable :: g_coord(:,:)
@@ -51,7 +50,8 @@ character(len=250) :: file_head,inp_path,out_path,part_path
 character(len=250) :: uxfile,uyfile,uzfile,gfile,trfile,wsfile
 integer :: cg_maxiter,nl_maxiter,nexcav,ninc,nsrf,ntstep
 real(kind=kreal) :: cg_tol,nl_tol
-integer,allocatable :: excavid(:),nexcavid(:) ! Excavation ID (regions), nunber of excavation IDs (regions) in each stage
+! Excavation ID (regions), nunber of excavation IDs (regions) in each stage
+integer,allocatable :: excavid(:),nexcavid(:)
 real(kind=kreal),allocatable :: srf(:) ! strength reduction factors
 
 ! initial stress

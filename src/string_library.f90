@@ -358,7 +358,6 @@ integer :: i,ios,narg
 ivect=0
 istat=-1
 do i=1,nvar
-  !print*,'hi',index(slist(1),vname,.true.)
   call split_string(slist(i),'=',args,narg)
   if (narg/=2)cycle
   if (vname==trim(adjustl(args(1))))then
@@ -458,7 +457,6 @@ character(len=250),dimension(2) :: args
 integer :: i,ios,narg
 
 do i=1,nvar
-  !print*,'hi',index(slist(1),vname,.true.)
   call split_string(slist(i),'=',args,narg)
   if (narg/=2)cycle
   if (vname==trim(adjustl(args(1))))then
@@ -488,7 +486,6 @@ integer :: i,ios,narg
 rvect=0.0_kreal
 istat=-1
 do i=1,nvar
-  !print*,'hi',index(slist(1),vname,.true.)
   call split_string(slist(i),'=',args,narg)
   if (narg/=2)cycle
   if (vname==trim(adjustl(args(1))))then

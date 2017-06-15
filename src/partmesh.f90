@@ -13,8 +13,8 @@ read_mesh_files,check_valence,scotch_partitioning, &
 write_mesh_databases,xfile,yfile,zfile,confile,idfile, &
 matfile,uxfile,uyfile,uzfile,trfile,istraction
 implicit none
-integer :: id,ind,ios,istat,narg,slen
-character(len=256) :: inp_fname,tmp_str
+integer :: ind,ios,istat,narg,slen
+character(len=256) :: inp_fname
 character(len=80) :: file_head,path,ext
 real :: cpu_tstart,cpu_tend
 
@@ -48,8 +48,8 @@ traction_stat=-1
 mesh_stat=-1
 material_stat=-1
 
-inp_path='../input/'
-out_path='../partition/'
+inp_path='./input/'
+out_path='./partition/'
 
 istraction=.false.
 write(*,'(a)',advance='no')'reading main input file...'
@@ -122,7 +122,6 @@ do
     trfile=get_string('trfile',args,narg)
     traction_stat=0
     istraction=.true.
-    !print*,trfile
     cycle
   endif
 
@@ -175,23 +174,23 @@ write(*,*)'partition directory: ',out_path
 call cpu_time(cpu_tstart)
 
 ! reads in (CUBIT) mesh files: mesh_file,nodes_coord_file, ...
-  call read_mesh_files()
+call read_mesh_files()
 
 ! checks valence of nodes
-  call check_valence()
+call check_valence()
 
 ! partitions mesh
-  call scotch_partitioning()
+call scotch_partitioning()
 
 ! writes out database files
-  call write_mesh_databases()
+call write_mesh_databases()
 
-  write(*,*)'mesh partitioning finished successfully!'
+write(*,*)'mesh partitioning finished successfully!'
 
 ! elapsed time
-  call cpu_time(cpu_tend)
-  write(*,*)'total elapsed time: ',cpu_tend-cpu_tstart,'s'
-  write(*,*)'-----------------------------------------'
+call cpu_time(cpu_tend)
+write(*,*)'total elapsed time: ',cpu_tend-cpu_tstart,'s'
+write(*,*)'-----------------------------------------'
 
 end program partmesh
 !=======================================================

@@ -2,12 +2,10 @@
 ! global degrees of freedom
 ! REVISION
 !   HNG, Jul 12,2011; ; HNG, Apr 09,2010
-subroutine apply_bc(ismpi,myid,nproc,gdof,neq,errcode,errtag)
+subroutine apply_bc(ismpi,neq,errcode,errtag)
 use global
 implicit none
 logical,intent(in) :: ismpi
-integer,intent(in) :: myid,nproc
-integer, dimension(nndof,nnode),intent(inout) :: gdof
 integer,intent(out) :: neq
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
@@ -18,8 +16,6 @@ integer :: ielmt,iface
 character(len=20) :: format_str,ptail
 character(len=250) :: fname
 character(len=150) :: data_path
-
-integer :: ipart ! partition ID
 
 type faces
   integer,dimension(:),allocatable :: nod
@@ -35,11 +31,10 @@ else
   data_path=trim(inp_path)
 endif
 
-ipart=myid-1 ! partition ID starts from 0
 if(ismpi)then
   write(format_str,*)ceiling(log10(real(nproc)+1))
   format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-  write(ptail, fmt=format_str)'_proc',ipart
+  write(ptail, fmt=format_str)'_proc',myrank
 else
   ptail=""
 endif
@@ -93,9 +88,8 @@ enddo
 !write(format_str,*)ceiling(log10(real(nproc)+1))
 !format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
 
-!write(fname, fmt=format_str)trim(inp_path)//trim(uxfile)//'_proc',ipart
+!write(fname, fmt=format_str)trim(inp_path)//trim(uxfile)//'_proc',myrank
 fname=trim(data_path)//trim(uxfile)//trim(ptail)
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -114,12 +108,8 @@ do
   gdof(1,g_num(face(iface)%nod,ielmt))=0
 enddo
 close(11)
-!sync all
-!call stop_all()
 
-!write(fname, fmt=format_str)trim(inp_path)//trim(uyfile)//'_proc',ipart
 fname=trim(data_path)//trim(uyfile)//trim(ptail)
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -139,9 +129,8 @@ do
 enddo
 close(11)
 
-!write(fname, fmt=format_str)trim(inp_path)//trim(uzfile)//'_proc',ipart
+!write(fname, fmt=format_str)trim(inp_path)//trim(uzfile)//'_proc',myrank
 fname=trim(data_path)//trim(uzfile)//trim(ptail)
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -153,9 +142,9 @@ endif
 !  write(*,'(/,a)')'ERROR: input file "',trim(inp_path)//trim(uzfile),'" cannot be opened!'
 !  stop
 !endif
-!if(myid==1) print*,'file:',fname
+!if(myrank==0) print*,'file:',fname
 read(11,*)itmp
-!if(myid==1) print*,itmp
+!if(myrank==0) print*,itmp
 do
   read(11,*,iostat=ios)ielmt,iface ! This will read a line and proceed to next line
   if (ios/=0)exit
