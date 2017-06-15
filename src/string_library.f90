@@ -1,12 +1,16 @@
 ! this module contains various routines to process string
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
 module string_library
 use set_precision
 contains
 
+!-------------------------------------------------------------------------------
 ! parse file name and return path, file head, and extension
 subroutine parse_file(fname,path,head,ext)
+implicit none
 character(len=*),intent(in) :: fname
 character(len=*),intent(out) :: path,head,ext
 integer :: i,ipath,iext,slen
@@ -44,9 +48,11 @@ path=fname(1:ipath)
 ext=fname(iext+1:slen)
 return
 end subroutine parse_file
+!===============================================================================
 
 ! check if line is blank
 logical function isblank(str)
+implicit none
 character(len=*) :: str
 
 isblank=.false.
@@ -54,10 +60,11 @@ isblank=.false.
 if (len(trim(str))==0)isblank=.true.
 return
 end function isblank
-!=====================================================
+!===============================================================================
 
 ! check if line is blank
 logical function iscomment(str,rch)
+implicit none
 character(len=*),intent(in) :: str
 character(len=1),intent(in) :: rch ! reference character for commenting
 character(len=1) :: ch
@@ -71,7 +78,7 @@ if (ch==rch)iscomment=.true.
 
 return
 end function iscomment
-!=====================================================
+!===============================================================================
 
 ! get first token of a string
 subroutine first_token(str,token)
@@ -100,7 +107,7 @@ enddo
 return
 
 end subroutine first_token
-!=====================================================
+!===============================================================================
 
 ! get first non-space character of a string if any
 subroutine first_char(str,ch,ind)
@@ -126,7 +133,7 @@ do i=1,slen
 enddo
 return
 end subroutine first_char
-!=====================================================
+!===============================================================================
 
 ! get last non-space character of a string if any
 subroutine last_char(str,ch,ind)
@@ -152,7 +159,7 @@ do i=slen,1,-1
 enddo
 return
 end subroutine last_char
-!=====================================================
+!===============================================================================
 
 ! split string with a delimter (delm) into several parts
 subroutine split_string(str,delm,args,narg)
@@ -189,11 +196,12 @@ enddo
 
 return
 end subroutine split_string
-!=====================================================
+!===============================================================================
 
 ! get string value from string list which contain a character '=' that separates
 ! variable name and variable vlue
 character(len=250) function get_string(vname,slist,nvar)
+implicit none
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*) :: slist
 integer,intent(in) :: nvar
@@ -212,11 +220,12 @@ enddo
 write(*,'(/,a)')'ERROR: cannot read the string variable "'//vname//'"!'
 stop
 end function get_string
-!=====================================================
+!===============================================================================
 
 ! seek string value from string list which contain a character '=' that separates
 ! variable name and variable vlue
 subroutine seek_string(vname,strval,slist,nvar)
+implicit none
 character(len=*),intent(in) :: vname
 character(len=*),intent(out) :: strval
 character(len=*),dimension(*) :: slist
@@ -238,7 +247,7 @@ return
 !write(*,'(/,a)')'ERROR: cannot read the string variable "'//vname//'"!'
 !stop
 end subroutine seek_string
-!=====================================================
+!===============================================================================
 
 ! get string vector from string list which contain a character '=' that separates
 ! variable name and variable vlue
@@ -264,11 +273,12 @@ enddo
 write(*,'(/,a)')'ERROR: cannot read the integer variable "'//vname//'"!'
 stop
 end function get_string_vect
-!=====================================================
+!===============================================================================
 
 ! get integer value from string list which contain a character '=' that separates
 ! variable name and variable vlue
 integer function get_integer(vname,slist,nvar)
+implicit none
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
@@ -287,11 +297,12 @@ enddo
 write(*,'(/,a)')'ERROR: cannot read the integer variable "'//vname//'"!'
 stop
 end function get_integer
-!=====================================================
+!===============================================================================
 
 ! seek integer value from string list which contain a character '=' that separates
 ! variable name and variable vlue
 subroutine seek_integer(vname,ival,slist,nvar,istat)
+implicit none
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
@@ -314,7 +325,7 @@ enddo
 !stop
 return
 end subroutine seek_integer
-!==========================================
+!===============================================================================
 
 ! get integer vector from string list which contain a character '=' that separates
 ! variable name and variable vlue
@@ -341,7 +352,7 @@ enddo
 write(*,'(/,a)')'ERROR: cannot read the integer variable "'//vname//'"!'
 stop
 end function get_integer_vect
-!=====================================================
+!===============================================================================
 
 ! seek integer vector from string list which contain a character '=' that separates
 ! variable name and variable vlue
@@ -370,11 +381,12 @@ enddo
 
 return
 end subroutine seek_integer_vect
-!=====================================================
+!===============================================================================
 
 ! get real value from string list which contain a character '=' that separates
 ! variable name and variable vlue
 real(kind=kreal) function get_real(vname,slist,nvar)
+implicit none
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
@@ -393,11 +405,12 @@ enddo
 write(*,'(/,a)')'ERROR: cannot read the real variable "'//vname//'"!'
 stop
 end function get_real
-!=====================================================
+!===============================================================================
 
 ! seek integer value from string list which contain a character '=' that separates
 ! variable name and variable vlue
 subroutine seek_real(vname,rval,slist,nvar,istat)
+implicit none
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
@@ -419,11 +432,12 @@ enddo
 
 return
 end subroutine seek_real
-!==========================================
+!===============================================================================
 
 ! get real value from string list which contain a character '=' that separates
 ! variable name and variable vlue
 double precision function get_double(vname,slist,nvar)
+implicit none
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
@@ -442,7 +456,7 @@ enddo
 write(*,'(/,a)')'ERROR: cannot read the double variable "'//vname//'"!'
 stop
 end function get_double
-!=====================================================
+!===============================================================================
 
 ! get real vector from string list which contain a character '=' that separates
 ! variable name and variable vlue
@@ -469,7 +483,7 @@ enddo
 write(*,'(/,a)')'ERROR: cannot read the real vector variable "'//vname//'"!'
 stop
 end function get_real_vect
-!=====================================================
+!===============================================================================
 
 ! seek real vector from string list which contain a character '=' that separates
 ! variable name and variable vlue
@@ -500,10 +514,11 @@ enddo
 !stop
 return
 end subroutine seek_real_vect
-!=====================================================
+!===============================================================================
 
 ! get format string for intger
 character(len=250) function form4int(n)
+implicit none
 integer,intent(in) :: n
 
 ! format for integer n
@@ -511,7 +526,7 @@ write(form4int,*)ceiling(log10(real(n)+1.))
 form4int='i'//trim(adjustl(form4int))
 
 end function form4int
-!=====================================================
+!===============================================================================
 
 function isalphabet(s) result(ind)
 ! isalphabet checks if a string contains only alphabets and blanks.
@@ -521,7 +536,6 @@ function isalphabet(s) result(ind)
 !    Input, character ( len = * ) S, the string to be checked.
 !    Output, logical isalphabet, is TRUE if the string contains only
 !    alphabetic characters and blanks.
-
 implicit none
 character(len=*),intent(in) :: s
 character :: c
@@ -544,7 +558,7 @@ do i=1,slen
 enddo
 ind = .true.
 end function isalphabet
-!=====================================================
+!===============================================================================
 
 end module string_library
-
+!===============================================================================

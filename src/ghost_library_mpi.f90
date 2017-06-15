@@ -4,6 +4,8 @@
 !   - better to avoid using allocatable component of derived type variable which
 !     is fortran 95 standard? How much influence will be on the performance with
 !     repeated allocate and deallocate
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, APR 15,2011; HNG, Apr 09,2010
 module ghost_library_mpi
@@ -24,7 +26,7 @@ type(ghost_partition),dimension(:),allocatable :: gpart
 
 contains
 
-!-----------------------------------------------------------
+!-------------------------------------------------------------------------------
 subroutine prepare_ghost()
 use global,only:ndim,nnode,nndof,ngllx,nglly,ngllz,g_num,g_coord,gdof,gfile,   &
 part_path,stdout
@@ -116,7 +118,6 @@ allocate(gpart(ngpart))
 gpart(1:ngpart)%nnode=0
 gpart(1:ngpart)%id=-1
 gpart(1:ngpart)%mindex=-1
-!allocate(cghost(ngpart)[*]) ! it will not work here, why?!:(
 
 do i_gpart=1,ngpart ! ghost partitions loop
   read(11,*) ! skip 1 line
@@ -125,7 +126,8 @@ do i_gpart=1,ngpart ! ghost partitions loop
 
   read(11,*) ! skip 1 line
   read(11,*)ngelmt
-  allocate(itmp_array(ngelmt*maxngll_face)) ! I don't know why this doesn't work!
+  allocate(itmp_array(ngelmt*maxngll_face))
+  ! I don't know why this doesn't work!
   itmp_array=-1
   switch_node=.false.
   ncount=0
@@ -150,7 +152,8 @@ do i_gpart=1,ngpart ! ghost partitions loop
       jg0=minval(jgn(node_face(eid,:))); jg1=maxval(jgn(node_face(eid,:)))
       kg0=minval(kgn(node_face(eid,:))); kg1=maxval(kgn(node_face(eid,:)))
     else
-      write(errtag,*)'ERROR: wrong etype:',etype,' for ghost partition ',mpartid,'!'
+      write(errtag,*)'ERROR: wrong etype:',etype,' for ghost partition ',      &
+      mpartid,'!'
       call error_stop(errtag,stdout,myrank)
     endif
 
@@ -188,8 +191,6 @@ do i_gpart=1,ngpart ! ghost partitions loop
 
   !sort nodes
   call sort_array_coord(ndim,ncount,xp,yp,zp,gpart(i_gpart)%node,new_ncount)
-  !call sort_array_coord(ndim,ncount,xp,yp,zp,gpart_node(i_gpart,1:ncount),    &
-  !new_ncount)
   deallocate(xp,yp,zp)
   if(ncount/=new_ncount)then
     write(errtag,*)'ERROR: number of ghost nodes mismatched after sorting!'
@@ -206,7 +207,7 @@ maxngnode=maxvec(gpart(1:ngpart)%nnode)
 
 return
 end subroutine prepare_ghost
-!=======================================================
+!===============================================================================
 
 ! modify ghost gdof based on the modified gdof
 subroutine modify_ghost(isnode)
@@ -227,7 +228,7 @@ do i_gpart=1,ngpart
 enddo ! do i_gpart
 return
 end subroutine modify_ghost
-!=======================================================
+!===============================================================================
 
 ! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
@@ -248,12 +249,6 @@ real(kind=kreal),parameter :: zero=0.0_kreal
 integer :: ierr,i_gpart,ncount
 array_g=array
 send_array=zero; recv_array=zero
-!do i_gpart=1,ngpart
-!  ncount=gpart(i_gpart)%nnode*nndof
-  ! array to send
-!  send_array(1:ncount,i_gpart)=array(gpart(i_gpart)%gdof)
-!enddo
-!call sync_process()
 do i_gpart=1,ngpart
   ncount=gpart(i_gpart)%nnode*nndof
   ! array to send
@@ -286,7 +281,7 @@ call sync_process()
 array_g(0)=zero
 return
 end subroutine assemble_ghosts
-!=======================================================
+!===============================================================================
 
 ! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
@@ -299,12 +294,10 @@ integer,intent(in) :: nndof
 real(kind=kreal),dimension(nndof,nnode),intent(in) :: array
 real(kind=kreal),dimension(nndof,nnode),intent(out) :: array_g
 
-!logical,dimension(maxngnode,ngpart) :: lsend_array,lrecv_array
 real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array
 integer,parameter :: tag=0
 integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
-!integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node
 real(kind=kreal),parameter :: zero=0.0_kreal
 integer :: ierr,i_gpart,ncount,ngnode
 
@@ -344,7 +337,7 @@ enddo
 call sync_process()
 return
 end subroutine assemble_ghosts_nodal
-!=======================================================
+!===============================================================================
 
 ! this subroutine counts the active ghost partitions for each node on the
 ! interfaces.
@@ -401,7 +394,7 @@ call sync_process()
 
 return
 end subroutine count_active_nghosts
-!=======================================================
+!===============================================================================
 
 ! this subroutine distributes the excavation loads discarded by a processors due
 ! to the special geoemtry partition. it will not distribute if the load is used
@@ -418,13 +411,11 @@ real(kind=kreal),dimension(nndof,nnode),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
 
 real(kind=kreal),dimension(nndof,nnode) :: tarray
-!logical,dimension(maxngnode,ngpart) :: lsend_array,lrecv_array
 real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array
 real(kind=kreal),dimension(nndof,maxngnode) :: garray
 integer,parameter :: tag=0
 integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
-!integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node
 real(kind=kreal),parameter :: zero=0.0_kreal
 integer :: i,j,ierr,i_gpart,igdof,ignode,ncount,ngnode
 
@@ -498,7 +489,7 @@ enddo
 array_g(0)=zero
 return
 end subroutine distribute2ghosts
-!===========================================
+!===============================================================================
 
 ! deallocate ghost variables
 subroutine free_ghost()
@@ -510,10 +501,9 @@ enddo
 deallocate(gpart)
 return
 end subroutine free_ghost
-!===========================================
+!===============================================================================
 
 ! routines below are imported and modified from SPECFEM3D
-
 ! subroutines to sort MPI buffers to assemble between chunks
 subroutine sort_array_coord(ndim,npoint,x,y,z,ibool,nglob)
 
@@ -523,209 +513,204 @@ subroutine sort_array_coord(ndim,npoint,x,y,z,ibool,nglob)
 ! returns: sorted indexing array (ibool),  reordering array (iglob) &
 ! number of global points (nglob)
 
- use math_constants, only : zerotol
- implicit none
+use math_constants, only : zerotol
+implicit none
 
- integer,intent(in) :: ndim,npoint
- double precision,dimension(npoint),intent(in) :: x,y,z
- integer,dimension(npoint),intent(inout) :: ibool
- integer,intent(out) :: nglob
+integer,intent(in) :: ndim,npoint
+double precision,dimension(npoint),intent(in) :: x,y,z
+integer,dimension(npoint),intent(inout) :: ibool
+integer,intent(out) :: nglob
 
- integer,dimension(npoint) :: iglob
- integer,dimension(npoint) :: iloc,ind,ninseg
- logical,dimension(npoint) :: ifseg
+integer,dimension(npoint) :: iglob
+integer,dimension(npoint) :: iloc,ind,ninseg
+logical,dimension(npoint) :: ifseg
 
- integer,dimension(npoint) :: iwork(npoint)
- double precision,dimension(npoint) :: work(npoint)
+integer,dimension(npoint) :: iwork(npoint)
+double precision,dimension(npoint) :: work(npoint)
 
- integer :: i,j
- integer :: nseg,ioff,iseg,ig
- double precision :: xtol
+integer :: i,j
+integer :: nseg,ioff,iseg,ig
+double precision :: xtol
 
 ! establish initial pointers
- do i=1,npoint
-   iloc(i)=i
- enddo
+do i=1,npoint
+  iloc(i)=i
+enddo
 
 ! define a tolerance, normalized radius is 1., so let's use a small value
- xtol = zerotol !SMALLVAL_TOL
+xtol = zerotol !SMALLVAL_TOL
 
- ifseg(:)=.false.
+ifseg(:)=.false.
 
- nseg=1
- ifseg(1)=.true.
- ninseg(1)=npoint
+nseg=1
+ifseg(1)=.true.
+ninseg(1)=npoint
 
- do j=1,NDIM
+do j=1,NDIM
 
 ! sort within each segment
-  ioff=1
-  do iseg=1,nseg
-    if(j == 1) then
+ ioff=1
+ do iseg=1,nseg
+   if(j == 1) then
 
-      call rank_buffers(x(ioff),ind,ninseg(iseg))
+     call rank_buffers(x(ioff),ind,ninseg(iseg))
 
-    else if(j == 2) then
+   else if(j == 2) then
 
-      call rank_buffers(y(ioff),ind,ninseg(iseg))
+     call rank_buffers(y(ioff),ind,ninseg(iseg))
 
-    else
+   else
 
-      call rank_buffers(z(ioff),ind,ninseg(iseg))
+     call rank_buffers(z(ioff),ind,ninseg(iseg))
 
-    endif
+   endif
 
-    call swap_all_buffers(ibool(ioff),iloc(ioff), &
-            x(ioff),y(ioff),z(ioff),iwork,work,ind,ninseg(iseg))
+   call swap_all_buffers(ibool(ioff),iloc(ioff), &
+           x(ioff),y(ioff),z(ioff),iwork,work,ind,ninseg(iseg))
 
-    ioff=ioff+ninseg(iseg)
-  enddo
+   ioff=ioff+ninseg(iseg)
+ enddo
 
 ! check for jumps in current coordinate
-  if(j == 1) then
-    do i=2,npoint
-      if(dabs(x(i)-x(i-1)) > xtol) ifseg(i)=.true.
-    enddo
-  else if(j == 2) then
-    do i=2,npoint
-      if(dabs(y(i)-y(i-1)) > xtol) ifseg(i)=.true.
-    enddo
-  else
-    do i=2,npoint
-      if(dabs(z(i)-z(i-1)) > xtol) ifseg(i)=.true.
-    enddo
-  endif
+if(j == 1) then
+  do i=2,npoint
+    if(dabs(x(i)-x(i-1)) > xtol) ifseg(i)=.true.
+  enddo
+else if(j == 2) then
+  do i=2,npoint
+    if(dabs(y(i)-y(i-1)) > xtol) ifseg(i)=.true.
+  enddo
+else
+  do i=2,npoint
+    if(dabs(z(i)-z(i-1)) > xtol) ifseg(i)=.true.
+  enddo
+endif
 
 ! count up number of different segments
-  nseg=0
-  do i=1,npoint
-    if(ifseg(i)) then
-      nseg=nseg+1
-      ninseg(nseg)=1
-    else
-      ninseg(nseg)=ninseg(nseg)+1
-    endif
-  enddo
-  enddo
+nseg=0
+do i=1,npoint
+  if(ifseg(i)) then
+    nseg=nseg+1
+    ninseg(nseg)=1
+  else
+    ninseg(nseg)=ninseg(nseg)+1
+  endif
+enddo
+enddo
 
 ! assign global node numbers (now sorted lexicographically)
-  ig=0
-  do i=1,npoint
-    if(ifseg(i)) ig=ig+1
-    iglob(iloc(i))=ig
-  enddo
+ig=0
+do i=1,npoint
+  if(ifseg(i)) ig=ig+1
+  iglob(iloc(i))=ig
+enddo
 
-  nglob=ig
+nglob=ig
 
-  end subroutine sort_array_coord
-!===========================================
+end subroutine sort_array_coord
+!===============================================================================
 
 ! -------------------- library for sorting routine ------------------
 
 ! sorting routines put here in same file to allow for inlining
-
-  subroutine rank_buffers(A,IND,N)
-!
+subroutine rank_buffers(A,IND,N)
 ! Use Heap Sort (Numerical Recipes)
-!
-  implicit none
+implicit none
 
-  integer :: n
-  double precision :: A(n)
-  integer :: IND(n)
+integer :: n
+double precision :: A(n)
+integer :: IND(n)
 
-  integer :: i,j,l,ir,indx
-  double precision :: q
+integer :: i,j,l,ir,indx
+double precision :: q
 
-  do j=1,n
-    IND(j)=j
-  enddo
+do j=1,n
+  IND(j)=j
+enddo
 
-  if(n == 1) return
+if(n == 1) return
 
-  L=n/2+1
-  ir=n
-  100 CONTINUE
-   IF(l>1) THEN
-      l=l-1
-      indx=ind(l)
-      q=a(indx)
-   ELSE
-      indx=ind(ir)
-      q=a(indx)
-      ind(ir)=ind(1)
-      ir=ir-1
-      if (ir == 1) then
-         ind(1)=indx
-         return
-      endif
-   ENDIF
-   i=l
-   j=l+l
-  200    CONTINUE
-   IF(J <= IR) THEN
-      IF(J < IR) THEN
-         IF(A(IND(j)) < A(IND(j+1))) j=j+1
-      ENDIF
-      IF (q < A(IND(j))) THEN
-         IND(I)=IND(J)
-         I=J
-         J=J+J
-      ELSE
-         J=IR+1
-      ENDIF
-   goto 200
-   ENDIF
-   IND(I)=INDX
-  goto 100
-  end subroutine rank_buffers
-!===========================================
+L=n/2+1
+ir=n
+100 CONTINUE
+ IF(l>1) THEN
+    l=l-1
+    indx=ind(l)
+    q=a(indx)
+ ELSE
+    indx=ind(ir)
+    q=a(indx)
+    ind(ir)=ind(1)
+    ir=ir-1
+    if (ir == 1) then
+       ind(1)=indx
+       return
+    endif
+ ENDIF
+ i=l
+ j=l+l
+200    CONTINUE
+ IF(J <= IR) THEN
+    IF(J < IR) THEN
+       IF(A(IND(j)) < A(IND(j+1))) j=j+1
+    ENDIF
+    IF (q < A(IND(j))) THEN
+       IND(I)=IND(J)
+       I=J
+       J=J+J
+    ELSE
+       J=IR+1
+    ENDIF
+ goto 200
+ ENDIF
+ IND(I)=INDX
+goto 100
+end subroutine rank_buffers
+!===============================================================================
 
-  subroutine swap_all_buffers(IA,IB,A,B,C,IW,W,ind,n)
-!
+subroutine swap_all_buffers(IA,IB,A,B,C,IW,W,ind,n)
 ! swap arrays IA, IB, A, B and C according to addressing in array IND
-!
-  implicit none
+implicit none
 
-  integer :: n
+integer :: n
 
-  integer :: IND(n)
-  integer :: IA(n),IB(n),IW(n)
-  double precision :: A(n),B(n),C(n),W(n)
+integer :: IND(n)
+integer :: IA(n),IB(n),IW(n)
+double precision :: A(n),B(n),C(n),W(n)
 
-  integer :: i
+integer :: i
 
-  do i=1,n
-    W(i)=A(i)
-    IW(i)=IA(i)
-  enddo
+do i=1,n
+  W(i)=A(i)
+  IW(i)=IA(i)
+enddo
 
-  do i=1,n
-    A(i)=W(ind(i))
-    IA(i)=IW(ind(i))
-  enddo
+do i=1,n
+  A(i)=W(ind(i))
+  IA(i)=IW(ind(i))
+enddo
 
-  do i=1,n
-    W(i)=B(i)
-    IW(i)=IB(i)
-  enddo
+do i=1,n
+  W(i)=B(i)
+  IW(i)=IB(i)
+enddo
 
-  do i=1,n
-    B(i)=W(ind(i))
-    IB(i)=IW(ind(i))
-  enddo
+do i=1,n
+  B(i)=W(ind(i))
+  IB(i)=IW(ind(i))
+enddo
 
-  do i=1,n
-    W(i)=C(i)
-  enddo
+do i=1,n
+  W(i)=C(i)
+enddo
 
-  do i=1,n
-    C(i)=W(ind(i))
-  enddo
+do i=1,n
+  C(i)=W(ind(i))
+enddo
 
-  end subroutine swap_all_buffers
-!===========================================
+end subroutine swap_all_buffers
+!===============================================================================
 
 end module ghost_library_mpi
-
+!===============================================================================
 

@@ -1,15 +1,21 @@
 ! this module contains visualization routines
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !  HNG, Mar 11,2011; HNG, Apr 09,2010
 ! TODO:
 !  define the array in main program such that entire array can be written
 !  without transpose in this routine (done!)
 module visual
+
 contains
+
+!-------------------------------------------------------------------------------
 ! this subroutine writes an ensight geofile only upto coordinates and returns
 ! the file unit to the calling program so that the calling program can writes
 ! the remaining part (connectivity) of the geo file and close it.
 subroutine write_ensight_geocoord(out_fname,destag,npart,nnode,coord,funit)
+implicit none
 character(len=250),intent(in) :: out_fname
 character(len=80),intent(in) :: destag
 integer,intent(in) :: npart,nnode
@@ -56,12 +62,13 @@ do i=1,3
 enddo
 return
 end subroutine write_ensight_geocoord
-!============================================
+!===============================================================================
 
 ! this subroutine writes an ensight geo file that consists of the mesh
 ! information
 subroutine write_ensight_geo(out_fname,etype,destag,npart,nelmt,nnode,coord,   &
 connect)
+implicit none
 character(len=250),intent(in) :: out_fname
 character(len=20),intent(in) :: etype
 character(len=80),intent(in) :: destag
@@ -115,11 +122,12 @@ write(11)connect
 close(11)
 return
 end subroutine write_ensight_geo
-!============================================
+!===============================================================================
 
 ! this subroutines writes ensight gold per-node variable
 ! ncomp:1 = scalar, 3 = vector and 6 = symmetric tensor
 subroutine write_ensight_pernode(out_fname,destag,npart,ncomp,n,var)
+implicit none
 character(len=250),intent(in) :: out_fname
 character(len=80),intent(in) :: destag
 integer,intent(in) :: npart,ncomp,n
@@ -155,6 +163,7 @@ enddo
 close(11)
 return
 end subroutine write_ensight_pernode
-!============================================
+!===============================================================================
 
 end module visual
+!===============================================================================

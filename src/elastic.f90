@@ -1,3 +1,8 @@
+! This module contains elastic routines
+! AUTHOR
+!   Hom Nath Gharti
+! REVISION
+!   HNG, Jul 18,2012; Jul 12,2011; HNG, Apr 09,2010
 module elastic
 use set_precision
 contains
@@ -5,8 +10,6 @@ contains
 ! REFERENCE:
 !  Zienkiewicz, Taylor, and Zhu (2005): "The finite element method: its basis &
 !  fundamentals", Sixth edition, pp195
-! REVISION
-!   HNG, Jul 18,2012; Jul 12,2011; HNG, Apr 09,2010
 subroutine compute_cmat(cmat,E,v)
 !use set_precision
 implicit none
@@ -37,19 +40,18 @@ cmat(6,6)=cmat(4,4)
 
 return
 end subroutine compute_cmat
-!===========================================
+!===============================================================================
 
 ! this subroutine returns the elastic matrix (3D)
 ! REFERENCE:
 !  copied and modified from
 !  Smith and Griffiths (2004): Programming the finite element method
-! REVISION
-!   HNG, Jul 12,2011; HNG, Apr 09,2010
 subroutine compute_cmatOLD(cmat,e,v)
 implicit none
 real(kind=kreal),intent(in)::e,v
 real(kind=kreal),intent(out)::cmat(:,:)
-real(kind=kreal)::v1,v2,c,vv,zero=0.0_kreal,pt5=0.5_kreal,one=1.0_kreal,two=2.0_kreal
+real(kind=kreal)::v1,v2,c,vv,zero=0.0_kreal,pt5=0.5_kreal,one=1.0_kreal,       &
+two=2.0_kreal
 integer::i,nst
 
 ! check size
@@ -80,7 +82,7 @@ cmat(3,2)=v2
 cmat=cmat*e/(two*(one+v)*vv)
 return
 end subroutine compute_cmatOLD
-!===========================================
+!===============================================================================
 
 subroutine compute_cmat_elastic(bulkmod,shearmod,cmat)
 implicit none
@@ -332,3 +334,4 @@ end subroutine compute_cmat_elastic
 !end subroutine elastic_stress_intact
 !!===========================================
 end module elastic
+!===============================================================================

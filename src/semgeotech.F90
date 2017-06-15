@@ -1,4 +1,6 @@
 ! this is a main program SPECFEM3D_GEOTECH
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
 program semgeotech
@@ -14,7 +16,6 @@ use serial_library
 use math_library_serial
 #endif
 use visual
-
 implicit none
 integer :: funit,i,ios,j,k
 integer :: i_elmt
@@ -84,8 +85,10 @@ tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
 min_nelmt=minscal(nelmt); min_nnode=minscal(nnode)
 if(myrank==0)then
-write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',min_nelmt
-write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',min_nnode
+write(stdout,*)'elements => total:',tot_nelmt,' max:',&
+max_nelmt,' min:',min_nelmt
+write(stdout,*)'nodes    => total:',tot_nnode,' max:',&
+max_nnode,' min:',min_nnode
 endif
 
 if (trim(method)/='sem')then

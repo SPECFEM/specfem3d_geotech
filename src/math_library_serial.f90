@@ -1,4 +1,6 @@
 ! Serial math library this equivalent to math_library_mpi
+! AUTHOR
+!   Hom Nath Gharti
 module math_library_serial
 use math_constants
 
@@ -37,14 +39,12 @@ interface minvec
   module procedure iminvec
   module procedure fminvec
 end interface
-contains
-!=======================================================
-!=======================================================
 
+contains
+
+!-------------------------------------------------------------------------------
 function iminscal(scal) result(gmin)
-!
 ! this finds a summation of a scalar across the processors
-!
 implicit none
 integer,intent(in)::scal
 integer :: gmin
@@ -53,12 +53,10 @@ gmin=scal
 
 return
 end function iminscal
-!=======================================================
+!===============================================================================
 
 function fminscal(scal) result(gmin)
-!
 ! this finds a summation of a scalar across the processors
-!
 implicit none
 real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gmin
@@ -67,12 +65,10 @@ gmin=scal
 
 return
 end function fminscal
-!=======================================================
+!===============================================================================
 
 function imaxscal(scal) result(gmax)
-!
 ! this finds a summation of a scalar across the processors
-!
 implicit none
 integer,intent(in)::scal
 integer :: gmax
@@ -81,12 +77,10 @@ gmax=scal
 
 return
 end function imaxscal
-!=======================================================
+!===============================================================================
 
 function fmaxscal(scal) result(gmax)
-!
 ! this finds a summation of a scalar across the processors
-!
 implicit none
 real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gmax
@@ -95,7 +89,7 @@ gmax=scal
 
 return
 end function fmaxscal
-!=======================================================
+!===============================================================================
 
 function imaxvec(vec) result(gmax)
 implicit none
@@ -108,7 +102,7 @@ gmax=lmax
 
 return
 end function imaxvec
-!=======================================================
+!===============================================================================
 
 function fmaxvec(vec) result(gmax)
 implicit none
@@ -121,7 +115,7 @@ gmax=lmax
 
 return
 end function fmaxvec
-!=======================================================
+!===============================================================================
 
 function iminvec(vec) result(gmin)
 implicit none
@@ -134,7 +128,7 @@ gmin=lmin
 
 return
 end function iminvec
-!=======================================================
+!===============i===============================================================
 
 function fminvec(vec) result(gmin)
 implicit none
@@ -147,12 +141,10 @@ gmin=lmin
 
 return
 end function fminvec
-!=======================================================
+!===============================================================================
 
 function isumscal(scal) result(gsum)
-!
 ! this finds a summation of a scalar across the processors
-!
 implicit none
 integer,intent(in)::scal
 integer :: gsum
@@ -161,12 +153,10 @@ gsum=scal
 
 return
 end function isumscal
-!=======================================================
+!===============================================================================
 
 function fsumscal(scal) result(gsum)
-!
 ! this finds a summation of a scalar across the processors
-!
 implicit none
 real(kind=kreal),intent(in)::scal
 real(kind=kreal) :: gsum
@@ -175,12 +165,10 @@ gsum=scal
 
 return
 end function fsumscal
-!=======================================================
+!===============================================================================
 
 function dot_product_par(vec1,vec2) result(gdot)
-!
 ! this finds dot product of two vectors across the processors
-!
 implicit none
 real(kind=kreal),intent(in)::vec1(:),vec2(:)
 real(kind=kreal) :: ldot,gdot
@@ -192,6 +180,7 @@ gdot=ldot
 
 return
 end function dot_product_par
-!=======================================================
+!===============================================================================
 
 end module math_library_serial
+!===============================================================================

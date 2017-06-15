@@ -1,5 +1,7 @@
 ! this module contains math constants
 ! math parameters
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
 module math_constants
@@ -13,7 +15,7 @@ real(kind=kreal),parameter :: deg2rad=pi/180.0_kreal,rad2deg=180.0_kreal/pi
 ! tolerance value for zero
 real(kind=kreal),parameter :: inftol=1.0e32_kreal,zerotol = 1.0e-12_kreal
 end module math_constants
-!=======================================================
+!===============================================================================
 
 ! this module coatins math routines
 ! REVISION
@@ -22,6 +24,8 @@ module math_library
 use set_precision
 
 contains
+
+!-------------------------------------------------------------------------------
 function get_normal(x1,x2,x3) result(nx)
 real(kind=kreal),dimension(3),intent(in) :: x1,x2,x3
 real(kind=kreal),dimension(3) :: nx
@@ -45,19 +49,17 @@ endif
 nx=nx/norm
 return
 end function get_normal
-!=======================================================
+!===============================================================================
 
 function norm(x) result(l2n)
-!
 ! this function calculates the l2 norm of vector x
-!
 implicit none
 real(kind=kreal),intent(in) :: x(:)
 real(kind=kreal)::l2n
 l2n=sqrt(sum(x**2))
 return
 end function norm
-!=======================================================
+!===============================================================================
 
 recursive function factorial(n) result(nfact)
 implicit none
@@ -73,7 +75,7 @@ else
   stop
 end if
 end function factorial
-!=======================================================
+!===============================================================================
 
 ! this function returns the determinant of a 1x1, 2x2 or 3x3
 ! matrix.
@@ -99,7 +101,7 @@ case default
 end select
 return
 end function determinant
-!=======================================================
+!===============================================================================
 
 ! this subroutine inverts a small square matrix onto itself.
 ! this routine was copied and modified from
@@ -152,7 +154,7 @@ else
 end if
 return
 end subroutine invert
-!=======================================================
+!===============================================================================
 
 ! this subroutine forms the stress invariants 3d.
 ! this routine was copied and modified from
@@ -200,7 +202,7 @@ else
 end if
 return
 end subroutine stress_invariant
-!=======================================================
+!===============================================================================
 
 ! quick sort of integer list
 function quick_sort(x,n) result(xnew)
@@ -221,7 +223,7 @@ do i = 2, n
 end do
 xnew=x
 end function quick_sort
-!=======================================================
+!===============================================================================
 
 ! quick sort of real list
 function rquick_sort(x,n) result(xnew)
@@ -242,7 +244,7 @@ do i = 2, n
 end do
 xnew=x
 end function rquick_sort
-!=======================================================
+!===============================================================================
 
 ! insertion sort of integer list
 subroutine insertion_sort(x,n)
@@ -261,6 +263,7 @@ do i = 2, n
   x(j+1) = temp
 end do
 end subroutine insertion_sort
-!=======================================================
+!===============================================================================
 
 end module math_library
+!===============================================================================

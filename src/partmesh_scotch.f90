@@ -6,9 +6,7 @@
 module partmesh_scotch
 
 use partmesh_library
-
 implicit none
-
 include './scotchf.h'
 
 ! number of partitions
@@ -75,7 +73,8 @@ character(len=256) :: prname
 
 real(kind=kreal),dimension(SCOTCH_GRAPHDIM) :: scotchgraph !double precision
 real(kind=kreal),dimension(SCOTCH_STRATDIM) :: scotchstrat !double precision
-!character(len=256),parameter :: scotch_strategy='b{job=t,map=t,poli=S,sep=h{pass=30}}'
+!character(len=256),parameter :: scotch_strategy='b{job=t,map=t,poli=S,        &
+!sep=h{pass=30}}'
 integer  :: istat,idummy
 
 !pll
@@ -99,8 +98,10 @@ integer,allocatable :: waterid(:)
 
 contains
 
+!-------------------------------------------------------------------------------
 ! reads in mesh files
 subroutine read_mesh_files
+implicit none
 character(len=80) :: inp_fname
 
 ! sets number of nodes per element
@@ -162,16 +163,23 @@ allocate(elmnts(esize,nspec))
 do ispec = 1, nspec
   ! format: # element_id  #id_node1 ... #id_node8
 
-  ! note: be aware that here we can have different node ordering for a cube element;
-  !          the ordering from Cubit files might not be consistent for multiple volumes, or uneven, unstructured grids
+  ! note: be aware that here we can have different node ordering for a 
+  ! cube element;
+  !          the ordering from Cubit files might not be consistent for multiple
+  !          volumes, or uneven, unstructured grids
   !
-  !          guess here it assumes that spectral elements ordering is like first at the bottom of the element, anticlock-wise, i.e.
-  !             point 1 = (0,0,0), point 2 = (0,1,0), point 3 = (1,1,0), point 4 = (1,0,0)
+  !          guess here it assumes that spectral elements ordering is like first
+  !          at the bottom of the element, anticlock-wise, i.e.
+  !             point 1 = (0,0,0), point 2 = (0,1,0), point 3 = (1,1,0), 
+  !             point 4 = (1,0,0)
   !          then top (positive z-direction) of element
-  !             point 5 = (0,0,1), point 6 = (0,1,1), point 7 = (1,1,1), point 8 = (1,0,1)
+  !             point 5 = (0,0,1), point 6 = (0,1,1), point 7 = (1,1,1), 
+  !             point 8 = (1,0,1)
 
-  !read(98,*) num_elmnt, elmnts(5,num_elmnt), elmnts(1,num_elmnt),elmnts(4,num_elmnt), elmnts(8,num_elmnt), &
-  !      elmnts(6,num_elmnt), elmnts(2,num_elmnt), elmnts(3,num_elmnt), elmnts(7,num_elmnt)
+  !read(98,*)num_elmnt, elmnts(5,num_elmnt), elmnts(1,num_elmnt),             &
+  !          elmnts(4,num_elmnt), elmnts(8,num_elmnt), &
+  !          elmnts(6,num_elmnt), elmnts(2,num_elmnt), elmnts(3,num_elmnt), &
+  !          elmnts(7,num_elmnt)
 
   read(98,*)elmnts(:,ispec)
 
@@ -203,16 +211,19 @@ close(98)
 !
 ! note: format of nummaterial_velocity_file must be
 !
-! #(1)material_domain_id #(2)material_id  #(3)gam  #(4)ym   #(5)nu   #(6)phi  #(7)anisotropy_flag
+! #(1)material_domain_id #(2)material_id  #(3)gam  #(4)ym   #(5)nu   #(6)phi
+! #(7)anisotropy_flag
 !
 ! where
 !     material_domain_id : 1=acoustic / 2=elastic / 3=poroelastic
-!     material_id               : number of material/volume
-!     gam                           : density
-!     ym                             : P-velocity
-!     nu                             : S-velocity
-!     phi                      : 0=no attenuation/1=IATTENUATION_SEDIMENTS_40, 2=..., 13=IATTENUATION_BEDROCK
-!     anisotropy_flag        : 0=no anisotropy/ 1,2,.. check with implementation in aniso_model.f90
+!     material_id            : number of material/volume
+!     gam                    : density
+!     ym                     : P-velocity
+!     nu                     : S-velocity
+!     phi                    : 0=no attenuation/1=IATTENUATION_SEDIMENTS_40, 
+!                              2=..., 13=IATTENUATION_BEDROCK
+!     anisotropy_flag        : 0=no anisotropy/ 1,2,.. check with 
+!                              implementation in aniso_model.f90
 !count_def_mat = 0
 count_undef_mat = 0
 ! open file to read
@@ -245,7 +256,8 @@ print*, '  defined = ',count_def_mat, 'undefined = ',count_undef_mat
 if( count_def_mat > 0 .and. maxval(matid(2,:)) > count_def_mat ) then
   print*,'error material definitions:'
   print*,'  materials associated in materials_file:',maxval(matid(2,:))
-  print*,'  bigger than defined materials in nummaterial_velocity_file:',count_def_mat
+  print*,'  bigger than defined materials in nummaterial_velocity_file:', &
+  count_def_mat
   stop 'error materials'
 endif
 allocate(mat_prop(6,count_def_mat),mat_domain(count_def_mat))
@@ -315,21 +327,28 @@ allocate(ibelm_xmin(nspec2D_xmin))
 allocate(nodes_ibelm_xmin(nspec2D_xmin))
 do ispec2D = 1,nspec2D_xmin
   ! format: #id_(element containing the face) #id_node1_face .. #id_node4_face
-  ! note: ordering for CUBIT seems such that the normal of the face points outward of the element the face belongs to;
-  !         in other words, nodes are in increasing order such that when looking from within the element outwards,
+  ! note: ordering for CUBIT seems such that the normal of the face points 
+  ! outward of the element the face belongs to;
+  !         in other words, nodes are in increasing order such that when looking
+  !         from within the element outwards,
   !         they are ordered clockwise
   !
-  !          doesn't necessarily have to start on top-rear, then bottom-rear, bottom-front, and finally top-front i.e.:
-  !          point 1 = (0,1,1), point 2 = (0,1,0), point 3 = (0,0,0), point 4 = (0,0,1)
+  !         doesn't necessarily have to start on top-rear, then bottom-rear,
+  !         bottom-front, and finally top-front i.e.:
+  !         point 1 = (0,1,1), point 2 = (0,1,0), point 3 = (0,0,0), 
+  !         point 4 = (0,0,1)
   read(98,*) ibelm_xmin(ispec2D), nodes_ibelm_xmin(ispec2D)
 
   !outputs info for each element for check of ordering
   !print*,'ispec2d:',ispec2d
-  !print*,'  xmin:', ibelm_xmin(ispec2D), nodes_ibelm_xmin(1,ispec2D), nodes_ibelm_xmin(2,ispec2D), &
+  !print*,'  xmin:', ibelm_xmin(ispec2D), nodes_ibelm_xmin(1,ispec2D), &
+  !nodes_ibelm_xmin(2,ispec2D), &
   !      nodes_ibelm_xmin(3,ispec2D), nodes_ibelm_xmin(4,ispec2D)
   !do i=1,4
-  !  print*,'i',i,'val:',ibelm_xmin(ispec2d),nodes_coords(1,nodes_ibelm_xmin(i,ispec2D)), &
-  !      nodes_coords(2,nodes_ibelm_xmin(i,ispec2D)),nodes_coords(3,nodes_ibelm_xmin(i,ispec2D))
+  !  print*,'i',i,'val:',ibelm_xmin(ispec2d),&
+  !  nodes_coords(1,nodes_ibelm_xmin(i,ispec2D)), &
+  !      nodes_coords(2,nodes_ibelm_xmin(i,ispec2D)),&
+  !      nodes_coords(3,nodes_ibelm_xmin(i,ispec2D))
   !enddo
   !print*
 end do
@@ -381,11 +400,11 @@ end do
 close(98)
 print*, '  nspec2D_ymin = ', nspec2D_ymin
 end subroutine read_mesh_files
-!=======================================================
+!===============================================================================
 
 ! checks valence of nodes
 subroutine check_valence
-
+implicit none
 logical,dimension(:),allocatable :: mask_nodes_elmnts
 integer,dimension(:),allocatable :: used_nodes_elmnts
 
@@ -396,11 +415,13 @@ used_nodes_elmnts(:) = 0
 do ispec = 1, nspec
   do inode = 1, ESIZE
     mask_nodes_elmnts(elmnts(inode,ispec)) = .true.
-    used_nodes_elmnts(elmnts(inode,ispec)) = used_nodes_elmnts(elmnts(inode,ispec)) + 1
+    used_nodes_elmnts(elmnts(inode,ispec)) = &
+      used_nodes_elmnts(elmnts(inode,ispec)) + 1
   enddo
 enddo
 print *, 'nodes valence: '
-print *, '  min = ',minval(used_nodes_elmnts(:)),'max = ', maxval(used_nodes_elmnts(:))
+print *, '  min = ',minval(used_nodes_elmnts(:)),'max = ', &
+  maxval(used_nodes_elmnts(:))
 do inode = 1, nnodes
   if (.not. mask_nodes_elmnts(inode)) then
     stop 'ERROR : nodes not used.'
@@ -412,11 +433,10 @@ print*, '  nsize = ',nsize, 'sup_neighbour = ', sup_neighbour
 
 deallocate(mask_nodes_elmnts,used_nodes_elmnts)
 end subroutine check_valence
-!=======================================================
+!===============================================================================
 
 ! divides model into partitions using scotch library functions
 subroutine scotch_partitioning
-
 implicit none
 
 elmnts(:,:) = elmnts(:,:) - 1
@@ -464,8 +484,10 @@ if (istat /= 0) then
 endif
 
 ! fills graph structure : see user manual (scotch_user5.1.pdf, page 72/73)
-! arguments: #(1) graph_structure       #(2) baseval(either 0/1)    #(3) number_of_vertices
-!                    #(4) adjacency_index_array         #(5) adjacency_end_index_array (optional)
+! arguments: #(1) graph_structure       #(2) baseval(either 0/1)
+! #(3) number_of_vertices
+!                    #(4) adjacency_index_array        
+!                    #(5) adjacency_end_index_array (optional)
 !                    #(6) vertex_load_array (optional) #(7) vertex_label_array
 !                    #(7) number_of_arcs                    #(8) adjacency_array
 !                    #(9) arc_load_array (optional)      #(10) istator
@@ -504,7 +526,6 @@ if (istat /= 0) then
   stop 'ERROR : MAIN : Cannot destroy strat'
 endif
 
-
 ! re-partitioning puts acoustic-elastic coupled elements into same partition
 !  integer  :: nfaces_coupled
 !  integer, dimension(:,:), pointer  :: faces_coupled
@@ -536,10 +557,11 @@ call Construct_interfaces(nspec,sup_neighbour,part,elmnts,xadj,adjncy,         &
 !adjncy,tab_interfaces,tab_size_interfaces,ninterfaces,count_def_mat,          &
 !mat_prop(3,:),matid(2,:),npart)
 end subroutine scotch_partitioning
-!=======================================================
+!===============================================================================
 
 ! writes out new Databases files for each partition
 subroutine write_mesh_databases
+implicit none
 !character(len=20) :: format_str
 !character(len=80) :: out_fname
 
@@ -590,7 +612,8 @@ do ipart = 0, npart-1
   !  glob2loc_nodes_parts, glob2loc_nodes, part, matid, ngnod, 2)
 
   ! writes out absorbing/free-surface boundaries
-  !call write_boundaries_database(out_phead,ipart, nspec, nspec2D_xmin, nspec2D_xmax, nspec2D_ymin, &
+  !call write_boundaries_database(out_phead,ipart, nspec, nspec2D_xmin,        &
+  !  nspec2D_xmax, nspec2D_ymin, &
   !  nspec2D_ymax, nspec2D_bottom, nspec2D_top, &
   !  ibelm_xmin, ibelm_xmax, ibelm_ymin, &
   !  ibelm_ymax, ibelm_bottom, ibelm_top, &
@@ -600,13 +623,15 @@ do ipart = 0, npart-1
   !  glob2loc_nodes_parts, glob2loc_nodes, part,npart)
 
   ! write MPI interfaces
-  !call Write_interfaces_database(out_phead,tab_interfaces, tab_size_interfaces, ipart, ninterfaces, &
+  !call Write_interfaces_database(out_phead,tab_interfaces, &
+  !  tab_size_interfaces, ipart, ninterfaces, &
   !  my_ninterface, my_interfaces, my_nb_interfaces, &
   !  glob2loc_elmnts, glob2loc_nodes_npart, glob2loc_nodes_parts, &
   !  glob2loc_nodes, npart)
 end do
 
-deallocate(matid,nodes_coords,xadj,adjncy,nnodes_elmnts,nodes_elmnts,elmnts_load)
+deallocate(matid,nodes_coords,xadj,adjncy,nnodes_elmnts,nodes_elmnts,          &
+elmnts_load)
 deallocate(tab_size_interfaces,tab_interfaces,my_interfaces,my_nb_interfaces)
 
 deallocate(mat_prop,mat_domain)
@@ -615,14 +640,18 @@ if(nwmat>0)deallocate(waterid)
 
 ! write BC files
 write(*,'(a)',advance='no')'writing bc files...'
-call write_ssbc(out_path,inp_path,uxfile,nspec,part+1,npart,glob2loc_elmnts(0:nspec-1)+1)
-call write_ssbc(out_path,inp_path,uyfile,nspec,part+1,npart,glob2loc_elmnts(0:nspec-1)+1)
-call write_ssbc(out_path,inp_path,uzfile,nspec,part+1,npart,glob2loc_elmnts(0:nspec-1)+1)
+call write_ssbc(out_path,inp_path,uxfile,nspec,part+1,npart,                   &
+glob2loc_elmnts(0:nspec-1)+1)
+call write_ssbc(out_path,inp_path,uyfile,nspec,part+1,npart,                   &
+glob2loc_elmnts(0:nspec-1)+1)
+call write_ssbc(out_path,inp_path,uzfile,nspec,part+1,npart,                   &
+glob2loc_elmnts(0:nspec-1)+1)
 write(*,'(a)')'complete!'
 if(istraction)then
   ! write traction files
   write(*,'(a)',advance='no')'writing traction files...'
-  call write_traction(out_path,inp_path,trfile,nspec,part+1,npart,glob2loc_elmnts(0:nspec-1)+1)
+  call write_traction(out_path,inp_path,trfile,nspec,part+1,npart,             &
+  glob2loc_elmnts(0:nspec-1)+1)
   write(*,'(a)')'complete!'
 endif
 deallocate(glob2loc_nodes_npart,glob2loc_nodes_parts,glob2loc_nodes)
@@ -647,7 +676,7 @@ write(*,*)'number of partitions: ',npart
 !print*, 'finished successfully'
 !write(*,*)'-----------------------------------'
 end subroutine write_mesh_databases
-!=======================================================
+!===============================================================================
 
 end module partmesh_scotch
-
+!===============================================================================

@@ -1,4 +1,6 @@
 ! this program is intended to test Fortran MPI compiler
+! AUTHOR
+!   Hom Nath Gharti
 program testmpi
 use mpi
 implicit none
@@ -10,3 +12,4 @@ call MPI_BARRIER(MPI_COMM_WORLD,ier)
 call MPI_FINALIZE(ier)
 
 end program testmpi
+!===============================================================================
