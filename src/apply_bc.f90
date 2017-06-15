@@ -1,5 +1,7 @@
 ! this subroutine applies displacement boundary conditions and determines
 ! global degrees of freedom
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION
 !   HNG, Jul 12,2011; ; HNG, Apr 09,2010
 subroutine apply_bc(ismpi,neq,errcode,errtag)
@@ -33,7 +35,8 @@ endif
 
 if(ismpi)then
   write(format_str,*)ceiling(log10(real(nproc)+1))
-  format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
+  format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str)) &
+  //')'
   write(ptail, fmt=format_str)'_proc',myrank
 else
   ptail=""
@@ -85,9 +88,6 @@ do k=1,ngllz
   enddo
 enddo
 
-!write(format_str,*)ceiling(log10(real(nproc)+1))
-!format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-
 !write(fname, fmt=format_str)trim(inp_path)//trim(uxfile)//'_proc',myrank
 fname=trim(data_path)//trim(uxfile)//trim(ptail)
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
@@ -96,14 +96,10 @@ if( ios /= 0 ) then
   return
 endif
 
-!open(unit=11,file=trim(inp_path)//trim(uxfile),status='old',action='read',iostat=ios)
-!if (ios /= 0)then
-!  write(*,'(/,a)')'ERROR: input file "',trim(inp_path)//trim(uxfile),'" cannot be opened!'
-!  stop
-!endif
 read(11,*)itmp
 do
-  read(11,*,iostat=ios)ielmt,iface ! This will read a line and proceed to next line
+  ! This will read a line and proceed to next line
+  read(11,*,iostat=ios)ielmt,iface
   if (ios/=0)exit
   gdof(1,g_num(face(iface)%nod,ielmt))=0
 enddo
@@ -116,20 +112,15 @@ if( ios /= 0 ) then
   return
 endif
 
-!open(unit=11,file=trim(inp_path)//trim(uyfile),status='old',action='read',iostat=ios)
-!if (ios /= 0)then
-!  write(*,'(/,a)')'ERROR: input file "',trim(inp_path)//trim(uyfile),'" cannot be opened!'
-!  stop
-!endif
 read(11,*)itmp
 do
-  read(11,*,iostat=ios)ielmt,iface ! This will read a line and proceed to next line
+  ! This will read a line and proceed to next line
+  read(11,*,iostat=ios)ielmt,iface
   if (ios/=0)exit
   gdof(2,g_num(face(iface)%nod,ielmt))=0
 enddo
 close(11)
 
-!write(fname, fmt=format_str)trim(inp_path)//trim(uzfile)//'_proc',myrank
 fname=trim(data_path)//trim(uzfile)//trim(ptail)
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
@@ -137,22 +128,14 @@ if( ios /= 0 ) then
   return
 endif
 
-!open(unit=11,file=trim(inp_path)//trim(uzfile),status='old',action='read',iostat=ios)
-!if (ios /= 0)then
-!  write(*,'(/,a)')'ERROR: input file "',trim(inp_path)//trim(uzfile),'" cannot be opened!'
-!  stop
-!endif
-!if(myrank==0) print*,'file:',fname
 read(11,*)itmp
-!if(myrank==0) print*,itmp
 do
-  read(11,*,iostat=ios)ielmt,iface ! This will read a line and proceed to next line
+  ! This will read a line and proceed to next line
+  read(11,*,iostat=ios)ielmt,iface
   if (ios/=0)exit
   gdof(3,g_num(face(iface)%nod,ielmt))=0
 enddo
 close(11)
-!sync all
-!error stop
 
 ! compute modified gdof
 neq=0
@@ -170,4 +153,4 @@ errcode=0
 return
 
 end subroutine apply_bc
-
+!===============================================================================

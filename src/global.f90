@@ -1,4 +1,6 @@
 ! this module contains global parameters and variables
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 07,2011; HNG, Apr 09,2010
 !  precision parameters
@@ -6,7 +8,7 @@ module set_precision
 implicit none
 integer,parameter :: kreal=8 !selected_real_kind(15)
 end module set_precision
-!============================================
+!===============================================================================
 
 ! global parameters/variables
 module global
@@ -80,5 +82,4 @@ character(len=1),parameter :: CR=achar(13) ! carriage return to overwrite
 integer :: stdout=6
 
 end module global
-!============================================
-
+!===============================================================================

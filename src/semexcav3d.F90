@@ -2,6 +2,8 @@
 ! this is a main routine for multistage excavation
 ! this program was originally based on the book "Programming the finite element
 ! method" Smith and Griffiths (2004)
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Aug 25,2011; HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
 subroutine semexcav3d(ismpi,gnod,sum_file,ptail,format_str)
@@ -10,12 +12,10 @@ use global
 use string_library, only : parse_file
 use math_constants
 use gll_library
-!use mesh_spec
 use shape_library
 use math_library
 use elastic
 use preprocess
-!use gauss_library
 use excavation
 use plastic_library
 #if (USE_MPI)
@@ -152,16 +152,15 @@ allocate(gll_weights(ngll),gll_points(ndim,ngll),lagrange_gll(ngll,ngll),      &
 dlagrange_gll(ndim,ngll,ngll))
 call gll_quadrature(ndim,ngllx,nglly,ngllz,ngll,gll_points,gll_weights,        &
 lagrange_gll,dlagrange_gll)
-!--------------------------------
 
 ! store elemental global degrees of freedoms from nodal gdof
-! this removes the repeated use of reshape later but it has larger size than gdof!!!
+! this removes the repeated use of reshape later but it has larger size
+! than gdof!!!
 allocate(gdof_elmt(nedof,nelmt))
 gdof_elmt=0
 do i_elmt=1,nelmt
-  gdof_elmt(:,i_elmt)=reshape(gdof(:,g_num(:,i_elmt)),(/nedof/)) !g=g_g(:,i_elmt)
+  gdof_elmt(:,i_elmt)=reshape(gdof(:,g_num(:,i_elmt)),(/nedof/))
 enddo
-!-------------------------------
 
 if(myrank==0)write(stdout,'(a)',advance='no')'preprocessing...'
 
@@ -192,7 +191,6 @@ if(s0_type==0)then
   pseudoeq)
 
   if(myrank==0)write(stdout,*)'complete!'
-  !-------------------------------
 
   ! apply traction boundary conditions
   if(istraction)then
@@ -201,7 +199,6 @@ if(s0_type==0)then
     if(errcode/=0)call error_stop(errtag,stdout,myrank)
     if(myrank==0)write(*,*)'complete!'
   endif
-  !-------------------------------
 
   ! compute water pressure
   if(iswater)then
@@ -219,7 +216,6 @@ if(s0_type==0)then
     call write_ensight_pernode(out_fname,destag,npart,1,nnode,real(wpressure))
     if(myrank==0)write(stdout,*)'complete!'
   endif
-  !-------------------------------
 
   if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 
@@ -247,10 +243,9 @@ else
   write(stdout,*)'ERROR: s0_type:',s0_type,' not supported!'
   stop
 endif
-!-------------------------------
 
 allocate(stress_global(nst,nnode),vmeps(nnode))
-allocate(scf(nnode)) !,psigma(ndim,nnode),psigma0(ndim,nnode),taumax(nnode),nsigma(nnode))
+allocate(scf(nnode))
 allocate(nmir(nnode),node_valency(nnode))
 
 ! compute node valency only once
@@ -337,12 +332,11 @@ excavation_stage: do i_excav=0,nexcav
   max_nelmt=maxscal(nelmt_intact); max_nnode=maxscal(nnode_intact)
   min_nelmt=minscal(nelmt_intact); min_nnode=minscal(nnode_intact)
   if(myrank==0)then
-    write(stdout,*)'intact elements => total:',tot_nelmt,' max:',max_nelmt,' min:',min_nelmt
-    write(stdout,*)'intact nodes    => total:',tot_nnode,' max:',max_nnode,' min:',min_nnode
+    write(stdout,*)'intact elements => total:',tot_nelmt,' max:',&
+    max_nelmt,' min:',min_nelmt
+    write(stdout,*)'intact nodes    => total:',tot_nnode,' max:',&
+    max_nnode,' min:',min_nnode
   endif
-
-  !write(stdout,'(a,i10)')' total intact nodes:',nnode_intact
-  !write(stdout,'(a,i10)')' total intact elements:',nelmt_intact
 
   ! correct node valency subtracting dead element-nodes
   call correct_nvalency(node_valency,nelmt_void,g_num(:,elmt_void))
@@ -352,23 +346,26 @@ excavation_stage: do i_excav=0,nexcav
 
   tot_neq=sumscal(neq); max_neq=maxscal(neq); min_neq=minscal(neq)
   if(myrank==0)then
-    write(stdout,*)'degrees of freedoms => total:',tot_neq,' max:',max_neq,' min:',min_neq
+    write(stdout,*)'degrees of freedoms => total:',tot_neq,' max:',&
+    max_neq,' min:',min_neq
   endif
-  !write(stdout,'(a,i10)')' total degrees of freedoms:',neq
 
   ! store elemental global degrees of freedoms from nodal gdof
-  ! this removes the repeated use of reshape later but it has larger size than gdof!!!
+  ! this removes the repeated use of reshape later but it has larger
+  ! size than gdof!!!
   gdof_elmt=0
   do i_elmt=1,nelmt
-    gdof_elmt(:,i_elmt)=reshape(gdof(:,g_num(:,i_elmt)),(/nedof/)) !g=g_g(:,i_elmt)
+    gdof_elmt(:,i_elmt)=reshape(gdof(:,g_num(:,i_elmt)),(/nedof/))
   enddo
 
   ! write geo file for this stage
   ! open Ensight Gold geo file to store mesh data
-  write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//'_step',i_excav,trim(ptail)//'.geo'
+  write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//'_step',      &
+  i_excav,trim(ptail)//'.geo'
   npart=1
   destag='unstructured meshes'
-  call write_ensight_geocoord(geo_file,destag,npart,nnode_intact,real(g_coord(:,node_intact)),funit)
+  call write_ensight_geocoord(geo_file,destag,npart,nnode_intact,              &
+  real(g_coord(:,node_intact)),funit)
 
   ! writes element information
   buffer=ensight_etype
@@ -402,8 +399,8 @@ excavation_stage: do i_excav=0,nexcav
   close(funit)
 
   ! reallocate those arrays whose size depend on the neq
-  allocate(load(0:neq),bodyload(0:neq),extload(0:neq),oldx(0:neq),x(0:neq), & !,extload1(0:neq)
-  dprecon(0:neq),storkm(nedof,nedof,nelmt_intact),stat=istat) ! elastic(0:neq),
+  allocate(load(0:neq),bodyload(0:neq),extload(0:neq),oldx(0:neq),x(0:neq), &
+  dprecon(0:neq),storkm(nedof,nedof,nelmt_intact),stat=istat)
   if (istat/=0)then
     write(stdout,*)'ERROR: cannot allocate memory!'
     stop
@@ -417,7 +414,8 @@ excavation_stage: do i_excav=0,nexcav
   excavload=zero; extload=zero; ! extload1=zero
 
   ! compute excavation load at gdofs
-  !call excavation_load(nelmt_void,neq,gnod,g_num(:,elmt_void),gdof_elmt(:,elmt_void), &
+  !call excavation_load(nelmt_void,neq,gnod,g_num(:,elmt_void),                &
+  !gdof_elmt(:,elmt_void), &
   !mat_id(elmt_void),dshape_hex8,dlagrange_gll,gll_weights, &
   !stress_local(:,:,elmt_void),extload)
 
@@ -505,15 +503,10 @@ excavation_stage: do i_excav=0,nexcav
       ielmt=elmt_intact(i_elmt)
 
       imat=mat_id(ielmt)
-      !tnph=tan(phi(mat_id(ielmt))*pi/r180)
-      !phif=atan(tnph/srf(i_srf))*r180/pi
-      !tnps=tan(psi(mat_id(ielmt))*pi/r180)
-      !psif=atan(tnps/srf(i_srf))*r180/pi
-      !cf=coh(mat_id(ielmt))/srf(i_srf)
       call compute_cmat(cmat,ym(imat),nuf(imat))
       num=g_num(:,ielmt)
-      coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
-      egdof=gdof_elmt(:,ielmt) !reshape(gdof(:,g_num(:,ielmt)),(/nedof/))
+      coord=transpose(g_coord(:,num(gnod)))
+      egdof=gdof_elmt(:,ielmt)
       eld=x(egdof)
       bload=zero
       do i=1,ngll ! loop over integration points
@@ -561,7 +554,8 @@ excavation_stage: do i_excav=0,nexcav
         if(nl_isconv.or.nl_iter==nl_maxiter)then
           devp=sigma
           ! compute von Mises effective plastic strain
-          vmeps(num(i))=vmeps(num(i))+sqrt(two_third*dot_product(evpt(:,i,ielmt),evpt(:,i,ielmt)))
+          vmeps(num(i))=vmeps(num(i))+&
+            sqrt(two_third*dot_product(evpt(:,i,ielmt),evpt(:,i,ielmt)))
           ! update stresses
           stress_local(:,i,ielmt)=effsigma
           phifr=phif(imat)*deg2rad !atan(tnph/srf(i_srf))
@@ -638,9 +632,8 @@ excavation_stage: do i_excav=0,nexcav
     kreal)
   enddo
 
-  call save_data(ptail,format_str,i_excav,nnode_intact,           &
-  nodalu(:,node_intact),scf(node_intact),                 &
-  vmeps(node_intact),stress_global(:,node_intact))
+  call save_data(ptail,format_str,i_excav,nnode_intact,nodalu(:,node_intact),  &
+  scf(node_intact),vmeps(node_intact),stress_global(:,node_intact))
 
   ! deallocate those variables whose size depend on changing geometry
   deallocate(elmt_intact,node_intact,stat=istat)
@@ -654,10 +647,7 @@ enddo srf_loop ! i_srf safety factor loop
 deallocate(mat_id,gam,ym,coh,nu,phi,psi,srf)
 deallocate(excavload,g_coord,g_num,isnode,nmir)
 call free_ghost()
-!-----------------------------------
 
 return
 end subroutine semexcav3d
-!===========================================
-
-
+!===============================================================================

@@ -1,16 +1,15 @@
-! include 'license.txt'
 ! this module contains the routines requred to analyse the excavation topology
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
-!   April 09,2010, Hom Nath Gharti
-! FEEDBACK:
-!   hgharti_AT_princeton_DOT_edu
+!   HNG, Jul 12,2011; HNG, Apr 09,2010
 module excavation
 use set_precision
 contains
 ! this subroutine analyzes the excavation and determine the elements in the
 ! intact and void regions
-subroutine intact_void_elmt(nexcavid,excavid,ismat,nelmt_intact,nelmt_void,elmt_intact, &
-elmt_void,isnode)
+subroutine intact_void_elmt(nexcavid,excavid,ismat,nelmt_intact,nelmt_void,    &
+elmt_intact,elmt_void,isnode)
 use global,only:mat_id,nelmt,nnode,g_num,nmat
 implicit none
 integer,intent(in) :: nexcavid,nelmt_intact,nelmt_void
@@ -47,16 +46,18 @@ do i_elmt=1,nelmt_intact
 enddo
 return
 end subroutine intact_void_elmt
-!===========================================
+!===============================================================================
 
 ! this subroutine analyzes the excavation and determines the nodes
 ! in the intact and void regions
-subroutine intact_void_node(isnode,nnode_intact,nnode_void,node_intact,node_void,nmir)
+subroutine intact_void_node(isnode,nnode_intact,nnode_void,node_intact,        &
+node_void,nmir)
 use global,only:nnode
 implicit none
 logical,intent(in) :: isnode(nnode)
 integer,intent(in) ::nnode_intact,nnode_void
-integer,intent(out) :: node_intact(nnode_intact),node_void(nnode_void),nmir(nnode)
+integer,intent(out) :: node_intact(nnode_intact),node_void(nnode_void),        &
+nmir(nnode)
 integer :: i_node,inode_intact,inode_void
 
 ! find intact and void nodes
@@ -77,7 +78,7 @@ if(inode_intact/=nnode_intact .and. inode_void/=nnode_void)then
 endif
 return
 end subroutine intact_void_node
-!===========================================
+!===============================================================================
 
 ! this subroutine modifies the gdof array setting all the freedoms corresponding
 ! to the dead nodes as fixed
@@ -103,7 +104,7 @@ do j=1,nnode
 enddo
 return
 end subroutine modify_gdof
-!===========================================
+!===============================================================================
 
 ! this subroutine corrects the nodal valency removing the dead-element nodes
 subroutine correct_nvalency(node_valency,nelmt_void,gnum_void)
@@ -122,26 +123,26 @@ do i_elmt=1,nelmt_void
 enddo
 return
 end subroutine correct_nvalency
-!===========================================
+!===============================================================================
 
 ! this subroutine computes the excavation loads. this load consists of both
 ! gravity and stress load
-subroutine excavation_load(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8, &
+subroutine excavation_load(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,  &
 dlagrange_gll,gll_weights,stress_local,extload)
 use global,only:ndim,nedof,nenod,ngll,ngnod,nst,g_coord,gam
 use preprocess,only:compute_bmat
 use math_library,only:determinant,invert
 implicit none
 integer,intent(in) :: nelmt,neq,gnod(8) ! nelmt (only void elements)
-integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)  ! only void elements
-!integer,intent(in) :: nelmt_void,elmt_void(nelmt_void)
+integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)
+! only void elements
 real(kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),                        &
 dlagrange_gll(ndim,ngll,ngll),gll_weights(ngll)
 real(kreal),intent(in) :: stress_local(nst,ngll,nelmt)
 real(kreal),intent(inout) :: extload(0:neq)
 
 real(kreal) :: detjac,zero=0.0_kreal
-real(kreal) :: coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
+real(kreal) :: coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod),             &
 bmat(nst,nedof),eld(nedof),bload(nedof),eload(nedof),sigma(nst)
 integer :: egdof(nedof),num(nenod)
 integer :: i,idof,i_elmt
@@ -150,18 +151,15 @@ integer :: i,idof,i_elmt
 do i_elmt=1,nelmt
   bload=zero; eld=zero
   num=g_num(:,i_elmt)
-  coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
-  egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,ielmt)),(/nndof*nenod/))
+  coord=transpose(g_coord(:,num(gnod)))
+  egdof=gdof_elmt(:,i_elmt)
   idof=0
   do i=1,ngll
-    !call shape_function(fun,gll_points(i))
-    ! compute Jacobian at GLL point using 20 noded element
-    !call shape_derivative(der,gll_points(:,i))
-    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord)
+    jac=matmul(dshape_hex8(:,:,i),coord)
     detjac=determinant(jac)
     call invert(jac)
-    deriv=matmul(jac,dlagrange_gll(:,i,:)) ! use der for gll
-    call compute_bmat(bmat,deriv) !!! gll bmat matrix
+    deriv=matmul(jac,dlagrange_gll(:,i,:))
+    call compute_bmat(bmat,deriv)
     sigma=stress_local(:,i,i_elmt)
     eload=MATMUL(sigma,bmat)
     bload=bload+eload*detjac*gll_weights(i)
@@ -175,18 +173,18 @@ enddo
 extload(0)=zero
 return
 end subroutine excavation_load
+!===============================================================================
 
 ! this subroutine computes the excavation loads. this load consists of both
 ! gravity and stress load
-subroutine excavation_load_nodal(nelmt,gnod,g_num,mat_id,dshape_hex8, &
+subroutine excavation_load_nodal(nelmt,gnod,g_num,mat_id,dshape_hex8,          &
 dlagrange_gll,gll_weights,stress_local,excavload)
 use global,only:ndim,nedof,nndof,nenod,ngll,ngnod,nnode,nst,g_coord,gam
 use preprocess,only:compute_bmat
 use math_library,only:determinant,invert
 implicit none
 integer,intent(in) :: nelmt,gnod(8) ! nelmt (only void elements)
-integer,intent(in) :: g_num(nenod,nelmt),mat_id(nelmt)  ! ,gdof_elmt(nedof,nelmt) only void elements
-!integer,intent(in) :: nelmt_void,elmt_void(nelmt_void)
+integer,intent(in) :: g_num(nenod,nelmt),mat_id(nelmt)
 real(kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),                        &
 dlagrange_gll(ndim,ngll,ngll),gll_weights(ngll)
 real(kreal),intent(in) :: stress_local(nst,ngll,nelmt)
@@ -203,18 +201,14 @@ excavload=zero
 do i_elmt=1,nelmt
   bload=zero; eld=zero; tload=zero
   num=g_num(:,i_elmt)
-  coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
-  !egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,ielmt)),(/nndof*nenod/))
+  coord=transpose(g_coord(:,num(gnod)))
   idof=0
   do i=1,ngll
-    !call shape_function(fun,gll_points(i))
-    ! compute Jacobian at GLL point using 20 noded element
-    !call shape_derivative(der,gll_points(:,i))
-    jac=matmul(dshape_hex8(:,:,i),coord) !jac=matmul(der,coord)
+    jac=matmul(dshape_hex8(:,:,i),coord)
     detjac=determinant(jac)
     call invert(jac)
-    deriv=matmul(jac,dlagrange_gll(:,i,:)) ! use der for gll
-    call compute_bmat(bmat,deriv) !!! gll bmat matrix
+    deriv=matmul(jac,dlagrange_gll(:,i,:))
+    call compute_bmat(bmat,deriv)
     sigma=stress_local(:,i,i_elmt)
     eload=MATMUL(sigma,bmat)
     bload=bload+eload*detjac*gll_weights(i)
@@ -233,6 +227,6 @@ enddo
 !extload(0)=zero
 return
 end subroutine excavation_load_nodal
-
+!===============================================================================
 end module excavation
-
+!===============================================================================

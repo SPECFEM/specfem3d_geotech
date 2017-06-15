@@ -1,6 +1,8 @@
 ! this is a main routine for slope stabiliy analysis
 ! this program was originally based on the book "Programming the finite element
 ! method" Smith and Griffiths (2004)
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
 subroutine semslope3d(ismpi,gnod,sum_file,ptail,format_str)
@@ -9,13 +11,10 @@ use global
 use string_library, only : parse_file
 use math_constants
 use gll_library
-!use mesh_spec
 use shape_library
 use math_library
 use elastic
 use preprocess
-!use gauss_library
-!use excavation
 use plastic_library
 #if (USE_MPI)
 use mpi_library
@@ -29,7 +28,6 @@ use solver
 #endif
 use visual
 use postprocess
-
 implicit none
 logical,intent(in) :: ismpi
 integer,intent(in) :: gnod(8)
@@ -132,13 +130,13 @@ lagrange_gll,dlagrange_gll)
 !--------------------------------
 
 ! store elemental global degrees of freedoms from nodal gdof
-! this removes the repeated use of reshape later but it has larger size than gdof!!!
+! this removes the repeated use of reshape later but it has larger
+! size than gdof!!!
 allocate(gdof_elmt(nedof,nelmt))
 gdof_elmt=0
 do i_elmt=1,nelmt
-  gdof_elmt(:,i_elmt)=reshape(gdof(:,g_num(:,i_elmt)),(/nedof/)) !g=g_g(:,i_elmt)
+  gdof_elmt(:,i_elmt)=reshape(gdof(:,g_num(:,i_elmt)),(/nedof/))
 enddo
-!-------------------------------
 
 ! compute stiffness and body load
 if(myrank==0)write(stdout,'(a)',advance='no')'preprocessing...'
@@ -158,7 +156,6 @@ call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nu,ym,       &
 dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,pseudoeq)
 
 if(myrank==0)write(stdout,*)'complete!'
-!-------------------------------
 
 ! apply traction boundary conditions
 if(istraction)then
@@ -167,7 +164,6 @@ if(istraction)then
   if(errcode/=0)call error_stop(errtag,stdout,myrank)
   if(myrank==0)write(*,*)'complete!'
 endif
-!-------------------------------
 
 ! compute water pressure
 if(iswater)then
@@ -184,7 +180,6 @@ if(iswater)then
   call write_ensight_pernode(out_fname,destag,npart,1,nnode,real(wpressure))
   if(myrank==0)write(stdout,*)'complete!'
 endif
-!-------------------------------
 
 if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 
@@ -208,7 +203,8 @@ do i_elmt=1,nelmt
 enddo
 
 ! open summary file
-open(unit=10,file=trim(sum_file),status='old',position='append',action='write',iostat=ios)
+open(unit=10,file=trim(sum_file),status='old',position='append',action='write',&
+iostat=ios)
 write(10,*)'CG_MAXITER, CG_TOL, NL_MAXITER, NL_TOL'
 write(10,*)cg_maxiter,cg_tol,nl_maxiter,nl_tol
 write(10,*)'Number of SRFs'
@@ -309,9 +305,8 @@ srf_loop: do i_srf=1,nsrf
 
       call compute_cmat(cmat,ym(imat),nuf(imat))
       num=g_num(:,ielmt)
-      coord=transpose(g_coord(:,num(gnod))) !transpose(g_coord(:,num(1:ngnod)))
+      coord=transpose(g_coord(:,num(gnod)))
       egdof=gdof_elmt(:,ielmt)
-      !reshape(gdof(:,g_num(:,ielmt)),(/nedof/)) !g=g_g(:,i_elmt)
       eld=x(egdof)
 
       bload=zero
@@ -439,10 +434,7 @@ deallocate(mat_id,gam,ym,coh,nu,phi,psi,srf)
 deallocate(g_coord,g_num)
 deallocate(load,bodyload,extload,oldx,x,dprecon,storkm,stat=istat)
 call free_ghost()
-!-----------------------------------
 
 return
 end subroutine semslope3d
-!===========================================
-
-
+!===============================================================================

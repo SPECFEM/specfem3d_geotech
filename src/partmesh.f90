@@ -65,7 +65,8 @@ do
   if (tmp_char=='&')then
     slen=len(line)
     tag=trim(line(1:ind-1))
-    read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
+    ! This will read a line and proceed to next line
+    read(11,'(a)',iostat=ios)line
     tag=trim(tag)//trim(line)
   endif
   call first_token(tag,token)
@@ -137,33 +138,31 @@ do
 enddo ! do
 close(11)
 
-! check for material list
-!if (mat_count/=nmat)then
-!        write(*,'(/,a)')'ERROR: number of materials doesn''t match with total number!'
-!  stop
-!endif
-
 ! check input status
 if (preinfo_stat /= 0)then
-  write(*,'(a)')'ERROR: cannot read pre information! make sure the line with "preinfo:" token is correct.'
+  write(*,'(a)')'ERROR: cannot read pre information! make sure the line with &
+  &"preinfo:" token is correct.'
   stop
 endif
 
 ! check input status
 if (mesh_stat /= 0)then
-  write(*,'(a)')'ERROR: cannot read mesh information! make sure the line with "mesh:" token is correct.'
+  write(*,'(a)')'ERROR: cannot read mesh information! make sure the line with &
+  &"mesh:" token is correct.'
   stop
 endif
 
 ! check output status
 if (bc_stat /= 0)then
-  write(*,'(a)')'ERROR: cannot read BC information! make sure the line with "bc:" token is correct.'
+  write(*,'(a)')'ERROR: cannot read BC information! make sure the line with &
+  &"bc:" token is correct.'
   stop
 endif
 
 ! check material status
 if (material_stat /= 0)then
-  write(*,'(a)')'ERROR: cannot read material information! make sure the line with "material:" token is correct.'
+  write(*,'(a)')'ERROR: cannot read material information! make sure the line &
+  &with "material:" token is correct.'
   stop
 endif
 
@@ -193,7 +192,7 @@ write(*,*)'total elapsed time: ',cpu_tend-cpu_tstart,'s'
 write(*,*)'-----------------------------------------'
 
 end program partmesh
-!=======================================================
+!===============================================================================
 
 ! parse file name and stop path, file head, and extension
 subroutine parse_file(fname,path,head,ext)
@@ -234,5 +233,5 @@ path=fname(1:ipath)
 ext=fname(iext+1:slen)
 stop
 end subroutine parse_file
-!=======================================================
+!===============================================================================
 

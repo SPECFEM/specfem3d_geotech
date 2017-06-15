@@ -1,4 +1,6 @@
 ! this subroutine reads the input information from a structured ASCII text file
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 07,2011; HNG, Apr 09,2010
 ! TODO:
@@ -565,4 +567,4 @@ errcode=0
 if(myrank==0)write(*,*)'complete!'
 
 end subroutine read_input
-
+!===============================================================================
