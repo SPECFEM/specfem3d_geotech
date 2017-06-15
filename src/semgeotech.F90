@@ -5,7 +5,6 @@ program semgeotech
 ! import necessary libraries
 use global
 use string_library, only : parse_file
-!use math_constants
 use mesh_spec
 #if (USE_MPI)
 use mpi_library
@@ -46,7 +45,6 @@ errtag=""; errcode=-1
 call start_process(ismpi,stdout)
 
 call get_command_argument(0, prog)
-!----input and initialisation----
 if (command_argument_count() <= 0) then
   call error_stop('ERROR: no input file!',stdout,myrank)
 endif
@@ -189,18 +187,18 @@ write(11,'(a)')'GEOMETRY'
 if(nexcav==0)then
   write(11,'(a,a/)')'model:    ',trim(file_head)//trim(ptail)//'.geo'
 else
-  write(11,'(a,i10,a,a/)')'model:    ',ts,' ',trim(file_head)//'_step'//       &
+  write(11,'(a,i10,a,a/)')'model:    ',ts,' ',trim(file_head)//'_step'//      &
   wild_char(1:twidth)//trim(ptail)//'.geo'
 endif
 
 write(11,'(a)')'VARIABLE'
 
 if(savedata%disp)then
-  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','displacement',' ',  &
+  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','displacement',' ', &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.dis'
 endif
 if(savedata%stress)then
-  write(11,'(a,i10,a,a,a,a,/)')'tensor symm per node: ',ts,' ','stress',' ',   &
+  write(11,'(a,i10,a,a,a,a,/)')'tensor symm per node: ',ts,' ','stress',' ',  &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.sig'
 endif
 if(savedata%psigma)then

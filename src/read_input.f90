@@ -23,8 +23,8 @@ character(len=250) :: confile,idfile,matfile
 character(len=250),dimension(3) :: coordfile
 integer :: id,ind,ios,narg,slen
 
-integer :: bc_stat,preinfo_stat,mesh_stat,material_stat,control_stat,eqload_stat, &
-stress0_stat,traction_stat,water_stat,save_stat
+integer :: bc_stat,preinfo_stat,mesh_stat,material_stat,control_stat,         &
+eqload_stat,stress0_stat,traction_stat,water_stat,save_stat
 integer :: mat_count,nwmat
 integer :: ielmt,i_node,inode,imat,mat_domain,tmp_nelmt,tmp_nnode
 
@@ -43,7 +43,8 @@ errcode=-1
 
 if(ismpi)then
   write(format_str,*)ceiling(log10(real(nproc)+1))
-  format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
+  format_str='(a,i'//trim(adjustl(format_str))//'.'//                         &
+  trim(adjustl(format_str))//')'
   write(ptail, fmt=format_str)'_proc',myrank
 else
   ptail=""
@@ -111,7 +112,8 @@ ninc=1 ! number of load increments
 ! open file to read
 open(unit=11,file=trim(inp_fname),status='old', action='read',iostat=ios)
 if (ios /= 0)then
-  write(errtag,'(a)')'ERROR: input file "'//trim(inp_fname)//'" cannot be opened!'
+  write(errtag,'(a)')'ERROR: input file "'//trim(inp_fname)//                 &
+  '" cannot be opened!'
   return
 endif
 do
@@ -200,7 +202,6 @@ do
     confile=get_string('confile',args,narg)
     idfile=get_string('idfile',args,narg)
     if(ismpi)gfile=get_string('gfile',args,narg)
-    !nmat=get_integer('nmat',args,narg)
 
     mesh_stat=1
     cycle
@@ -495,7 +496,6 @@ else
 endif
 close(11)
 
-
 ! read material id
 fname=trim(data_path)//trim(idfile)//trim(ptail)
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
@@ -506,7 +506,6 @@ endif
 read(11,*)tmp_nelmt
 if(tmp_nelmt/=nelmt)then
   write(errtag,'(a)')'ERROR: total number of elements mismatch!'
-  !,fname,tmp_nelmt,nelmt
   return
 endif
 allocate(mat_id(nelmt))
