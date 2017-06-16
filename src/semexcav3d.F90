@@ -515,7 +515,7 @@ excavation_stage: do i_excav=0,nexcav
         call invert(jac)
 
         deriv=matmul(jac,dlagrange_gll(:,i,:))
-        call compute_bmat(bmat,deriv)
+        call compute_bmat(deriv,bmat)
         eps=matmul(bmat,eld)
         eps=eps-evpt(:,i,ielmt)
         sigma=matmul(cmat,eps)

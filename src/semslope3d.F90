@@ -316,7 +316,7 @@ srf_loop: do i_srf=1,nsrf
         call invert(jac)
 
         deriv=matmul(jac,dlagrange_gll(:,i,:))
-        call compute_bmat(bmat,deriv)
+        call compute_bmat(deriv,bmat)
         eps=matmul(bmat,eld)
         eps=eps-evpt(:,i,ielmt)
         sigma=matmul(cmat,eps)

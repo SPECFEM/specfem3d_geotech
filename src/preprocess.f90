@@ -15,7 +15,7 @@ real(kind=kreal) :: dx,dy,dz
 ! check size
 nst=ubound(bmat,1)
 if(nst.ne.6)then
-  write(*,*)'ERROR: wrong size of the stress tensor!'
+  write(*,*)'ERROR: wrong size of the stress tensor!',nst
   stop
 endif
 nod=ubound(deriv,2)
@@ -108,7 +108,7 @@ do i_elmt=1,nelmt
     call invert(jac)
 
     deriv=matmul(jac,dlagrange_gll(:,i,:))
-    call compute_bmat(bmat,deriv)
+    call compute_bmat(deriv,bmat)
     km=km+matmul(matmul(transpose(bmat),cmat),bmat)*detjac*gll_weights(i)
     idof=idof+3
     ! interpolation functions are orthogonal, hence it is simple

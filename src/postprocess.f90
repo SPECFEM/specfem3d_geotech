@@ -66,7 +66,7 @@ do i_elmt=1,nelmt
     call invert(jac)!
 
     deriv=matmul(jac,dlagrange_gll(:,i,:))
-    call compute_bmat(bmat,deriv)
+    call compute_bmat(deriv,bmat)
     eps=matmul(bmat,eld)
     sigma=matmul(cmat,eps)
     stress_local(:,i,i_elmt)=sigma
@@ -109,7 +109,7 @@ do i_elmt=1,nelmt_intact
     call invert(jac)!
 
     deriv=matmul(jac,dlagrange_gll(:,i,:))
-    call compute_bmat(bmat,deriv)
+    call compute_bmat(deriv,bmat)
     eps=matmul(bmat,eld)
     sigma=matmul(cmat,eps)
     stress_local(:,i,ielmt)=stress_local(:,i,ielmt)+sigma

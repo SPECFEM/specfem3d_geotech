@@ -15,15 +15,22 @@ contains
 ! the file unit to the calling program so that the calling program can writes
 ! the remaining part (connectivity) of the geo file and close it.
 subroutine write_ensight_geocoord(out_fname,destag,npart,nnode,coord,funit)
-implicit none
 character(len=250),intent(in) :: out_fname
 character(len=80),intent(in) :: destag
 integer,intent(in) :: npart,nnode
-real,dimension(3,nnode),intent(in) :: coord !3D
+real,dimension(:,:),intent(in) :: coord !3D
 integer,intent(out) :: funit
 
 character(len=80) :: buffer ! this must be 80 characters long
-integer :: i,ios
+character(len=250) :: myname
+integer :: ios
+
+myname='=>write_ensight_geocoord'
+
+if(ubound(coord,1).ne.3 .or. ubound(coord,2).ne.nnode)then
+  write(*,*)'ERROR: wrong coord dimensions!'
+  stop
+endif
 
 funit=11
 open(unit=funit,file=trim(out_fname),access='stream',form='unformatted',       &
@@ -57,9 +64,10 @@ write(funit)buffer
 buffer='coordinates'
 write(funit)buffer
 write(funit)nnode
-do i=1,3
-  write(11)coord(i,:)
-enddo
+!do i=1,3
+!  write(11)coord(i,:)
+!enddo
+write(11)transpose(coord)
 return
 end subroutine write_ensight_geocoord
 !===============================================================================
@@ -68,16 +76,28 @@ end subroutine write_ensight_geocoord
 ! information
 subroutine write_ensight_geo(out_fname,etype,destag,npart,nelmt,nnode,coord,   &
 connect)
-implicit none
 character(len=250),intent(in) :: out_fname
 character(len=20),intent(in) :: etype
 character(len=80),intent(in) :: destag
 integer,intent(in) :: npart,nelmt,nnode
-real,dimension(3,nnode),intent(in) :: coord !3D
-integer,dimension(8,nelmt),intent(in) :: connect !hexahedral elements
+real,dimension(:,:),intent(in) :: coord !3D
+integer,dimension(:,:),intent(in) :: connect !hexahedral elements
 
 character(len=80) :: buffer ! this must be 80 characters long
-integer :: i,ios
+character(len=250) :: myname
+integer :: ios
+
+myname='=>write_ensight_geo'
+
+if(ubound(coord,1).ne.3 .or. ubound(coord,2).ne.nnode)then
+  write(*,*)'ERROR: wrong "coord" dimensions!'//trim(myname),ubound(coord)
+  stop
+endif
+if(ubound(connect,1).ne.8 .or. ubound(connect,2).ne.nelmt)then
+  write(*,*)'ERROR: wrong "connect" dimensions!'
+  stop
+endif
+
 open(unit=11,file=trim(out_fname),access='stream',form='unformatted',          &
 status='replace',action='write',iostat=ios)
 if (ios /= 0)then
@@ -109,9 +129,10 @@ write(11)buffer
 buffer='coordinates'
 write(11)buffer
 write(11)nnode
-do i=1,3
-  write(11)coord(i,:)
-enddo
+!do i=1,3
+!  write(11)coord(i,:)
+!enddo
+write(11)transpose(coord)
 ! writes element information
 buffer=etype
 write(11)buffer
@@ -127,14 +148,13 @@ end subroutine write_ensight_geo
 ! this subroutines writes ensight gold per-node variable
 ! ncomp:1 = scalar, 3 = vector and 6 = symmetric tensor
 subroutine write_ensight_pernode(out_fname,destag,npart,ncomp,n,var)
-implicit none
 character(len=250),intent(in) :: out_fname
 character(len=80),intent(in) :: destag
 integer,intent(in) :: npart,ncomp,n
-real,dimension(ncomp,n),intent(in) :: var
+real,intent(in) :: var(ncomp,n)
 
 character(len=80) :: buffer ! this must be 80 characters long
-integer :: i,ios
+integer :: ios
 
 if(ncomp/=1 .and. ncomp/=3 .and. ncomp/=6)then
   write(*,'(/,a)')'ERROR: invalid ncomp for ensight per_node variable!'
@@ -156,14 +176,99 @@ write(11)buffer
 write(11)npart
 buffer='coordinates'
 write(11)buffer
-do i=1,ncomp
-  write(11)var(i,:)
-enddo
+!do i=1,ncomp
+!  write(11)var(i,:)
+!enddo
+write(11)transpose(var)
 
 close(11)
 return
 end subroutine write_ensight_pernode
 !===============================================================================
 
+! this subroutines writes ensight gold per-node variable
+! ncomp:1 = scalar, 3 = vector and 6 = symmetric tensor
+subroutine write_ensight_pernodeVECAS(out_fname,destag,npart,ncomp,n,var)
+character(len=250),intent(in) :: out_fname
+character(len=80),intent(in) :: destag
+integer,intent(in) :: npart,ncomp,n
+real,intent(in) :: var(:,:)
+
+character(len=80) :: buffer ! this must be 80 characters long
+integer :: ios
+
+if(ncomp/=1 .and. ncomp/=3 .and. ncomp/=6)then
+  write(*,'(/,a)')'ERROR: invalid ncomp for ensight per_node variable!'
+  print*,ncomp
+  stop
+endif
+if(ubound(var,1).ne.ncomp .or. ubound(var,2).ne.n)then
+  write(*,'(/,a)')'ERROR: wrong bounds of "var"!'
+  stop
+endif
+! open Ensight Gold data file to store data
+open(unit=11,file=trim(out_fname),access='stream',form='unformatted',          &
+status='replace',action='write',iostat=ios)
+if (ios /= 0)then
+  write(*,'(/,a)')'ERROR: output file "'//out_fname//'" cannot be opened!'
+  stop
+endif
+
+buffer=destag
+write(11)buffer
+buffer='part'
+write(11)buffer
+write(11)npart
+buffer='coordinates'
+write(11)buffer
+!do i=1,ncomp
+!  write(11)var(i,:)
+!enddo
+write(11)transpose(var)
+
+close(11)
+return
+end subroutine write_ensight_pernodeVECAS
+!===============================================================================
+
+! this subroutines writes ensight gold per-node variable
+! ncomp:1 = scalar, 3 = vector and 6 = symmetric tensor
+subroutine write_ensight_pernodeSCALAS(out_fname,destag,npart,n,var)
+character(len=250),intent(in) :: out_fname
+character(len=80),intent(in) :: destag
+integer,intent(in) :: npart,n
+real,intent(in) :: var(:)
+
+character(len=80) :: buffer ! this must be 80 characters long
+integer :: ios
+
+if(size(var).ne.n)then
+  write(*,'(/,a)')'ERROR: wrong bounds of "var"!'
+  stop
+endif
+! open Ensight Gold data file to store data
+open(unit=11,file=trim(out_fname),access='stream',form='unformatted',          &
+status='replace',action='write',iostat=ios)
+if (ios /= 0)then
+  write(*,'(/,a)')'ERROR: output file "'//out_fname//'" cannot be opened!'
+  stop
+endif
+
+buffer=destag
+write(11)buffer
+buffer='part'
+write(11)buffer
+write(11)npart
+buffer='coordinates'
+write(11)buffer
+!do i=1,ncomp
+!  write(11)var(i,:)
+!enddo
+write(11)var
+
+close(11)
+return
+end subroutine write_ensight_pernodeSCALAS
+!===============================================================================
 end module visual
 !===============================================================================

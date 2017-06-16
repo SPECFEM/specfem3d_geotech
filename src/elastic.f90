@@ -188,7 +188,7 @@ end subroutine compute_cmat_elastic
 !
 !    dinterpf=matmul(jac,dlagrange_gll(:,i,:))
 !    call compute_rmat_stress(dinterpf,bmat)
-!    !call compute_bmat(bmat,dinterpf)
+!    !call compute_bmat(dinterpf,bmat)
 !    epst=matmul(bmat,eld)
 !    !strain_local(:,i,ielmt)=epst !+strain_local(:,i,ielmt)
 !    sigma=matmul(cmat,epst)
@@ -271,7 +271,7 @@ end subroutine compute_cmat_elastic
 !
 !    dinterpf=matmul(jac,dlagrange_gll(:,i,:))
 !    call compute_rmat_stress(bmat,dinterpf)
-!    !call compute_bmat(bmat,deriv)
+!    !call compute_bmat(deriv,bmat)
 !    eps=matmul(bmat,eld)
 !    sigma=matmul(cmat,eps)
 !    stress_local(:,i,i_elmt)=sigma
@@ -317,7 +317,7 @@ end subroutine compute_cmat_elastic
 !
 !    dinterpf=matmul(jac,dlagrange_gll(:,i,:))
 !    call compute_rmat_stress(bmat,dinterpf)
-!    !call compute_bmat(bmat,deriv)
+!    !call compute_bmat(deriv,bmat)
 !    eps=matmul(bmat,eld)
 !    sigma=matmul(cmat,eps)
 !    stress_local(:,i,ielmt)=stress_local(:,i,ielmt)+sigma
