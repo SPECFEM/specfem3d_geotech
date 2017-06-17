@@ -17,6 +17,7 @@ logical,intent(out) :: ismpi
 integer,intent(in) :: ounit
 ismpi=.false. ! serial
 myrank=0; nproc=1
+write(*,*)'Single process started!'
 return
 end subroutine start_process
 !===============================================================================
@@ -39,7 +40,7 @@ subroutine error_stop(errtag,ounit,myrank)
 implicit none
 character(*),intent(in) :: errtag
 integer,intent(in) :: ounit,myrank
-if(myrank==1)write(ounit,'(a)')errtag
+if(myrank==0)write(ounit,'(a)')errtag
 stop
 end subroutine error_stop
 !===============================================================================
@@ -58,6 +59,15 @@ subroutine prepare_ghost()
 implicit none
 return
 end subroutine prepare_ghost
+!===============================================================================
+
+subroutine prepare_ghost_gdof()                                              
+use global,only:gdof                                                      
+                                                                                 
+implicit none                                                                    
+                                                                                 
+return                                                                           
+end subroutine prepare_ghost_gdof                                                
 !===============================================================================
 
 subroutine modify_ghost(isnode)

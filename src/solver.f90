@@ -19,7 +19,8 @@ real(kind=kreal),dimension(nedof,nedof,nelmt),intent(in) :: k
 ! only for intact elements
 real(kind=kreal),dimension(0:neq),intent(inout) :: u
 real(kind=kreal),dimension(0:neq),intent(in) :: f,dprecon
-integer,dimension(nedof,nelmt),intent(in) :: gdof_elmt
+!integer,dimension(nedof,nelmt),intent(in) :: gdof_elmt
+integer,dimension(:,:),intent(in) :: gdof_elmt
 ! only for intact elements
 integer,intent(out) :: cg_iter
 integer,intent(out) :: errcode

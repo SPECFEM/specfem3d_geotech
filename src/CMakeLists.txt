@@ -99,10 +99,16 @@ IF(ISPARTMESH)
   SET(srcpartmesh
      global.f90
      string_library.f90
+     serial_library.f90
+     math_library.f90
      partmesh_library.f90
+     read_input.f90
      partmesh_scotch.f90
+     partmesh.f90
   )
   ADD_LIBRARY(partscotch ${srcpartmesh})
+  TARGET_INCLUDE_DIRECTORIES(partscotch PUBLIC                                   
+  ${SCOTCH_INCLUDE_PATH})
   ADD_EXECUTABLE(partmesh
               partmesh.f90)
   TARGET_LINK_LIBRARIES(partmesh partscotch

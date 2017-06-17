@@ -7,6 +7,7 @@
 module plastic_library
 use set_precision
 use math_constants
+use conversion_constants,only:DEG2RAD,RAD2DEG
 
 contains
 

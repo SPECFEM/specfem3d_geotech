@@ -66,23 +66,27 @@ end subroutine compute_bmat
 ! body loads (gravity and pseudostatic loads) optionally
 ! TODO: optional precoditioner,optional assembly of stiffness
 subroutine stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nu,ym, &
-dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,pseudoeq)
+dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon,extload,gravity,pseudoeq)
 use set_precision
-use global,only:ndim,nst,ngll,nedof,nenod,ngnod,g_coord,eqkx,eqky,eqkz,nmat
+use global,only:ndim,nst,ngll,nedof,nenod,ngnode,g_coord,eqkx,eqky,eqkz,nmatblk
 use math_library,only:determinant,invert
 use elastic,only:compute_cmat
 implicit none
-integer,intent(in) :: nelmt,neq,gnod(8) ! nelmt (only intact elements)
-integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt) ! only intact elements
-real(kind=kreal),intent(in) :: gam(nmat),nu(nmat),ym(nmat)
-real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),                   &
+integer,intent(in) :: nelmt,neq,gnod(8)
+!nelmt (only intact elements)
+!integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)
+! only intact elements
+integer,intent(in) :: g_num(:,:),gdof_elmt(:,:),mat_id(:)
+! only intact elements
+real(kind=kreal),intent(in) :: gam(nmatblk),nu(nmatblk),ym(nmatblk)
+real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnode,ngll),                   &
 dlagrange_gll(ndim,ngll,ngll),gll_weights(ngll)
-real(kind=kreal),intent(out) :: storkm(nedof,nedof,nelmt),dprecon(0:neq)
+real(kind=kreal),intent(out) :: storekm(nedof,nedof,nelmt),dprecon(0:neq)
 real(kind=kreal),intent(inout),optional :: extload(0:neq)
 logical,intent(in),optional :: gravity,pseudoeq
 
 real(kind=kreal) :: detjac,zero=0.0_kreal
-real(kind=kreal) :: cmat(nst,nst),coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
+real(kind=kreal) :: cmat(nst,nst),coord(ngnode,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
 bmat(nst,nedof),eld(nedof),eqload(nedof),km(nedof,nedof)
 integer :: egdof(nedof),num(nenod)
 integer :: i,idof,i_elmt,k
@@ -93,7 +97,7 @@ if(present(extload).and.(.not.present(gravity) .or. .not.present(pseudoeq)))then
 endif
 
 ! compute stiffness matrices
-storkm=zero; dprecon=zero
+storekm=zero; dprecon=zero
 !----element stiffness integration, storage and preconditioner----
 do i_elmt=1,nelmt
   call compute_cmat(cmat,ym(mat_id(i_elmt)),nu(mat_id(i_elmt)))
@@ -115,7 +119,7 @@ do i_elmt=1,nelmt
     eld(idof)=eld(idof)+detjac*gll_weights(i)
     !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
   end do ! i=1,ngll
-  storkm(:,:,i_elmt)=km
+  storekm(:,:,i_elmt)=km
   do k=1,nedof
     dprecon(egdof(k))=dprecon(egdof(k))+km(k,k)
   end do

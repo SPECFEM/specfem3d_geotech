@@ -7,6 +7,7 @@ program semgeotech
 ! import necessary libraries
 use global
 use string_library, only : parse_file
+use input
 use mesh_spec
 #if (USE_MPI)
 use mpi_library
@@ -149,7 +150,7 @@ real(g_coord),g_num)
 
 ! create spectral elements
 if(myrank==0)write(stdout,'(a)',advance='no')'creating spectral elements...'
-call hex2spec(ndim,ngnod,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
+call hex2spec(ndim,ngnode,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
 if(myrank==0)write(stdout,*)'complete!'
 

@@ -23,6 +23,7 @@ errcode,ounit)
 call MPI_COMM_SIZE(MPI_COMM_WORLD,nproc,errcode)
 if(errcode /= 0) call mpierror('ERROR: cannot find number of processors!',     &
 errcode,ounit)
+if(myrank==0)write(*,*)'Total processes started:',nproc,'!'
 return
 end subroutine start_process
 !===============================================================================

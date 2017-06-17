@@ -6,15 +6,16 @@
 !   HNG, Jul 12,2011; ; HNG, Apr 09,2010
 subroutine apply_bc(ismpi,neq,errcode,errtag)
 use global
+use math_constants,only:ZERO
 implicit none
 logical,intent(in) :: ismpi
 integer,intent(out) :: neq
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
-integer :: i,ios,itmp,j,k
+integer :: i,ios,j,k
 integer :: i1,i2,i3,i4,i5,i6,inod
-integer :: ielmt,iface
-
+integer :: bctype,ielmt,iface,nelpart,i_elpart
+real(kind=kreal) :: val
 character(len=20) :: format_str,ptail
 character(len=250) :: fname
 character(len=150) :: data_path
@@ -96,13 +97,30 @@ if( ios /= 0 ) then
   return
 endif
 
-read(11,*)itmp
-do
-  ! This will read a line and proceed to next line
-  read(11,*,iostat=ios)ielmt,iface
-  if (ios/=0)exit
-  gdof(1,g_num(face(iface)%nod,ielmt))=0
-enddo
+bcux: do
+  read(11,*,iostat=ios)bctype,val
+  if(ios/=0)exit
+  if(val/=zero)then
+    write(errtag,*)'ERROR: nonzero displacement BC not implemented!'               
+    return                                                                       
+  endif
+  if(bctype==0)then ! point                                                      
+    write(errtag,*)'ERROR: nodal displacement BC not implemented!'               
+    return                                                                       
+  elseif(bctype==1)then ! edge                                                   
+    write(errtag,*)'ERROR: edge displacement BC not implemented!'                
+    return                                                                       
+  elseif(bctype==2)then ! face                                                   
+    read(11,*)nelpart                                                            
+    do i_elpart=1,nelpart                                                        
+      read(11,*)ielmt,iface ! This will read a line and proceed to next line     
+      gdof(1,g_num(face(iface)%nod,ielmt))=0                                    
+    enddo                                                                        
+  else                                                                           
+    write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype            
+    return                                                                       
+  endif                       
+enddo bcux
 close(11)
 
 fname=trim(data_path)//trim(uyfile)//trim(ptail)
@@ -112,13 +130,30 @@ if( ios /= 0 ) then
   return
 endif
 
-read(11,*)itmp
-do
-  ! This will read a line and proceed to next line
-  read(11,*,iostat=ios)ielmt,iface
-  if (ios/=0)exit
-  gdof(2,g_num(face(iface)%nod,ielmt))=0
-enddo
+bcuy: do
+  read(11,*,iostat=ios)bctype,val
+  if(ios/=0)exit
+  if(val/=zero)then
+    write(errtag,*)'ERROR: nonzero displacement BC not implemented!'               
+    return                                                                       
+  endif
+  if(bctype==0)then ! point                                                      
+    write(errtag,*)'ERROR: nodal displacement BC not implemented!'               
+    return                                                                       
+  elseif(bctype==1)then ! edge                                                   
+    write(errtag,*)'ERROR: edge displacement BC not implemented!'                
+    return                                                                       
+  elseif(bctype==2)then ! face                                                   
+    read(11,*)nelpart                                                            
+    do i_elpart=1,nelpart                                                        
+      read(11,*)ielmt,iface ! This will read a line and proceed to next line     
+      gdof(2,g_num(face(iface)%nod,ielmt))=0                                    
+    enddo                                                                        
+  else                                                                           
+    write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype            
+    return                                                                       
+  endif                       
+enddo bcuy
 close(11)
 
 fname=trim(data_path)//trim(uzfile)//trim(ptail)
@@ -128,13 +163,30 @@ if( ios /= 0 ) then
   return
 endif
 
-read(11,*)itmp
-do
-  ! This will read a line and proceed to next line
-  read(11,*,iostat=ios)ielmt,iface
-  if (ios/=0)exit
-  gdof(3,g_num(face(iface)%nod,ielmt))=0
-enddo
+bcuz: do
+  read(11,*,iostat=ios)bctype,val
+  if(ios/=0)exit
+  if(val/=zero)then
+    write(errtag,*)'ERROR: nonzero displacement BC not implemented!'               
+    return                                                                       
+  endif
+  if(bctype==0)then ! point                                                      
+    write(errtag,*)'ERROR: nodal displacement BC not implemented!'               
+    return                                                                       
+  elseif(bctype==1)then ! edge                                                   
+    write(errtag,*)'ERROR: edge displacement BC not implemented!'                
+    return                                                                       
+  elseif(bctype==2)then ! face                                                   
+    read(11,*)nelpart                                                            
+    do i_elpart=1,nelpart                                                        
+      read(11,*)ielmt,iface ! This will read a line and proceed to next line     
+      gdof(3,g_num(face(iface)%nod,ielmt))=0                                    
+    enddo                                                                        
+  else                                                                           
+    write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype            
+    return                                                                       
+  endif                       
+enddo bcuz
 close(11)
 
 ! compute modified gdof
