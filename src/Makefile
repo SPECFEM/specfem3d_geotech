@@ -24,6 +24,7 @@ CC_COMPILE = $(CC) $(CFLAGS)
 LIB =
 #LIBMPI = -L/~/openmpi-1.4.3/lib/lmpi # OR path to appropriate MPI library
 LIBSCOTCH = -L/home/hgharti/lsoft/scotch_6.0.4-intel17/lib -lscotch -lscotcherr
+INCSCOTCH = -I$(HOME)/lsoft/scotch_6.0.4-intel17/include
 
 # object tree
 OBJ = $(BIN)/global.o           \
@@ -65,8 +66,11 @@ OBJ_SEM = $(BIN)/serial_library.o      \
 # object tree for PARTMESH
 OBJ_PARTMESH = $(BIN)/global.o           \
                $(BIN)/string_library.o   \
+               $(BIN)/serial_library.o   \
+               $(BIN)/math_library.o     \
                $(BIN)/partmesh_library.o \
-	       $(BIN)/partmesh_scotch.o  \
+               $(BIN)/read_input.o       \
+	             $(BIN)/partmesh_scotch.o  \
                $(BIN)/partmesh.o
 
 OBJ_semgeotech = $(OBJ) $(OBJ_SEM) $(BIN)/semslope3d.o $(OBJ_EXCAV) $(BIN)/semexcav3d.o $(BIN)/semgeotech.o
@@ -202,7 +206,7 @@ $(BIN)/partmesh_library.o: partmesh_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/partmesh_library.o partmesh_library.f90
 
 $(BIN)/partmesh_scotch.o: partmesh_scotch.f90 partmesh_library.f90
-	$(FC_COMPILE) -c -o $(BIN)/partmesh_scotch.o partmesh_scotch.f90
+	$(FC_COMPILE) -c -o $(BIN)/partmesh_scotch.o partmesh_scotch.f90 $(INCSCOTCH)
 
 $(BIN)/partmesh.o: partmesh.f90
 	$(FC_COMPILE) -c -o $(BIN)/partmesh.o partmesh.f90

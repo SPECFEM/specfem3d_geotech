@@ -49,11 +49,11 @@ flow(nst,nst),m1(nst,nst),m2(nst,nst),m3(nst,nst),effsigma(nst),sigma(nst)
 ! dynamic arrays
 integer,allocatable::gdof_elmt(:,:),num(:),node_valency(:)
 ! factored parameters
-real(kind=kreal),allocatable :: cohf(:),nuf(:),phif(:),psif(:),ymf(:)
+real(kind=kreal),allocatable :: cohf_blk(:),nuf_blk(:),phif_blk(:),psif_blk(:),ymf_blk(:)
 real(kind=kreal),allocatable::bodyload(:),bmat(:,:),bload(:),coord(:,:),       &
 der(:,:),deriv(:,:),dprecon(:),eld(:),eload(:),evpt(:,:,:),                    &
-extload(:),jac(:,:),load(:),nodalu(:,:),storkm(:,:,:),oldx(:),x(:),            &
-stress_local(:,:,:),stress_global(:,:),scf(:),vmeps(:)
+extload(:),jac(:,:),load(:),nodalu(:,:),storekm(:,:,:),oldx(:),x(:),            &
+stress_elmt(:,:,:),stress_global(:,:),scf(:),vmeps(:)
 !,psigma(:,:),psigma0(:,:),taumax(:),nsigma(:)
 integer,allocatable :: egdof(:) ! elemental global degree of freedom
 
@@ -96,8 +96,8 @@ if(errcode/=0)call error_stop(errtag,stdout,myrank)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
 
-allocate(num(nenod),evpt(nst,ngll,nelmt),coord(ngnod,ndim),jac(ndim,ndim),     &
-der(ndim,ngnod),deriv(ndim,nenod),bmat(nst,nedof),eld(nedof),bload(nedof),     &
+allocate(num(nenod),evpt(nst,ngll,nelmt),coord(ngnode,ndim),jac(ndim,ndim),    &
+der(ndim,ngnode),deriv(ndim,nenod),bmat(nst,nedof),eld(nedof),bload(nedof),    &
 eload(nedof),nodalu(nndof,nnode),egdof(nedof),stat=istat)
 if (istat/=0)then
   write(stdout,*)'ERROR: cannot allocate memory!'
@@ -118,8 +118,8 @@ call zwgljd(etagll,wygll,nglly,jacobi_alpha,jacobi_beta)
 call zwgljd(zetagll,wzgll,ngllz,jacobi_alpha,jacobi_beta)
 
 ! get derivatives of shape functions for 8-noded hex
-allocate(dshape_hex8(ndim,ngnod,ngll))
-call dshape_function_hex8(ngnod,ngllx,nglly,ngllz,xigll,etagll,zetagll,   &
+allocate(dshape_hex8(ndim,ngnode,ngll))
+call dshape_function_hex8(ngnode,ngllx,nglly,ngllz,xigll,etagll,zetagll,   &
 dshape_hex8)
 deallocate(xigll,wxgll,etagll,wygll,zetagll,wzgll)
 ! compute gauss-lobatto-legendre quadrature information
@@ -141,19 +141,20 @@ enddo
 ! compute stiffness and body load
 if(myrank==0)write(stdout,'(a)',advance='no')'preprocessing...'
 
-allocate(stress_local(nst,ngll,nelmt))
+allocate(stress_elmt(nst,ngll,nelmt))
 ! compute initial stress assuming elastic domain
-stress_local=zero
+stress_elmt=zero
 
-allocate(extload(0:neq),dprecon(0:neq),storkm(nedof,nedof,nelmt),stat=istat)
+allocate(extload(0:neq),dprecon(0:neq),storekm(nedof,nedof,nelmt),stat=istat)
 ! elastic(0:neq),
 if (istat/=0)then
   write(stdout,*)'ERROR: cannot allocate memory!'
   stop
 endif
 extload=zero; gravity=.true.; pseudoeq=iseqload
-call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nu,ym,       &
-dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon,extload,gravity,pseudoeq)
+call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam_blk,nu_blk,  &
+ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon,extload,gravity,   &
+pseudoeq)
 
 if(myrank==0)write(stdout,*)'complete!'
 
@@ -185,6 +186,9 @@ if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 
 ! prepare ghost partitions for the communication
 call prepare_ghost()
+
+! prepare ghost partitions gdof
+call prepare_ghost_gdof()
 
 ! assemble from ghost partitions
 call assemble_ghosts(neq,dprecon,dprecon)
@@ -219,7 +223,7 @@ if (istat/=0)then
   stop
 endif
 
-allocate(cohf(nmat),nuf(nmat),phif(nmat),psif(nmat),ymf(nmat))
+allocate(cohf_blk(nmatblk),nuf_blk(nmatblk),phif_blk(nmatblk),psif_blk(nmatblk),ymf_blk(nmatblk))
 
 if(myrank==0)then
   write(stdout,'(a,e12.4,a,i5)')'CG_TOL:',cg_tol,' CG_MAXITER:',cg_maxiter
@@ -237,22 +241,22 @@ srf_loop: do i_srf=1,nsrf
 
    ! initialize
   nodalu=zero; vmeps=zero
-  stress_local=zero; scf=inftol
+  stress_elmt=zero; scf=inftol
 
   ! strength reduction
-  call strength_reduction(srf(i_srf),phinu,nmat,coh,nu,phi,psi,cohf,nuf,phif,  &
-  psif,istat)
+  call strength_reduction(srf(i_srf),phinu,nmatblk,coh_blk,nu_blk,phi_blk,     &
+  psi_blk,cohf_blk,nuf_blk,phif_blk,psif_blk,istat)
 
   ! compute minimum pseudo-time step for viscoplasticity
-  dt=dt_viscoplas(nmat,nuf,phif,ym)
+  dt=dt_viscoplas(nmatblk,nuf_blk,phif_blk,ym_blk)
 
   ! recompute stiffness if either of nu and ym has changed
   if(istat==1)then
     ! in future this should be changed so that only the elements with changed
     ! material properties are involved
     dprecon=zero
-    call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nuf,ym,  &
-    dshape_hex8,dlagrange_gll,gll_weights,storkm,dprecon)
+    call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam_blk,nuf_blk, &
+    ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon)
 
     ! assemble from ghost partitions
     call assemble_ghosts(neq,dprecon,dprecon)
@@ -280,7 +284,7 @@ srf_loop: do i_srf=1,nsrf
 
     ! pcg solver
     !x=zero
-    call pcg_solver(neq,nelmt,storkm,x,load,dprecon, &
+    call pcg_solver(neq,nelmt,storekm,x,load,dprecon, &
     gdof_elmt,cg_iter,errcode,errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myrank)
     cg_tot=cg_tot+cg_iter
@@ -288,7 +292,7 @@ srf_loop: do i_srf=1,nsrf
 
     if(allelastic)then
       call elastic_stress(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,   &
-      dlagrange_gll,x,stress_local)
+      dlagrange_gll,x,stress_elmt)
 
       exit plastic
     endif
@@ -303,7 +307,7 @@ srf_loop: do i_srf=1,nsrf
       ielmt=i_elmt
       imat=mat_id(ielmt)
 
-      call compute_cmat(cmat,ym(imat),nuf(imat))
+      call compute_cmat(cmat,ym_blk(imat),nuf_blk(imat))
       num=g_num(:,ielmt)
       coord=transpose(g_coord(:,num(gnod)))
       egdof=gdof_elmt(:,ielmt)
@@ -316,13 +320,13 @@ srf_loop: do i_srf=1,nsrf
         call invert(jac)
 
         deriv=matmul(jac,dlagrange_gll(:,i,:))
-        call compute_bmat(bmat,deriv)
+        call compute_bmat(deriv,bmat)
         eps=matmul(bmat,eld)
         eps=eps-evpt(:,i,ielmt)
         sigma=matmul(cmat,eps)
 
         ! compute effective stress
-        effsigma=sigma+stress_local(:,i,ielmt)
+        effsigma=sigma+stress_elmt(:,i,ielmt)
         if(iswater)then
           if(submerged_node(num(i)))then
              ! water pressure is compressive (negative)
@@ -330,14 +334,14 @@ srf_loop: do i_srf=1,nsrf
           endif
         endif
 
-        !effsigma=effsigma+stress_local(:,i,ielmt)
+        !effsigma=effsigma+stress_elmt(:,i,ielmt)
         call stress_invariant(effsigma,sigm,dsbar,lode_theta)
         ! check whether yield is violated
-        call mohcouf(phif(imat),cohf(imat),sigm,dsbar,lode_theta,f)
+        call mohcouf(phif_blk(imat),cohf_blk(imat),sigm,dsbar,lode_theta,f)
         if(f>fmax)fmax=f
 
         if(f>=zero)then !.or.(nl_isconv.or.nl_iter==nl_maxiter))then
-          call mohcouq(psif(imat),dsbar,lode_theta,dq1,dq2,dq3)
+          call mohcouq(psif_blk(imat),dsbar,lode_theta,dq1,dq2,dq3)
           call formm(effsigma,m1,m2,m3)
           flow=f*(m1*dq1+m2*dq2+m3*dq3)
 
@@ -358,10 +362,10 @@ srf_loop: do i_srf=1,nsrf
           !vmeps(num(i))=vmeps(num(i))+sqrt(two_third*                         &
           !dot_product(evpt(:,i,ielmt),evpt(:,i,ielmt)))
           ! update stresses
-          stress_local(:,i,ielmt)=effsigma
-          !phifr=atan(tnph/srf(i_srf))
-          !sf=(sigm*sin(phifr)-cohf*cos(phifr))/(-dsbar*(cos(lode_theta)/      &
-          !sqrt(r3)-sin(lode_theta)*sin(phifr)/r3))
+          stress_elmt(:,i,ielmt)=effsigma
+          !phif_blkr=atan(tnph/srf(i_srf))
+          !sf=(sigm*sin(phif_blkr)-cohf_blk*cos(phif_blkr))/(-dsbar*(cos(lode_theta)/      &
+          !sqrt(r3)-sin(lode_theta)*sin(phif_blkr)/r3))
           !if(sf<scf(num(i)))scf(num(i))=sf
         endif
       end do ! i_gll
@@ -415,7 +419,7 @@ srf_loop: do i_srf=1,nsrf
   do i_elmt=1,nelmt
     ielmt=i_elmt
     num=g_num(:,ielmt)
-    stress_global(:,num)=stress_global(:,num)+stress_local(:,:,ielmt)
+    stress_global(:,num)=stress_global(:,num)+stress_elmt(:,:,ielmt)
   enddo
 
   ! compute average stress at sharing nodes
@@ -430,9 +434,9 @@ srf_loop: do i_srf=1,nsrf
   if(nl_iter==nl_maxiter)exit
 
 enddo srf_loop ! i_srf safety factor loop
-deallocate(mat_id,gam,ym,coh,nu,phi,psi,srf)
+deallocate(mat_id,gam_blk,ym_blk,coh_blk,nu_blk,phi_blk,psi_blk,srf)
 deallocate(g_coord,g_num)
-deallocate(load,bodyload,extload,oldx,x,dprecon,storkm,stat=istat)
+deallocate(load,bodyload,extload,oldx,x,dprecon,storekm,stat=istat)
 call free_ghost()
 
 return

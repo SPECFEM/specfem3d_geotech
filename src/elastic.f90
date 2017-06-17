@@ -188,12 +188,12 @@ end subroutine compute_cmat_elastic
 !
 !    dinterpf=matmul(jac,dlagrange_gll(:,i,:))
 !    call compute_rmat_stress(dinterpf,bmat)
-!    !call compute_bmat(bmat,dinterpf)
+!    !call compute_bmat(dinterpf,bmat)
 !    epst=matmul(bmat,eld)
 !    !strain_local(:,i,ielmt)=epst !+strain_local(:,i,ielmt)
 !    sigma=matmul(cmat,epst)
 !    !print*,'Elastic stress',maxval(abs(sigma)); stop
-!    stress_elas(:,i,ielmt)=sigma !+stress_local(:,i,ielmt)
+!    stress_elas(:,i,ielmt)=sigma !+stress_elmt(:,i,ielmt)
 !
 !    if(islast)then
 !      strain_elas(:,i,ielmt)=epst
@@ -209,13 +209,13 @@ end subroutine compute_cmat_elastic
 !end subroutine compute_stress_elastic
 !!===========================================
 !
-!subroutine overburden_stress(nelmt,g_num,mat_id,z0,p0,k0,stress_local)
+!subroutine overburden_stress(nelmt,g_num,mat_id,z0,p0,k0,stress_elmt)
 !use global,only:nenod,ngll,nmatblk,nst,g_coord,rho
 !implicit none
 !integer,intent(in) :: nelmt
 !integer,intent(in) :: g_num(nenod,nelmt),mat_id(nelmt)
 !real(kind=kreal),intent(in) :: z0,p0,k0
-!real(kind=kreal),intent(inout) :: stress_local(nst,ngll,nelmt)
+!real(kind=kreal),intent(inout) :: stress_elmt(nst,ngll,nelmt)
 !
 !real(kind=kreal) :: z,szz,gam(nmatblk)
 !integer :: i,i_elmt,num(nenod)
@@ -227,19 +227,19 @@ end subroutine compute_cmat_elastic
 !  do i=1,ngll ! loop over integration points
 !    z=g_coord(3,num(i))
 !    szz=p0-gam(mat_id(i_elmt))*abs(z-z0) ! compression -
-!    stress_local(3,i,i_elmt)=szz
-!    stress_local(1,i,i_elmt)=k0*szz
-!    stress_local(2,i,i_elmt)=k0*szz
+!    stress_elmt(3,i,i_elmt)=szz
+!    stress_elmt(1,i,i_elmt)=k0*szz
+!    stress_elmt(2,i,i_elmt)=k0*szz
 !  end do ! i GLL
 !end do ! i_elmt
 !return
 !end subroutine overburden_stress
 !!===========================================
 !
-!! TODO: is it possible to compute stress_local only for intact elements just in case?
+!! TODO: is it possible to compute stress_elmt only for intact elements just in case?
 !! it seems that the subarray cannot be a receiving array
 !! this subroutine computes elastic stress from the known displacement
-!subroutine elastic_stress(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,dlagrange_gll,x,stress_local)
+!subroutine elastic_stress(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,dlagrange_gll,x,stress_elmt)
 !use global,only:ndim,nedof,nenod,ngnod,ngll,nst,g_coord,ym,nu
 !!use preprocess,only:compute_bmat,compute_cmat
 !use math_library,only:determinant,invert
@@ -248,7 +248,7 @@ end subroutine compute_cmat_elastic
 !integer,intent(in) :: nelmt,neq,gnod(8)
 !integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)
 !real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),dlagrange_gll(ndim,ngll,ngll),x(0:neq)
-!real(kind=kreal),intent(inout) :: stress_local(nst,ngll,nelmt)
+!real(kind=kreal),intent(inout) :: stress_elmt(nst,ngll,nelmt)
 !
 !real(kind=kreal) :: detjac,zero=0.0_kreal
 !real(kind=kreal) :: cmat(nst,nst),coord(ngnod,ndim),jac(ndim,ndim),dinterpf(ndim,nenod), &
@@ -271,10 +271,10 @@ end subroutine compute_cmat_elastic
 !
 !    dinterpf=matmul(jac,dlagrange_gll(:,i,:))
 !    call compute_rmat_stress(bmat,dinterpf)
-!    !call compute_bmat(bmat,deriv)
+!    !call compute_bmat(deriv,bmat)
 !    eps=matmul(bmat,eld)
 !    sigma=matmul(cmat,eps)
-!    stress_local(:,i,i_elmt)=sigma
+!    stress_elmt(:,i,i_elmt)=sigma
 !  end do ! i GLL
 !end do ! i_elmt
 !return
@@ -282,7 +282,7 @@ end subroutine compute_cmat_elastic
 !!===========================================
 !
 !subroutine elastic_stress_intact(nelmt_intact,neq,gnod,elmt_intact,g_num,gdof_elmt, &
-!mat_id,dshape_hex8,dlagrange_gll,x,stress_local)
+!mat_id,dshape_hex8,dlagrange_gll,x,stress_elmt)
 !use global,only:ndim,nedof,nelmt,nenod,ngnod,ngll,nst,g_coord,ym,nu
 !!use preprocess,only:compute_bmat,compute_cmat
 !use math_library,only:determinant,invert
@@ -292,7 +292,7 @@ end subroutine compute_cmat_elastic
 !integer,intent(in) :: elmt_intact(nelmt_intact),g_num(nenod,nelmt_intact), &
 !gdof_elmt(nedof,nelmt_intact),mat_id(nelmt_intact)
 !real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),dlagrange_gll(ndim,ngll,ngll),x(0:neq)
-!real(kind=kreal),intent(inout) :: stress_local(nst,ngll,nelmt)
+!real(kind=kreal),intent(inout) :: stress_elmt(nst,ngll,nelmt)
 !
 !real(kind=kreal) :: detjac,zero=0.0_kreal
 !real(kind=kreal) :: cmat(nst,nst),coord(ngnod,ndim),jac(ndim,ndim),dinterpf(ndim,nenod), &
@@ -317,10 +317,10 @@ end subroutine compute_cmat_elastic
 !
 !    dinterpf=matmul(jac,dlagrange_gll(:,i,:))
 !    call compute_rmat_stress(bmat,dinterpf)
-!    !call compute_bmat(bmat,deriv)
+!    !call compute_bmat(deriv,bmat)
 !    eps=matmul(bmat,eld)
 !    sigma=matmul(cmat,eps)
-!    stress_local(:,i,ielmt)=stress_local(:,i,ielmt)+sigma
+!    stress_elmt(:,i,ielmt)=stress_elmt(:,i,ielmt)+sigma
 !    !if(i_elmt==1.and.i==1)then
 !    !      print*,'s',sigma
 !    !      print*,'e',eld
@@ -329,7 +329,7 @@ end subroutine compute_cmat_elastic
 !    !    endif
 !  end do ! i GLL
 !end do ! i_elmt
-!!print*,size(stress_local)
+!!print*,size(stress_elmt)
 !return
 !end subroutine elastic_stress_intact
 !!===========================================

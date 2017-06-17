@@ -10,15 +10,15 @@ contains
 ! intact and void regions
 subroutine intact_void_elmt(nexcavid,excavid,ismat,nelmt_intact,nelmt_void,    &
 elmt_intact,elmt_void,isnode)
-use global,only:mat_id,nelmt,nnode,g_num,nmat
+use global,only:mat_id,nelmt,nnode,g_num,nmatblk
 implicit none
 integer,intent(in) :: nexcavid,nelmt_intact,nelmt_void
 integer,intent(in) :: excavid(nexcavid)
-logical,intent(in) :: ismat(nmat)
+logical,intent(in) :: ismat(nmatblk)
 integer,intent(out) :: elmt_intact(nelmt_intact),elmt_void(nelmt_void)
 logical,intent(out) :: isnode(nnode)
 integer :: i_elmt,ielmt_intact,ielmt_void
-logical :: ismat_off(nmat)
+logical :: ismat_off(nmatblk)
 
 ismat_off=.false.
 ismat_off(excavid)=.true.
@@ -112,7 +112,8 @@ use global,only : ngll,nnode
 implicit none
 integer,intent(inout) :: node_valency(nnode)
 integer,intent(in) :: nelmt_void
-integer,intent(in) :: gnum_void(ngll,nelmt_void)
+!integer,intent(in) :: gnum_void(ngll,nelmt_void)
+integer,intent(in) :: gnum_void(:,:)
 integer :: i_elmt,num(ngll)
 
 ! correct node valency subtracting dead-element nodes
@@ -128,21 +129,21 @@ end subroutine correct_nvalency
 ! this subroutine computes the excavation loads. this load consists of both
 ! gravity and stress load
 subroutine excavation_load(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,  &
-dlagrange_gll,gll_weights,stress_local,extload)
-use global,only:ndim,nedof,nenod,ngll,ngnod,nst,g_coord,gam
+dlagrange_gll,gll_weights,stress_elmt,extload)
+use global,only:ndim,nedof,nenod,ngll,ngnode,nst,g_coord,gam_blk
 use preprocess,only:compute_bmat
 use math_library,only:determinant,invert
 implicit none
 integer,intent(in) :: nelmt,neq,gnod(8) ! nelmt (only void elements)
 integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)
 ! only void elements
-real(kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),                        &
+real(kreal),intent(in) :: dshape_hex8(ndim,ngnode,ngll),                        &
 dlagrange_gll(ndim,ngll,ngll),gll_weights(ngll)
-real(kreal),intent(in) :: stress_local(nst,ngll,nelmt)
+real(kreal),intent(in) :: stress_elmt(nst,ngll,nelmt)
 real(kreal),intent(inout) :: extload(0:neq)
 
 real(kreal) :: detjac,zero=0.0_kreal
-real(kreal) :: coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod),             &
+real(kreal) :: coord(ngnode,ndim),jac(ndim,ndim),deriv(ndim,nenod),             &
 bmat(nst,nedof),eld(nedof),bload(nedof),eload(nedof),sigma(nst)
 integer :: egdof(nedof),num(nenod)
 integer :: i,idof,i_elmt
@@ -159,8 +160,8 @@ do i_elmt=1,nelmt
     detjac=determinant(jac)
     call invert(jac)
     deriv=matmul(jac,dlagrange_gll(:,i,:))
-    call compute_bmat(bmat,deriv)
-    sigma=stress_local(:,i,i_elmt)
+    call compute_bmat(deriv,bmat)
+    sigma=stress_elmt(:,i,i_elmt)
     eload=MATMUL(sigma,bmat)
     bload=bload+eload*detjac*gll_weights(i)
     ! since interpolation funtions are orthogonal we compute only nonzero terms
@@ -168,7 +169,7 @@ do i_elmt=1,nelmt
     eld(idof)=eld(idof)+detjac*gll_weights(i)
     !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
   end do ! i=1,ngll
-  extload(egdof)=extload(egdof)+eld*gam(mat_id(i_elmt))+bload
+  extload(egdof)=extload(egdof)+eld*gam_blk(mat_id(i_elmt))+bload
 enddo
 extload(0)=zero
 return
@@ -178,20 +179,21 @@ end subroutine excavation_load
 ! this subroutine computes the excavation loads. this load consists of both
 ! gravity and stress load
 subroutine excavation_load_nodal(nelmt,gnod,g_num,mat_id,dshape_hex8,          &
-dlagrange_gll,gll_weights,stress_local,excavload)
-use global,only:ndim,nedof,nndof,nenod,ngll,ngnod,nnode,nst,g_coord,gam
+dlagrange_gll,gll_weights,stress_elmt,excavload)
+use global,only:ndim,nedof,nndof,nenod,ngll,ngnode,nnode,nst,g_coord,gam_blk
 use preprocess,only:compute_bmat
 use math_library,only:determinant,invert
 implicit none
 integer,intent(in) :: nelmt,gnod(8) ! nelmt (only void elements)
-integer,intent(in) :: g_num(nenod,nelmt),mat_id(nelmt)
-real(kreal),intent(in) :: dshape_hex8(ndim,ngnod,ngll),                        &
+!integer,intent(in) :: g_num(nenod,nelmt),mat_id(nelmt)
+integer,intent(in) :: g_num(:,:),mat_id(:)
+real(kreal),intent(in) :: dshape_hex8(ndim,ngnode,ngll),                        &
 dlagrange_gll(ndim,ngll,ngll),gll_weights(ngll)
-real(kreal),intent(in) :: stress_local(nst,ngll,nelmt)
+real(kreal),intent(in) :: stress_elmt(nst,ngll,nelmt)
 real(kreal),intent(out) :: excavload(nndof,nnode) ! nnode include all nodes
 
 real(kreal) :: detjac,zero=0.0_kreal
-real(kreal) :: coord(ngnod,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
+real(kreal) :: coord(ngnode,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
 bmat(nst,nedof),eld(nedof),bload(nedof),eload(nedof),tload(nedof),sigma(nst)
 integer :: num(nenod)
 integer :: i,idof,i_elmt
@@ -208,8 +210,8 @@ do i_elmt=1,nelmt
     detjac=determinant(jac)
     call invert(jac)
     deriv=matmul(jac,dlagrange_gll(:,i,:))
-    call compute_bmat(bmat,deriv)
-    sigma=stress_local(:,i,i_elmt)
+    call compute_bmat(deriv,bmat)
+    sigma=stress_elmt(:,i,i_elmt)
     eload=MATMUL(sigma,bmat)
     bload=bload+eload*detjac*gll_weights(i)
     ! since interpolation funtions are orthogonal we compute only nonzero terms
@@ -217,12 +219,12 @@ do i_elmt=1,nelmt
     eld(idof)=eld(idof)+detjac*gll_weights(i)
     !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
   end do ! i=1,ngll
-  tload=eld*gam(mat_id(i_elmt))+bload
+  tload=eld*gam_blk(mat_id(i_elmt))+bload
   !excavload(:,num)=excavload(:,num)+reshape(tload,(/nndof,ngll/))
   do i=1,nndof
     excavload(i,num)=excavload(i,num)+tload(i:nedof:nndof)
   enddo
-  !extload(egdof)=extload(egdof)+eld*gam(mat_id(i_elmt))+bload
+  !extload(egdof)=extload(egdof)+eld*gam_blk(mat_id(i_elmt))+bload
 enddo
 !extload(0)=zero
 return

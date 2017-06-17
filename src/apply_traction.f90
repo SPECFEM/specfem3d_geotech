@@ -11,7 +11,7 @@ use shape_library,only : dshape_function_quad4
 use gll_library,only : gll_quadrature2d,zwgljd
 implicit none
 logical,intent(in) :: ismpi
-integer,intent(in) :: gnod(ngnod)
+integer,intent(in) :: gnod(ngnode)
 integer,intent(in) :: neq
 real(kind=kreal),intent(inout) :: load(0:neq)
 integer,intent(out) :: errcode

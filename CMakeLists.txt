@@ -64,15 +64,22 @@ ENDIF(BUILD_DOCUMENTATION)
 
 # build partmesh option
 SET(BUILD_PARTMESH OFF CACHE BOOL "Build mesh partitioning program")
-IF(BUILD_PARTMESH)
-  SET(ISPARTMESH ON)
-  FIND_PATH(SCOTCH_LIBRARY_PATH NAMES libscotch.a libscotcherr.a
-  PATHS /usr/lib /usr/local/lib ENV LD_LIBRARY_PATH)
-  IF(NOT SCOTCH_LIBRARY_PATH)
-    MESSAGE(WARNING "SCOTCH library not found! Please set correct \
-    SCOTCH_LIBRARY_PATH manually!")
-    SET(ISPARTMESH OFF)
-  ENDIF(NOT SCOTCH_LIBRARY_PATH)
+IF(BUILD_PARTMESH)                                                               
+  SET(ISPARTMESH ON)                                                             
+  # find library                                                                 
+  FIND_PATH(SCOTCH_LIBRARY_PATH NAMES libscotch.a libscotcherr.a                 
+  PATHS /usr/lib /usr/local/lib ENV LD_LIBRARY_PATH)                             
+  IF(NOT SCOTCH_LIBRARY_PATH)                                                    
+    MESSAGE(WARNING "SCOTCH library not found! Please set correct SCOTCH_LIBRARY_PATH manually!")
+    SET(ISPARTMESH OFF)                                                          
+  ENDIF(NOT SCOTCH_LIBRARY_PATH)                                                 
+  # find include                                                                 
+  FIND_PATH(SCOTCH_INCLUDE_PATH NAMES scotch.h ptscotch.h                        
+  PATHS /usr/include /usr/local/include ENV LD_INCLUDE_PATH)                     
+  IF(NOT SCOTCH_INCLUDE_PATH)                                                    
+    MESSAGE(WARNING "SCOTCH include not found! Please set correct SCOTCH_INCLUDE_PATH manually!")
+    SET(ISPARTMESH OFF)                                                          
+  ENDIF(NOT SCOTCH_INCLUDE_PATH)                                                 
 ENDIF(BUILD_PARTMESH)
 SET(BUILD_UTILITIES_EXODUS2SEM OFF CACHE BOOL "Build exodus2sem program")
 SET(BUILD_UTILITIES_WRITE_SOS OFF CACHE BOOL "Build write_sos program")

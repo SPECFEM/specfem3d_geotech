@@ -1,5 +1,5 @@
 #pre information
-preinfo: nproc=64, phead='proc', method='sem', ngllx=5, nglly=5, ngllz=5, nenod=8, ngnod=8, inp_path='./input', part_path='./partition', out_path='./output/'
+preinfo: nproc=64, phead='proc', method='sem', ngllx=5, nglly=5, ngllz=5, nenod=8, ngnode=8, inp_path='./input', part_path='./partition', out_path='./output/'
 
 #mesh information
 mesh: xfile='example2_coord_x', yfile='example2_coord_y', zfile='example2_coord_z', &

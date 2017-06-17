@@ -1,27 +1,9 @@
-! this module contains math constants
-! math parameters
-! AUTHOR
-!   Hom Nath Gharti
-! REVISION
-!   HNG, Jul 12,2011; HNG, Apr 09,2010
-module math_constants
-use set_precision
-implicit none
-real(kind=kreal),parameter :: zero=0.0_kreal,half=0.5_kreal,one=1.0_kreal,     &
-two=2.0_kreal
-real(kind=kreal),parameter :: pi=3.141592653589793_kreal
-real(kind=kreal),parameter :: deg2rad=pi/180.0_kreal,rad2deg=180.0_kreal/pi
-
-! tolerance value for zero
-real(kind=kreal),parameter :: inftol=1.0e32_kreal,zerotol = 1.0e-12_kreal
-end module math_constants
-!===============================================================================
-
-! this module coatins math routines
+! this module contains math routines
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
 module math_library
 use set_precision
+use math_constants
 
 contains
 
@@ -205,7 +187,7 @@ end subroutine stress_invariant
 !===============================================================================
 
 ! quick sort of integer list
-function quick_sort(x,n) result(xnew)
+function iquick_sort(x,n) result(xnew)
 integer,intent(in) :: n ! size of the vector data x
 integer, dimension(n) :: x ! data vector to sort
 integer :: temp
@@ -222,7 +204,7 @@ do i = 2, n
   x(j+1) = temp
 end do
 xnew=x
-end function quick_sort
+end function iquick_sort
 !===============================================================================
 
 ! quick sort of real list

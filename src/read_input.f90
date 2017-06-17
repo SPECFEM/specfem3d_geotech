@@ -1,3 +1,8 @@
+module input
+
+contains
+
+!-------------------------------------------------------------------------------
 ! this subroutine reads the input information from a structured ASCII text file
 ! AUTHOR
 !   Hom Nath Gharti
@@ -5,9 +10,9 @@
 !   HNG, Jul 07,2011; HNG, Apr 09,2010
 ! TODO:
 !   - prompt warning or error for unknown argument/s
-subroutine read_input(ismpi,inp_fname,errcode,errtag)
+subroutine read_input(ismpi,inp_fname,errcode,errtag,ispartmesh)
 use global
-use math_constants,only:zero,zerotol
+use math_constants,only:inftol,zero,zerotol,ONE,HALF,TWO,THREE
 use string_library
 implicit none
 
@@ -16,19 +21,21 @@ character(len=*),intent(in) :: inp_fname
 logical,intent(in) :: ismpi
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
+logical,optional,intent(in) :: ispartmesh
 character(len=250) :: line
+character(len=60) :: lineword(9)
 character(len=800) ::tag
 character(len=250) :: strval,token
 character(len=1) :: tmp_char
 character(len=250),dimension(50) :: args
-character(len=250) :: confile,idfile,matfile
-character(len=250),dimension(3) :: coordfile
+!character(len=250) :: confile,idfile,matfile
+!character(len=250),dimension(3) :: coordfile
 integer :: id,ind,ios,narg,slen
 
 integer :: bc_stat,preinfo_stat,mesh_stat,material_stat,control_stat,         &
 eqload_stat,stress0_stat,traction_stat,water_stat,save_stat
 integer :: mat_count,nwmat
-integer :: ielmt,i_node,inode,imat,mat_domain,tmp_nelmt,tmp_nnode
+integer :: ielmt,i_node,inode,imat,tmp_nelmt,tmp_nnode
 
 character(len=20) :: format_str,ptail
 character(len=250) :: fname
@@ -99,6 +106,12 @@ else
 endif
 out_path='./output/'
 
+if(present(ispartmesh))then                                                      
+  if(ispartmesh)then                                                             
+    part_path='./partition/'                                                     
+  endif                                                                          
+endif 
+
 eqkx=0.0_kreal
 eqky=0.0_kreal
 eqkz=0.0_kreal
@@ -145,12 +158,13 @@ do
     endif
     preinfo_stat=-1;
     call split_string(tag,',',args,narg)
-    if(ismpi)then
-      nproc_inp=get_integer('nproc',args,narg);
-      if(nproc_inp/=nproc)then
-        write(errtag,*)'ERROR: number of processors and images must be equal!'
-        return
-      endif
+    if(ismpi.or. (present(ispartmesh).and.ispartmesh))then                       
+      nproc_inp=get_integer('nproc',args,narg);                                  
+      if(present(ispartmesh).and.ispartmesh)nproc=nproc_inp                      
+      if(nproc_inp/=nproc)then                                                   
+        write(errtag,*)'ERROR: number of processors and images must be equal!'   
+        return                                                                   
+      endif                                                                      
     endif
     call seek_string('method',strval,args,narg)
     if (.not. isblank(strval))method=trim(strval)
@@ -166,9 +180,9 @@ do
     ! nedof=nndof*nenod
     if (method=='sem')then
       ! number of geometrical nodes
-      ngnod=get_integer('ngnod',args,narg);
+      ngnode=get_integer('ngnode',args,narg);
     elseif(method=='fem')then
-      ngnod=nenod ! default number of geometrical nodes
+      ngnode=nenod ! default number of geometrical nodes
     else
       write(errtag,*)'ERROR: wrong value for method!'
       return
@@ -177,12 +191,12 @@ do
     if (.not. isblank(strval))inp_path=trim(strval)
     slen=len_trim(inp_path)
     if(inp_path(slen:slen)/='/')inp_path=trim(inp_path)//'/'
-    if(ismpi)then
-      call seek_string('part_path',strval,args,narg)
-      if (.not. isblank(strval))part_path=trim(strval)
-      slen=len_trim(part_path)
-      if(part_path(slen:slen)/='/')part_path=trim(part_path)//'/'
-    endif
+    if(ismpi .or. (present(ispartmesh).and.ispartmesh))then                      
+      call seek_string('part_path',strval,args,narg)                             
+      if (.not. isblank(strval))part_path=trim(strval)                           
+      slen=len_trim(part_path)                                                   
+      if(part_path(slen:slen)/='/')part_path=trim(part_path)//'/'                
+    endif 
     call seek_string('out_path',strval,args,narg)
     if (.not. isblank(strval))out_path=trim(strval)
     slen=len_trim(out_path)
@@ -522,49 +536,94 @@ else
 endif
 close(11)
 
-! read material lists
-if(ismatpart==0)then ! material file not partitioned
-  fname=trim(mat_path)//trim(matfile)
-elseif(ismatpart==1)then ! material file partitioned
-  fname=trim(mat_path)//trim(matfile)//trim(ptail)
-else
-  write(errtag,'(a)')'ERROR: illegal ismatpart value!'
-  return
-endif
-open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
-if( ios /= 0 ) then
-  write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
-  return
-endif
-read(11,*)
-read(11,*)nmat
-allocate(gam(nmat),rho(nmat),ym(nmat),coh(nmat),nu(nmat),phi(nmat),psi(nmat),  &
-water(nmat))
-do i=1,nmat
-  read(11,*)imat,mat_domain,gam(i),ym(i),nu(i),phi(i),coh(i),psi(i)
-enddo
-if(minval(mat_id)<1 .or. maxval(mat_id)>nmat)then
-  write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined&
-  & material regions!'
-  return
-endif
-water=.false.
-if(iswater)then
-  read(11,*,iostat=ios)nwmat
-  if( ios /= 0 ) then
-    write(errtag,'(a)')'ERROR: water IDs cannot be read from material list!'
+! for partmesh library following information is read in the library itself       
+if(.not.present(ispartmesh).or. .not.ispartmesh)then
+  ! read material lists
+  if(ismatpart==0)then ! material file not partitioned
+    fname=trim(mat_path)//trim(matfile)
+  elseif(ismatpart==1)then ! material file partitioned
+    fname=trim(mat_path)//trim(matfile)//trim(ptail)
+  else
+    write(errtag,'(a)')'ERROR: illegal ismatpart value!'
     return
   endif
-  do i=1,nwmat
-    read(11,*)id
-    water(id)=.true.
-  enddo
+  open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
+  if( ios /= 0 ) then
+    write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
+    return
+  endif
+  read(11,*)
+  read(11,*)nmatblk                                                              
+  allocate(mat_domain(nmatblk),type_blk(nmatblk),gam_blk(nmatblk),             & 
+  rho_blk(nmatblk),ym_blk(nmatblk),coh_blk(nmatblk),nu_blk(nmatblk),           & 
+  phi_blk(nmatblk),psi_blk(nmatblk),water(nmatblk))                              
+  allocate(mfile_blk(nmatblk))                                                   
+  allocate(bulkmod_blk(nmatblk),shearmod_blk(nmatblk))                           
+  ! initilize                                                                    
+  type_blk=-10000                                                                
+  mfile_blk=""                                                                   
+  gam_blk=-inftol                                                                
+  ym_blk=-inftol                                                                 
+  nu_blk=-inftol                                                                 
+  coh_blk=-inftol                                                                
+  phi_blk=-inftol                                                                
+  psi_blk=-inftol                                                                
+  do i=1,nmatblk                                                                 
+    ! This will read a line and proceed to next line                             
+    ! if the input line is long enough only the part of the lineword will be     
+    ! filled                                                                     
+    lineword=""                                                                  
+    read(11,*,iostat=ios)lineword                                                
+    imat=str2int(lineword(1))                                                    
+    mat_domain(i)=str2int(lineword(2))                                           
+    type_blk(i)=str2int(lineword(3))                                             
+    if(type_blk(i).eq.0)then                                                     
+      ! block material properties                                                
+      gam_blk(i)=str2real(lineword(4))                                           
+      ym_blk(i)=str2real(lineword(5))                                            
+      nu_blk(i)=str2real(lineword(6))                                            
+      phi_blk(i)=str2real(lineword(7))                                           
+      coh_blk(i)=str2real(lineword(8))                                           
+      psi_blk(i)=str2real(lineword(9))                                           
+      !read(11,*)imat,mat_domain(i),gam_blk(i),ym_blk(i),nu_blk(i),phi_blk(i), &
+      !coh_blk(i),psi_blk(i)                                                     
+                                                                                 
+      ! convert to bulk modulus and shear modulus                                
+      bulkmod_blk(i)=ym_blk(i)/(THREE*(one-two*nu_blk(i)))                       
+      shearmod_blk(i)=half*ym_blk(i)/(one+nu_blk(i))                             
+    elseif(type_blk(i).eq.-1)then                                                
+      ! tomographic model defined on regular structured grid                     
+      mfile_blk(i)=trim(lineword(4))                                             
+    else                                                                         
+      print*,'ERROR: type_blk:',type_blk(i),' is unsupported!'                   
+      stop                                                                       
+    endif                                                                        
+                                                                                 
+  enddo                            
+  if(minval(mat_id)<1 .or. maxval(mat_id)>nmatblk)then
+    write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined&
+    & material regions!'
+    return
+  endif
+  water=.false.
+  if(iswater)then
+    read(11,*,iostat=ios)nwmat
+    if( ios /= 0 ) then
+      write(errtag,'(a)')'ERROR: water IDs cannot be read from material list!'
+      return
+    endif
+    do i=1,nwmat
+      read(11,*)id
+      water(id)=.true.
+    enddo
+  endif
+  rho_blk=gam_blk/9.81_kreal ! Kg/m3
 endif
-rho=gam/9.81_kreal ! Kg/m3
-
 ! read bc
 errcode=0
 if(myrank==0)write(*,*)'complete!'
 
 end subroutine read_input
+!===============================================================================
+end module input
 !===============================================================================

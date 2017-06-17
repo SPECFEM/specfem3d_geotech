@@ -7,6 +7,7 @@ program semgeotech
 ! import necessary libraries
 use global
 use string_library, only : parse_file
+use input
 use mesh_spec
 #if (USE_MPI)
 use mpi_library
@@ -20,7 +21,7 @@ implicit none
 integer :: funit,i,ios,j,k
 integer :: i_elmt
 
-integer :: gnod(8),map2exodus(8),ngllxy,node_hex8(8)
+integer :: gnod(8),gnum_hex(8),map2exodus(8),ngllxy,node_hex8(8)
 
 character(len=250) :: arg1,inp_fname,prog
 character(len=250) :: path
@@ -38,7 +39,7 @@ integer :: tot_nelmt,max_nelmt,min_nelmt,tot_nnode,max_nnode,min_nnode
 
 character(len=250) :: errtag ! error message
 integer :: errcode
-logical :: isopen ! flag to check whether the file is opened
+logical :: isfile,isopen ! flag to check whether the file is opened
 
 myrank=0; nproc=1;
 errtag=""; errcode=-1
@@ -77,8 +78,16 @@ call cpu_time(cpu_tstart)
 ! get input file name
 call get_command_argument(1, inp_fname)
 
+if(myrank==0)write(stdout,*)'Input file name: "',trim(inp_fname),'"'
+inquire(file=trim(inp_fname),exist=isfile)
+if(.not.isfile)then
+ if(myrank==0)then
+   write(stdout,*)'Input file: "',trim(inp_fname),'" doesn''t exist!'
+ endif
+ call close_process()  
+endif
 ! read input data
-call read_input(ismpi,myrank,inp_fname,errcode,errtag)
+call read_input(ismpi,inp_fname,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
@@ -141,7 +150,7 @@ real(g_coord),g_num)
 
 ! create spectral elements
 if(myrank==0)write(stdout,'(a)',advance='no')'creating spectral elements...'
-call hex2spec(ndim,ngnod,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
+call hex2spec(ndim,ngnode,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
 if(myrank==0)write(stdout,*)'complete!'
 
@@ -288,7 +297,8 @@ do i_elmt=1,nelmt
         node_hex8(7)=node_hex8(5)+ngllx
         node_hex8(8)=node_hex8(7)+1
         ! map to exodus/cubit numbering and write
-        write(funit)g_num(node_hex8(map2exodus),i_elmt)
+        gnum_hex=g_num(node_hex8(map2exodus),i_elmt)
+        write(funit)gnum_hex
       enddo
     enddo
   enddo
