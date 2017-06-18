@@ -1,0 +1,24 @@
+\chapter{Introduction}
+\section{Background}
+
+\pack\ is a free and open-source command-driven software for 3D slope stability analysis~\citep[for more details see][]{gharti2012a} and simulation of 3D multistage excavation~\citep[for more details see][]{gharti2012b} based on the spectral-element method~\citep[e.g.,][]{patera1984,canuto1988,seriani1994,faccioli1997,komatitsch1998,komatitsch1999,peter2011}. The slope stability and the excavation routines were originally started from the routines found in the book ``Programming the finite element method''~\citep{smith2004}. The software can run on a single processor as well as multi-core machines or large clusters. It is written mainly in FORTRAN 90, and parallelized using
+MPI~\citep{gropp1994,pacheco1997} based on domain decomposition. For the domain decomposition, the open-source graph partitioning library SCOTCH~\citep{pellegrini1996} is used. The element-by-element preconditioned conjugate-gradient method~\citep[e.g.,][]{hughes1983,law1986,king1987,barragy1988} is implemented to solve the linear equations. For elastoplastic failure,
+a Mohr-coulomb failure criterion is used with a viscoplastic strain method~ \citep{zienkiewicz1974}.\\
+
+This program does not automatically determine the factor of safety of slope stability. Simulations can be performed for a series of safety factors. After plotting the safety factor verses maximum displacement curve, one can determine the factor of safety of the given slope. Although the software is optimized for slope stability analysis and multistage excavation, other relevant simulations of quasistatic problems in solid (geo)mechanics can also be performed with this software.\\
+
+The software currently does not include an inbuilt mesher. Existing tools, such as Gmsh~\citep{geuzaine2009}, CUBIT/Trelis~\citep{cubit2011}, TrueGrid~\citep{truegrid2006}, etc., can be used for hexahedral meshing, and the resulting mesh file can be converted to the input files required by \pack. Output data can be visualized and processed using the open-source visualization application ParaView (\texttt{www.paraview.org}).
+
+\section{Status summary}
+\begin{desclist}{Pseudo-static earthquake loading}
+\item[Slope stability analysis]        : Yes
+\item[Multistage excavation]           : Yes
+\item[Gravity loading]                 : Yes
+\item[Surface loading]                 : Yes (point load, uniformly distributed load, linearly distributed load) [Experimental]
+\item[Water table]                     : Yes [Experimental]
+\item[Pseudo-static earthquake loading]: Yes [Experimental]
+\item[Automatic factor of safety]      : No
+\end{desclist}
+
+\section*{Last revision}
+June 17, 2017

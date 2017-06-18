@@ -1,0 +1,502 @@
+\chapter{Input}
+\label{chap:input}
+\section{Main input file}
+
+The main input file structure is motivated by the ``E3D''~\citep{larsen1995} software package. The main input file consists of legitimate input lines defined in the specified formats. Any number of blank lines or comment lines can be placed for user friendly input structure. The blank lines contain no or only white-space characters, and the comment lines contain "\#" as the first character. \\
+
+Each legitimate input line consists of a line type, and list of arguments and corresponding values. All argument-value pair are separated by comma (,). If necessary, any legitimate input line can be continued to next line using FORTRAN 90 continuation  character "\&" as an absolute last character of a line to be continued. Repetition of same line type is not allowed.\\
+
+Legitimate input lines have the format\\
+{\it{line\_type}} $arg_1=val_1$, $arg_2=val_2$, ......., $arg_n=val_n$\\
+
+Example:\\
+\texttt{preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+inp\_path=\sq{./input}, part\_path=\sq{./partition}, out\_path=\sq{./output/}}\\
+
+All legitimate input lines should be written in lower case. Line type and argument-value pairs must be separated by a space. Each argument-value pair must be separated by a comma(,) and a space/s. No space/s are recommended before line type and in between argument name and "=" or "=" and argument value. If argument value is a string, the FORTRAN 90 string (i.e., enclosed within single quotes) should be used, for example, \texttt{inp\_path=\sq{./input}}. If the argument value is a vector (i.e., multi-valued), a list of values separated by space (no comma!) shoud be used, e.g, \texttt{srf=1.0 1.2 1.3 1.4}.
+
+\subsection{Line types}
+
+Only the following line types are permitted.
+\begin{adescription}{traction:}
+\item[preinfo:]  preliminary information of the simulation
+\item[mesh:]     mesh information
+\item[bc:]      boundary conditions information
+\item[traction:] traction information [optional]
+\item[stress0:] initial stress information [optional]. It is generally necessary for multistage excavation.
+\item[material:] material properties
+\item[eqload:]   pseudo-static earthquake loading [optional]
+\item[water:]    water table information [optional]
+\item[control:]  control of the simulation
+\item[save:]  options to save data
+\end{adescription}
+
+\subsection{Arguments}
+
+Only the following arguments under the specified line types are permitted.\\
+
+\texttt{\underline{preinfo:}}
+
+\begin{adescription}{nl\_maxiter}
+  \item[nproc] : number of processors to be used for the parallel processing [integer > 1]. Only required for parallel processing.
+  \item[ngllx] : number of Gauss-Lobatto-Legendre (GLL) points along $x$-axis [integer > 1].
+  \item[nglly] : number of GLL points along $y$-axis [integer > 1].
+  \item[ngllz] : number of GLL points along $z$-axis [integer > 1]. \\\\
+  {\emph{Note: Although the program can use different values of}} \texttt{ngllx}, \texttt{nglly}, {\emph{and}} \texttt{ngllz}, {\emph{it is recommended to use same number of GLL points along all axes.}}
+  \item[inp\_path]  : input path where the input data are located [string, optional, default $\Rightarrow$ \texttt{\sq{./input}}].
+  \item[part\_path] : partition path where the partitioned data will be or are located [string, optional, default $\Rightarrow$ \texttt{\sq{./partition}}]. Only required for parallel processing.
+  \item[out\_path]  : output path where the output data will be stored [string, optional, default $\Rightarrow$ \texttt{\sq{./output}}].\\
+\end{adescription}
+
+
+\texttt{\underline{mesh:}}
+\begin{adescription}{nl\_maxiter}
+  \item[xfile] : file name of $x$-coordinates [string].
+  \item[yfile] : file name of $y$-coordinates [string].
+  \item[zfile] : file name of $z$-coordinates [string].
+  \item[confile]: file name of mesh connectivity [string].
+  \item[idfile]: file name of element IDs [string].
+  \item[gfile]: file name of ghost interfaces, i.e., partition interfaces [string]. Only required for parallel processing.\\
+\end{adescription}
+
+\texttt{\underline{bc:}}
+\begin{adescription}{nl\_maxiter}
+  \item[uxfile]: file name of displacement boundary conditions along $x$-axis [string].
+  \item[uyfile]: file name of displacement boundary conditions along $y$-axis [string].
+  \item[uzfile]: file name of displacement boundary conditions along $z$-axis [string].\\
+\end{adescription}
+
+\texttt{\underline{traction:}}
+\begin{adescription}{nl\_maxiter}
+  \item[trfile]: file name of traction specification [string].\\
+\end{adescription}
+
+\texttt{\underline{stress0:}}
+\begin{adescription}{nl\_maxiter}
+  \item[type]: type of initial stress [integer, optional, 0 = compute using SEM itself, 1 = compute using simple vertical lithostatic relation, default $\Rightarrow$ 0].
+  \item[z0]: datum (free surface) coordinate [real, m]. Only required if \texttt{type}=1.
+  \item[s0]: datum (free surface) vertical stress [real, kN/m\tsup{2}]. Only required if \texttt{type}=1.
+  \item[k0]: lateral earth pressure coefficient [real].
+  \\
+\end{adescription}
+
+\texttt{\underline{material:}}
+\begin{adescription}{nl\_maxiter}
+  \item[matfile]: file name of material list [string].
+  \item[ispart]: flag to indicate whether the material file is partitioned [integer, optional, 0 = No, 1 = Yes, default $\Rightarrow$ 1]. Only required for parallel processing.
+  \item[matpath]: path to material file [string, optional, default $\Rightarrow$ \texttt{\sq{./input}} for serial or unpartitioned material file in parallel and \texttt{\sq{./partition}} for partitioned material file in parallel].
+  \item[allelastic]: assume all entire domain as elastic [integer, optional, 0 = No, 1 = Yes, default $\Rightarrow$ 0].\\
+\end{adescription}
+
+\texttt{\underline{eqload:}}
+\begin{adescription}{nl\_maxiter}
+  \item[eqkx]: pseudo-static earthquake loading coefficient along $x$-axis [real, 0 <= \texttt{eqkx} <= 1.0, default $\Rightarrow$ 0.0].
+  \item[eqky]: pseudo-static earthquake loading coefficient along $y$-axis [real, 0 <= \texttt{eqky} <= 1.0, default $\Rightarrow$ 0.0].
+  \item[eqkz]: pseudo-static earthquake loading coefficient along $z$-axis [real, 0 <= \texttt{eqkz} <= 1.0, default $\Rightarrow$ 0.0].
+  \\\\
+  {\emph{Note: For the stability analysis purpose, these coefficients should be chosen carefully. For example, if the slope face is pointing towards the negative $x$-axis, value of}} \texttt{eqkx} {\emph{is taken negative.}} \\
+\end{adescription}
+
+\texttt{\underline{water:}}
+\begin{adescription}{nl\_maxiter}
+  \item[wsfile]: file name of water surface file.\\
+\end{adescription}
+
+\texttt{\underline{control:}}
+\begin{adescription}{nl\_maxiter}
+  \item[cg\_tol]: tolerance for conjugate gradient method [real].
+  \item[cg\_maxiter]: maximum iterations for conjugate gradient method [integer > 0].
+  \item[nl\_tol]: tolerance for nonlinear iterations [real].
+  \item[nl\_maxiter]: maximum iterations for nonlinear iterations [integer > 0].
+  \item[ninc]: number of load increments for the plastic iterations [integer>0  default $\Rightarrow$ 1].This is currently not used for slope stability analysis.
+  \item[Arguments specific to slope stability analysis:]
+  \item[nsrf]: number of strength reduction factors to try [integer > 0, optional, default $\Rightarrow$ 1].
+  \item[srf]: values of strength reduction factors [real vector, optional, default $\Rightarrow$ 1.0]. Number of \texttt{srf}s must be equal to \texttt{nsrf}.
+  \item[phinu]: force $\phi-\nu$ (Friction angle - Poisson's ratio) inequality: $\sin\phi\geq 1-2\,\nu$ \citep[see][]{zheng2005} [integer, 0 = No, 1 = Yes, default $\Rightarrow$ 0]. Only for \underline{TESTING} purpose.
+  \item[Arguments specific to multistage excavation:]
+  \item[nexcav]: number of excavation stages [integer > 0, optional, default $\Rightarrow$ 1].
+  \item[nexcavid]: number of excavation IDs in each excavation stage [integer vector, default $\Rightarrow$ {1}].
+  \item[excavid]: IDs of blocks/regions in the mesh to be excavated in each stage [integer vector, default $\Rightarrow$ {1}].
+  \\\\
+  {\emph{Note: Do not mix arguments for slope stability and excavation.}} \\
+\end{adescription}
+
+\texttt{\underline{save:}}
+\begin{adescription}{porep}
+  \item[disp]: displacement field [integer, optional, 0 = No, 1 = Yes, default $\Rightarrow$ 0].
+  \item[porep]: pore water pressure [integer, optional, 0 = No, 1 = Yes, default $\Rightarrow$ 0].\\
+\end{adescription}
+
+\subsection{Examples of main input file}
+
+\subsubsection*{Input file for a simple elastic simulation}
+
+\colorbox{gray}{
+\parbox{16cm}{
+\noindent{\texttt{\#-----------------------------------------------------------------\\
+\#input file elastic.sem\\
+\#pre information\\
+preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
+\#mesh information \\
+mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
+zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
+idfile=\sq{validation1\_material\_id}\\\\
+\#boundary conditions\\
+bc: uxfile=\sq{validation1\_ssbcux}, uyfile=\sq{validation1\_ssbcuy}, \& \\
+uzfile=\sq{validation1\_ssbcuz}\\\\
+\#material list\\
+material: matfile=\sq{validation1\_material\_list}, allelastic=1\\\\
+\#control parameters\\
+control: cg\_tol=1e-8, cg\_maxiter=5000\\
+\#-----------------------------------------------------------------}}\\\\
+}}
+
+\subsubsection*{Serial input file for slope stability}
+
+\colorbox{gray}{
+\parbox{16cm}{
+\noindent{\texttt{\#-----------------------------------------------------------------\\
+\#input file validation1.sem\\
+\#pre information\\
+preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
+\#mesh information \\
+mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
+zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
+idfile=\sq{validation1\_material\_id}\\\\
+\#boundary conditions\\
+bc: uxfile=\sq{validation1\_ssbcux}, uyfile=\sq{validation1\_ssbcuy}, \& \\
+uzfile=\sq{validation1\_ssbcuz}\\\\
+\#material list\\
+material: matfile=\sq{validation1\_material\_list}\\\\
+\#control parameters\\
+control: cg\_tol=1e-8, cg\_maxiter=5000, nl\_tol=0.0005, nl\_maxiter=3000, \& \\
+nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20\\
+\#-----------------------------------------------------------------}}\\\\
+}}
+
+\subsubsection*{Parallel input file for slope stability}
+
+\colorbox{gray}{
+\parbox{16cm}{
+\noindent{\texttt{\#-----------------------------------------------------------------\\
+\#input file validation1.psem\\
+\#pre information\\
+preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, \& \\
+ngnod=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
+\#mesh information \\
+mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
+zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
+idfile=\sq{validation1\_material\_id}, gfile=\sq{validation1\_ghost}\\\\
+\#boundary conditions\\
+bc: uxfile=\sq{validation1\_ssbcux}, uyfile=\sq{validation1\_ssbcuy}, \& \\
+uzfile=\sq{validation1\_ssbcuz}\\\\
+\#material list\\
+material: matfile=\sq{validation1\_material\_list}\\\\
+\#control parameters\\
+control: cg\_tol=1e-8, cg\_maxiter=5000, nl\_tol=0.0005, nl\_maxiter=3000, \& \\
+nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20\\
+\#-----------------------------------------------------------------\\}}
+}}
+
+\subsubsection*{Serial input file for excavation}
+
+\colorbox{gray}{
+\parbox{16cm}{
+\noindent{\texttt{\#-----------------------------------------------------------------\\
+\#input file excavation\_3d.sem\\
+\#pre information\\
+preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
+\#mesh information \\
+mesh: xfile=\sq{excavation\_3d\_coord\_x}, yfile=\sq{excavation\_3d\_coord\_y}, \& \\
+zfile=\sq{excavation\_3d\_coord\_z}, confile=\sq{excavation\_3d\_connectivity}, \& \\
+idfile=\sq{excavation\_3d\_material\_id}\\\\
+\#boundary conditions\\
+bc: uxfile=\sq{excavation\_3d\_ssbcux}, uyfile=\sq{excavation\_3d\_ssbcuy}, \& \\
+uzfile=\sq{excavation\_3d\_ssbcuz}\\\\
+\#initial stress
+stress0: type=0, z0=0, s0=0, k0=0.5, usek0=1\\\\
+\#material list\\
+material: matfile=\sq{excavation\_3d\_material\_list}\\\\
+\#control parameters\\
+control: cg\_tol=1e-8, cg\_maxiter=5000, nl\_tol=0.0005, nl\_maxiter=3000, \& \\
+nexcav=3, excavid=2 3 4, ninc=10\\
+\#-----------------------------------------------------------------}}\\\\
+}}
+
+\subsubsection*{Parallel input file for excavation}
+
+\colorbox{gray}{
+\parbox{16cm}{
+\noindent{\texttt{\#-----------------------------------------------------------------\\
+\#input file excavation\_3d.psem\\
+\#pre information\\
+preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, \& \\
+ngnod=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
+\#mesh information \\
+mesh: xfile=\sq{excavation\_3d\_coord\_x}, yfile=\sq{excavation\_3d\_coord\_y}, \& \\
+zfile=\sq{excavation\_3d\_coord\_z}, confile=\sq{excavation\_3d\_connectivity}, \& \\
+idfile=\sq{excavation\_3d\_material\_id}, gfile=\sq{excavation\_3d\_ghost}\\\\
+\#boundary conditions\\
+bc: uxfile=\sq{excavation\_3d\_ssbcux}, uyfile=\sq{excavation\_3d\_ssbcuy}, \& \\
+uzfile=\sq{excavation\_3d\_ssbcuz}\\\\
+\#initial stress
+stress0: type=0, z0=0, s0=0, k0=0.5, usek0=1\\\\
+\#material list\\
+material: matfile=\sq{excavation\_3d\_material\_list}\\\\
+\#control parameters\\
+control: cg\_tol=1e-8, cg\_maxiter=5000, nl\_tol=0.0005, nl\_maxiter=3000, \& \\
+nexcav=3, excavid=2 3 4, ninc=10\\
+\#-----------------------------------------------------------------\\}}
+}}
+\\
+
+There are only two additional pieces of information, i.e., number of processors \texttt{\sq{nproc}} in line \texttt{\sq{preinfo}} and file name for ghost partition interfaces \texttt{\sq{gfile}} in line \texttt{\sq{mesh}} in parallel input file.
+
+\section{Input files detail}
+All local element/face/edge/node numbering follows the EXODUS II convention.\\
+
+\subsection{Coordinates files: \texttt{xfile, yfile, zfile}}
+Each of the coordinates files contains a list of corresponding coordinates in the following format:\\
+
+\emph{number of points \\
+coordinate of point  1\\
+coordinate of point  2\\
+coordinate of point  3\\
+..\\
+..\\
+..}\\
+
+Example:\\\\
+{\texttt{2354\\
+40.230394465164999\\
+40.759090909090901\\
+42.700000000000003\\
+40.957142857142898\\
+40.230394465164999\\
+40.759090909090901\\
+42.700000000000003\\
+40.957142857142898\\
+...\\
+...\\}}
+
+\subsection{Connectivity file: \texttt{confile}}
+
+The connectivity file contains the connectivity lists of elements in the following format:\\
+
+\emph{number of elements\\
+$n_1$ $n_2$ $n_3$ $n_4$ $n_5$ $n_6$ $n_7$ $n_8$ of element 1\\
+$n_1$ $n_2$ $n_3$ $n_4$ $n_5$ $n_6$ $n_7$ $n_8$ of element 2\\
+$n_1$ $n_2$ $n_3$ $n_4$ $n_5$ $n_6$ $n_7$ $n_8$ of element 3\\
+$n_1$ $n_2$ $n_3$ $n_4$ $n_5$ $n_6$ $n_7$ $n_8$ of element 4\\
+..\\
+..}\\
+
+
+Example:\\\\
+1800\\
+\texttt{1 2 3 4 5 6 7 8 \\
+9 10 2 1 11 12 6 5 \\
+9 1 4 13 11 5 8 14 \\
+15 16 10 9 17 18 12 11 \\
+15 9 13 19 17 11 14 20 \\
+21 22 16 15 23 24 18 17 \\
+21 15 19 25 23 17 20 26 \\
+27 28 22 21 29 30 24 23 \\
+27 21 25 31 29 23 26 32 \\
+33 34 28 27 35 36 30 29 \\
+33 27 31 37 35 29 32 38 \\
+34 33 39 40 36 35 41 42 \\
+33 37 43 39 35 38 44 41 \\
+...\\
+...\\}
+
+\subsection{Element IDs (or Material IDs) file: \texttt{idfile}}
+
+
+This file contains the IDs of elements. This ID will be used in the program mainly to identify the material regions. This file has the following format: \\
+
+\emph{number of elements\\
+ID of element 1\\
+ID of element 2\\
+ID of element 3\\
+ID of element 4\\
+...\\
+...}\\
+
+Example:\\
+
+\texttt{1800\\
+1\\
+1\\
+1\\
+1\\
+1\\
+1\\
+1\\
+1\\
+1\\
+1\\
+...\\
+...\\}
+
+\subsection{Ghost partition interfaces file: \texttt{gfile}}
+
+
+This file will be generated automatically by a program \texttt{partmesh}.\\
+
+\subsection{Displacement boundary conditions files: \texttt{uxfile, uyfile, uzfile}}
+
+This file contains information on the displacement boundary conditions (currently only the zero-displacement is implemented), and has the following format:\\
+
+\emph{BCtype} \emph{BCvalue}\\
+\emph{number of element faces}\\
+\emph{elementID faceID \\
+elementID faceID \\
+elementID faceID \\
+...\\
+...\\}
+
+The \emph{BCtype} represents BC geometry (0: Point, 1: Line, 2: Surface). Currently, only the surface BC is supported; therefore, always use 2. The \emph{BCvalue} represent the BC value. Use only the $0.0$. Non-zero BC values will be supported in next version.
+
+Example:\\
+\\
+\texttt{2 0.0\\
+849\\
+2 2\\
+3 4\\
+5 1\\
+6 1\\
+7 1\\
+8 1\\
+9 1\\
+...\\
+...}\\
+
+\subsection{Traction file: \texttt{trfile}}
+
+This file contains the traction information on the model in the following format:\\
+
+\emph{traction type} (integer, 0 = point, 1 = uniformly distributed, 2 = linearly distributed)\\
+if \emph{traction type} = 0\\
+  \emph{$q_x$ $q_y$ $q_z$} (load vector in kN)\\
+if \emph{traction type} = 1\\
+  \emph{$q_x$ $q_y$ $q_z$} (load vector in kN/m\tsup{2})\\
+if \emph{traction type} = 2\\
+  \emph{relevant-axis $x_1$ $x_2$ $q_{x1}$ $q_{y1}$ $q_{z1}$ $q_{x2}$ $q_{y2}$ $q_{z2}$}\\
+\emph{number of entities} (points for point load or faces for distributed load)\\
+\emph{elementID entityID \\
+elementID entityID \\
+elementID entityID \\
+...\\
+...\\}
+
+This can be repeated as many times as there are tractions.\\
+
+The \emph{relevant-axis} denotes the axis along which the load is varying, and is represented by an integer as 1 = $x$-axis, 2 = $y$-axis, and 3 = $z$-axis. The variables $x_1$ and $x_2$ denote the coordinates (only the \emph{relevant-axis}) of two points between which the linearly distributed load is applied. Similarly, $q_{x1}$, $q_{y1}$ and $q_{z1}$, and $q_{x2}$, $q_{y2}$ and $q_{z2}$ denote the load vectors in kN/m\tsup{2} at the point 1 and 2, respectively.\\
+
+Example:\\
+The following data specify the two tractions: a uniformly distributed traction and a linearly distributed traction.\\\\
+
+\texttt{1\\
+0.0 0.0 -167.751\\
+363\\
+56 1\\
+57 1\\
+58 1\\
+59 1\\
+60 1\\
+61 1\\
+62 1\\
+...\\
+...\\
+2\\
+3 7.3 24.4 51.8379 0.0 -159.5407 0.0 0.0 0.0\\
+594\\
+38 1\\
+39 1\\
+40 1\\
+41 1\\
+42 1\\
+43 1\\
+44 1\\
+45 1\\
+46 1\\
+...\\
+...}\\
+
+\subsection{Material list file: \texttt{matfile}}
+
+This file contains material properties of each material regions. Material properties must be listed in a sequential order of the unique material IDs. In addition, this data file optionally contains the information on the water condition of material regions. Material regions or material IDs must be consistent with the Material IDs (Element IDs) defined in \texttt{idfile}. The \texttt{matfile} has the following format:\\\\
+
+\emph{comment line}\\
+\emph{number of material regions (unique material IDs)\\
+materialID, domainID, blockType, $\gamma$, $E$, $\nu$, $\phi$, $c$, $\psi$ \\
+materialID, domainID, blockType, $\gamma$, $E$, $\nu$, $\phi$, $c$, $\psi$ \\
+materialID, domainID, blockType, $\gamma$, $E$, $\nu$, $\phi$, $c$, $\psi$ \\
+...\\
+...\\
+number of submerged material regions\\
+submerged materialID\\
+submerged materialID\\
+...\\
+...\\}
+
+The \emph{materilID} must be in a sequential order starting from 1. The \emph{doaminID} represents the material domain (e.g., elastic = 1 or viscoelastic = 11), and currently only the elastic domain is supported, therefore, always use 1. The \emph{blockType} represents the type of material properties defined for a particular block/region (0: properties defined as a single block, 1: properties defined on the structured grid). Currently, only the single block definition is supported; therefore always use 0.  Similarly, $\gamma$ represents the unit weight in kN/m\tsup{3}, $E$ the Young's modulus of elasticity in kN/m\tsup{2}, $\phi$ the angle of internal friction in degrees, $c$ the cohesion in kN/m\tsup{2}, and $\psi$ the angle of dilation in degrees.\\
+
+Example:\\
+\\
+The following data defines four material regions. No region is submerged in water.\\
+
+\texttt{\# material properties (id, domain, type, gamma, ym, nu, phi, coh, psi)\\
+4\\
+1 1 0 18.8 1e5 0.3 20.0 29.0 0.0\\
+2 1 0 19.0 1e5 0.3 20.0 27.0 0.0\\
+3 1 0 18.1 1e5 0.3 20.0 20.0 0.0\\
+4 1 0 18.5 1e5 0.3 20.0 29.0 0.0\\
+}\\
+
+The following data defines four material regions with two of them submerged.\\
+
+\texttt{\# material properties (id, domain, type, gamma, ym, nu, phi, coh, psi)\\
+4\\
+1 1 0 18.8 1e5 0.3 20.0 0.0 0.0\\
+2 1 0 19.0 1e5 0.3 20.0 27.0 0.0\\
+3 1 0 18.1 1e5 0.3 20.0 0.0 0.0\\
+4 1 0 18.5 1e5 0.3 20.0 29.0 0.0\\
+2\\
+1\\
+3\\
+}\\
+
+
+\subsection{Water surface file: \texttt{wsfile}}
+
+This file contains the water table information on the model in the format as
+
+\emph{number of water surfaces}\\
+\emph{water surface type} (integer, 0 = horizontal surface, 1 = inclined surface, 2 = meshed surface)\\
+if \emph{wstype}=0 (can be reconstructed by sweeping a horizontal line)\\
+  \emph{relevant-axis $x_1$ $x_2$ $z$}\\
+if \emph{wstype}=1 (can be reconstructed by sweeping a inclined line)\\
+  \emph{relevant-axis $x_1$ $x_2$ $z_1$ $z_2$}\\
+if \emph{wstype}=2 (meshed surface attached to the model)\\
+  \emph{number of faces\\
+  elelemetID, faceID\\
+  elelemetID, faceID\\
+  elelemetID, faceID\\
+  ...\\
+  ...}\\
+
+The \emph{relevant-axis} denotes the axis along which the line is defined, and it is taken as 1 = $x$-axis, 2 = $y$-axis, and 3 = $z$-axis. The variables $x_1$ and $x_2$ denote the coordinates (only \emph{relevant-axis}) of point 1 and 2 that define the line. Similarly, $z$ denotes a $z$-coordinate of a horizontal water surface, and $z_1$ and $z_2$ denote the $z$-coordinates of the two points (that define the line) on the water surface.\\
+
+
+Example:\\
+Following data specify the two water surfaces: a horizontal surface and an inclined surface.\\\\
+\texttt{2\\
+0\\
+1 42.7 50.0 6.1\\
+1\\
+1 0.0 42.7 12.2 6.1}\\
