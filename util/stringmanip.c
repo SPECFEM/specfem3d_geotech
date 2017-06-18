@@ -4,7 +4,7 @@
 	Apr 23,2010 (NORSAR)
 	Mar 18, 2009 (Princeton University)
 	Mar 13, 2008; Mar 19, 2008; HNG (NORSAR) */
-#include <stdio.h>	
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -47,12 +47,12 @@ void removeExtension(char *filename, char *noextfile)
 
 /* This function had been imported from e3d by shawn larsen. */
 void getFileName(filename, head, tail, number, max)
-char *filename, *head, *tail; 
+char *filename, *head, *tail;
 int number, max;
 {
 	int digits;
 	char ext[10], format[20];
-	
+
 	/* determine number of digits */
 	digits = 1;
 	if (max < 1) max = 1;
@@ -77,7 +77,7 @@ int number, max;
 /* This function had been imported from e3d by Shawn Larsen. */
 /* Function to open file name inputted through command line. */
 FILE *
-getFile(argc, argv) 
+getFile(argc, argv)
 int    argc;
 char **argv;
 {
@@ -104,7 +104,7 @@ int stringpos(char *s1, char *s2)
 	for (i1=0; i1<nchar1; i1++){
 		if(i1+nchar2>nchar1)break;
 		if(s1[i1]==s2[0]){
-			ipos=i1;			
+			ipos=i1;
 			stat=1;
 			for (i2=0; i2<nchar2; i2++){
 				if(s1[i2+ipos] != s2[i2]){
@@ -123,7 +123,7 @@ int stringpos(char *s1, char *s2)
 /*======================================*/
 
 /* 	This function returns 1 if string s contains '#' as the first non-white
-    space character otherwise 0. */ 
+    space character otherwise 0. */
 int commentline(char *s)
 {
 	int i,nchar,stat; /* stat = 1:yes, 0: No */
@@ -147,7 +147,7 @@ int commentline(char *s)
 int blankline(char *s)
 {
 	int i,nchar,stat; /* stat = 1:yes, 0: No */
-	
+
 	nchar=strlen(s);
 
 	stat=1; /* Default is yes */
@@ -156,7 +156,7 @@ int blankline(char *s)
 			stat=0;
 			break;
 		}
-	}	
+	}
 	return(stat);
 }
 
@@ -177,7 +177,7 @@ return(0);
 }
 /*======================================*/
 
-/* look for integer value. if found return intger value and 
+/* look for integer value. if found return intger value and
 function value as 0 otherwise return -1 as a function value */
 int look_int(int *var, char *arg, char *src)
 {
@@ -185,7 +185,7 @@ int pos; /* position of matched string */
 
 pos=stringpos(src,arg);
 
-if(pos == 0){		
+if(pos == 0){
   return(-1);
 }
 
@@ -194,7 +194,7 @@ return(0);
 }
 /*======================================*/
 
-/* look for float value. if found return float value and 
+/* look for float value. if found return float value and
 function value as 0 otherwise return -1 as a function value */
 int look_float(float *var, char *arg, char *src)
 {
@@ -202,7 +202,7 @@ int pos; /* position of matched string */
 
 pos=stringpos(src,arg);
 
-if(pos == 0){		
+if(pos == 0){
   return(-1);
 }
 
@@ -211,7 +211,7 @@ return(0);
 }
 /*======================================*/
 
-/* look for double value. if found return double value and 
+/* look for double value. if found return double value and
 function value as 0 otherwise return -1 as a function value */
 int look_double(double *var, char *arg, char *src)
 {
@@ -219,7 +219,7 @@ int pos; /* position of matched string */
 
 pos=stringpos(src,arg);
 
-if(pos == 0){		
+if(pos == 0){
   return(-1);
 }
 
@@ -228,9 +228,9 @@ return(0);
 }
 /*======================================*/
 
-/* 	This function assigns the corresponding value immediately after the '=' 
+/* 	This function assigns the corresponding value immediately after the '='
     or ':' sign following the string arg to var, and exits the execution if no
-    such arg is found in string s 
+    such arg is found in string s
 
 	May 16,2008,HNG: Now the argument name can be a part of other word in the
   line for, e.g., using vfile and file in a same line is fine. */
@@ -241,12 +241,12 @@ int getvalue(char *s, char *arg, char *type, int *var)
 	double *dbl;
 	float  *flt;
 	char argt[10],*str,*symb[nsymb];
-	
+
 	symb[0]="="; /* x= */
 	symb[1]=":"; /* x: */
 	symb[2]=" ="; /* x = */
 	symb[3]=" :"; /* x : */
-	
+
 	pos=0;inum=0;
 	while(pos==0 && inum<nsymb){
 		strcpy(argt,arg);
@@ -254,12 +254,12 @@ int getvalue(char *s, char *arg, char *type, int *var)
 		pos=stringpos(s,argt);
 		inum++;
 	}
-	
+
 	if(pos == 0){
 		printf("Variable \"%s\" not found!\n",arg);
 		exit(-1);
 	}
-	
+
   switch(type[0]){
 		case 'd':
 			*var = atoi(&s[pos]);
@@ -283,7 +283,7 @@ int getvalue(char *s, char *arg, char *type, int *var)
 }
 /*======================================*/
 
-/* This function assigns the corresponding value immediately after the '=' or 
+/* This function assigns the corresponding value immediately after the '=' or
    ':' sign following the string arg to var, and returns (-1) if no such arg
    is found in string s, otherwise this function is exactly same as getvalue */
 #define nsymb 4
@@ -293,12 +293,12 @@ int getvaluestat(char *s, char *arg, char *type, int *var)
 	double *dbl;
 	float  *flt;
 	char argt[10],*str,*symb[nsymb];
-	
+
 	symb[0]="="; /* x= */
 	symb[1]=":"; /* x: */
 	symb[2]=" ="; /* x = */
 	symb[3]=" :"; /* x : */
-	
+
 	pos=0;inum=0;
 	while(pos==0 && inum<nsymb){
 		strcpy(argt,arg);
@@ -306,12 +306,12 @@ int getvaluestat(char *s, char *arg, char *type, int *var)
 		pos=stringpos(s,argt);
 		inum++;
 	}
-	
+
 	if(pos == 0){
 		/* Variable not found */
 		return(-1);
 	}
-	
+
 	switch(type[0]){
 		case 'd':
 			*var = atoi(&s[pos]);
@@ -342,15 +342,15 @@ int matchfirstword(char *s1, char *s2)
 	int nchar1,nchar2,i1,i2,ipos,stat,match;
 	nchar1=strlen(s1);
 	nchar2=strlen(s2);
-	
+
   match=0;
 	if(nchar2>nchar1)return(match); /* No match */
-	
+
 	for (i1=0; i1<nchar1; i1++){
 		if(s1[i1] != ' ' && s1[i1] != '\0' && s1[i1] != '\n' && s1[i1] != '\t'){
 			if(i1+nchar2>nchar1)break;
 			if(s1[i1]==s2[0]){
-				ipos=i1;			
+				ipos=i1;
 				stat=1;
 				for (i2=0; i2<nchar2; i2++){
 					if(s1[i2+ipos] != s2[i2]){
@@ -387,15 +387,15 @@ int getfirstquote(char *s1, char *s2)
 			else if(num==2){
 				ipos2=i;
 				break;
-			}	
-		}	
+			}
+		}
 	}
 	num=0;
 	for(i=ipos1+1; i<ipos2;i++){
 		temp[num]=s1[i];
 		num=num+1;
 	}
-	
+
 	temp[ipos2-1]='\0';
 	strcpy(s2,temp);
 	return(0);
@@ -412,15 +412,15 @@ int getintegervect(char *s1, char *arg, int n, int ivect[n])
 	int pos; /* position of matched string */
 
     pos=stringpos(s1,arg);
-   
-	stringafterstring(s1,"=",temp);	
-	for(i=0;i<n;i++){		
+
+	stringafterstring(s1,"=",temp);
+	for(i=0;i<n;i++){
 		slen=strlen(temp);
 		if(sscanf(temp,"%d%n",&ivect[i],&nchar)!= 1){
 			printf("ERROR: wrong values for -xmat option!\n");
 			exit(-1);
-		}		
-		strncpy(temp,temp+nchar+1,slen);		
+		}
+		strncpy(temp,temp+nchar+1,slen);
 	}
 	return(0);
 }
@@ -437,13 +437,13 @@ int stringafterstring(char *s1, char *arg, char *s2)
     pos=stringpos(s1,arg);
 
 	nchar=strlen(s1);
-	
+
 	num=0;
 	for(i=pos; i<nchar;i++){
 		temp[num]=s1[i];
 		num=num+1;
 	}
-	
+
 	temp[nchar-pos]='\0';
 	strcpy(s2,temp);
 	return(0);

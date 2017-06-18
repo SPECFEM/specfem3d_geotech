@@ -107,7 +107,7 @@ IF(ISPARTMESH)
      partmesh.f90
   )
   ADD_LIBRARY(partscotch ${srcpartmesh})
-  TARGET_INCLUDE_DIRECTORIES(partscotch PUBLIC                                   
+  TARGET_INCLUDE_DIRECTORIES(partscotch PUBLIC
   ${SCOTCH_INCLUDE_PATH})
   ADD_EXECUTABLE(partmesh
               partmesh.f90)

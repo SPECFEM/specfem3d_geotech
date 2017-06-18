@@ -10,7 +10,7 @@ bc: uxfile='excavation_1d_ssbcux', uyfile='excavation_1d_ssbcuy', uzfile='excava
 
 #initial stress
 stress0: type=1, z0=40, s0=0, k0=0.5, usek0=1
- 
+
 #material list
 material: matfile='excavation_1d_material_list', allelastic=1
 

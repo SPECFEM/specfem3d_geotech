@@ -5,14 +5,14 @@ the CUBIT:
 in CUBIT:
 - blocks defines only the material regions
   -> actual material properties should not be defined within the CUBIT.
-  actual material properties can be listed later corresponding to each block 
+  actual material properties can be listed later corresponding to each block
   (i.e., material region).
 - nodal boundary conditions must be defined using node set
-  -> each node set name must contain the corresponding BC names as defined in 
+  -> each node set name must contain the corresponding BC names as defined in
   char *ns_bcname[] below
   e.g., node set name can be front_nsbcux or front_nsbcux_nsbcuy etc.
 - surface boundary conditions must be defined using side set
-  -> each side set name must contain the corresponding BC names as defined in 
+  -> each side set name must contain the corresponding BC names as defined in
   char *ss_bcname[] below
   e.g., side set name can be front_ssbcux or front_ssbcux_ssbcuy etc.
 
@@ -28,7 +28,7 @@ There will be several output files:
 *_coord_? : total number of nodes followed by nodal coordinate ? (? -> x, y, z)
 *_connectivity : total number of elements followed by connectivity list
 *_material_id : total number of elements followed by material IDs
-*_??bcu? : node IDs which have u? = 0 as the boundary conditions (?? -> ns or ss, ? -> x, y, z) 
+*_??bcu? : node IDs which have u? = 0 as the boundary conditions (?? -> ns or ss, ? -> x, y, z)
 ------------------------------------------------------
 DEVELOPER:
   Hom Nath Gharti
@@ -38,20 +38,20 @@ DEPENDENCY:
   stringmanip.c: string manipulation routines
 COMPILE:
   gcc exodus2semgeotech.c -o exodus2semgeotech
-USAGE: 
+USAGE:
   exodus2semgeotech <inputfile> <OPTIONS>
   Example: exodus2semgeotech sloep3d_mest.txt
   or
   exodus2semgeotech slope3d_mesh.e -fac=0.001 -bin=1
 OPTIONS:
-  -fac: use this option to multiply coordinates. this is importantn for unit 
+  -fac: use this option to multiply coordinates. this is importantn for unit
         conversion, e.g., to convert m to km use -fac=0.001
   -bin: use this option if you want to convert exodus binary directly, provided
         that the command ncdump is in the path. ncdump is a part of netCDF library
-        that can be downloaded freely from 
-        http://www.unidata.ucar.edu/downloads/netcdf/index.jsp. use -bin=1 for binary 
+        that can be downloaded freely from
+        http://www.unidata.ucar.edu/downloads/netcdf/index.jsp. use -bin=1 for binary
         or -bin=0 for ascii file.
-HISTORY: 
+HISTORY:
   HNG,Apr 23,2010;HNG,Apr 17,2010;HNG,Feb 08,2009
 TODO:
   - add support to side sets,i.e., surface boundary conditions
@@ -75,7 +75,7 @@ int getfirstquote(char *, char *);
 /* main routine */
 int main(int argc,char **argv){
 int i,itmp,j,k;
-int ndim; /* geometry dimension */ 
+int ndim; /* geometry dimension */
 int nnode,nelmt; /* number of nodes, number of elements */
 int nblk,nns,nss; /* number of blocks, number of node sets */
 int elmt_count,node_count; /* element, node count */
@@ -115,7 +115,7 @@ int isbin; /* test if binary */
 
 FILE *inf,*outf_dum,*outf_mat,*outf_con,*outf_coord[3],**outf_nsbc,**outf_ssbc;
 
-/* default factor and binary switch*/    
+/* default factor and binary switch*/
 fac=1.0; isbin=OFF;
 
 if(argc<2){
@@ -127,7 +127,7 @@ if(argc<2){
 if(argc>2){
   for(i=2;i<argc;i++){
     if(look_double(&dtmp,"-fac=",argv[i])==0){
-      fac=dtmp;     
+      fac=dtmp;
       continue;
     }
     else if(look_int(&itmp,"-bin=",argv[i])==0){
@@ -154,7 +154,7 @@ if (isbin){
   sprintf(infname,"%s.txt",fonly);
 
   /* convert binary netCDF file to ascii file */
-  sprintf(dumc,"ncdump %s > %s.txt",argv[1],fonly);  
+  sprintf(dumc,"ncdump %s > %s.txt",argv[1],fonly);
   if (system(dumc)!=0){
     printf("ERROR: command \"%s\" cannot be executed! use -bin=0 or no option for ascii input file! \n",dumc);
     exit(-1);
@@ -171,12 +171,12 @@ if(inf==NULL){
 /*printf("--------------------------------\n");*/
 
 bulk=malloc(100000); /* bulk string */
-      
+
 /* initialize some variables to 0 */
 ndim=0; nns=0; nblk=0; nnode=0; nelmt=0; nss=0;
 
 /* intialize count to 0 */
-blk_count=0; ns_count=0; ss_count=0; node_count=0; elmt_count=0;  
+blk_count=0; ns_count=0; ss_count=0; node_count=0; elmt_count=0;
 node_countx=0; node_county=0; node_countz=0;
 
 /* set default status to OFF */
@@ -189,7 +189,7 @@ outf_nsbc=malloc(ns_maxnbc*sizeof(FILE *));
 ns_bcfilestat=malloc(ns_maxnbc*sizeof(int));
 for(i=0;i<ns_maxnbc;i++)ns_bcfilestat[i]=0;
 ns_bc_nnode=malloc(ns_maxnbc*sizeof(int));
-for(j=0;j<ns_maxnbc;j++){     
+for(j=0;j<ns_maxnbc;j++){
   ns_bc_nnode[j]=0;
 }
 
@@ -199,7 +199,7 @@ outf_ssbc=malloc(ss_maxnbc*sizeof(FILE *));
 ss_bcfilestat=malloc(ss_maxnbc*sizeof(int));
 for(i=0;i<ss_maxnbc;i++)ss_bcfilestat[i]=0;
 ss_bc_nside=malloc(ss_maxnbc*sizeof(int));
-for(j=0;j<ss_maxnbc;j++){     
+for(j=0;j<ss_maxnbc;j++){
   ss_bc_nside[j]=0;
 }
 fscanf(inf,"%s",token);
@@ -214,16 +214,16 @@ while(!feof(inf)){
   /* read dimensions */
   if(dim_stat!=ON && strcmp(token,"dimensions:")==0){
     printf("reading dimensions...");
-    while(strstr(fgets(line,100,inf),"variables:") == NULL){    
-      strncat(bulk,line,strcspn(line,";")+1);              
-    }    
+    while(strstr(fgets(line,100,inf),"variables:") == NULL){
+      strncat(bulk,line,strcspn(line,";")+1);
+    }
     get_int(&ndim,"num_dim =",bulk);
-    if(ndim>0){   
+    if(ndim>0){
       /* allocate memory */
       coord_name=malloc(ndim*sizeof(char *));
-      for(i=0;i<ndim;i++){      
-      coord_name[i]=malloc(62*sizeof(char)); /* each name has maximum of 62 characters */   
-      }   
+      for(i=0;i<ndim;i++){
+      coord_name[i]=malloc(62*sizeof(char)); /* each name has maximum of 62 characters */
+      }
     }else{
       printf("ERROR: illegal value of dimension!\n");
       exit(-1);
@@ -231,7 +231,7 @@ while(!feof(inf)){
     get_int(&nnode,"num_nodes =",bulk);
     get_int(&nelmt,"num_elem =",bulk);
     get_int(&nblk,"num_el_blk =",bulk);
-    
+
     /* allocate memory */
     blk_nelmt=malloc(nblk*sizeof(int));
     blk_nenod=malloc(nblk*sizeof(int));
@@ -246,11 +246,11 @@ while(!feof(inf)){
       }
       ns_nnode=malloc(nns*sizeof(int));
     }
-    
+
     if(nns>0){ /* This segment has a significance only if nns has legitimate value */
       for(i=0;i<nns;i++){
         sprintf(stag,"num_nod_ns%d =",i+1);
-        get_int(&ns_nnode[i],stag,bulk);          
+        get_int(&ns_nnode[i],stag,bulk);
       }
     }
     coord=malloc(3*sizeof(double *));
@@ -261,7 +261,7 @@ while(!feof(inf)){
             exit(-1);
         }
     }
-  
+
     /* sideset information */
     if (look_int(&nss,"num_side_sets =",bulk)!=0){
       nss=0;
@@ -273,49 +273,49 @@ while(!feof(inf)){
       }
       ss_nside=malloc(nss*sizeof(int));
     }
-    
+
     if(nss>0){ /* This segment has a significance only if nss has legitimate value */
       for(i=0;i<nss;i++){
         sprintf(stag,"num_side_ss%d =",i+1);
-        get_int(&ss_nside[i],stag,bulk);          
+        get_int(&ss_nside[i],stag,bulk);
       }
     }
 
-    /* block information */        
+    /* block information */
     for(i=0;i<nblk;i++){
       sprintf(stag,"num_el_in_blk%d =",i+1);
-      get_int(&blk_nelmt[i],stag,bulk); 
-      
+      get_int(&blk_nelmt[i],stag,bulk);
+
       sprintf(stag,"num_nod_per_el%d =",i+1);
       get_int(&blk_nenod[i],stag,bulk);
-    }    
-      
+    }
+
     dim_stat=ON;
     free(bulk);
     printf("complete!\n");
-    printf(" geometry dimension: %d\n",ndim);    
+    printf(" geometry dimension: %d\n",ndim);
     printf(" number of nodes: %d\n",nnode);
     printf(" number of elements: %d\n",nelmt);
     printf(" number of blocks: %d\n",nblk);
     continue;
-  }  
-  
+  }
+
   /* read coordinate names */
-  if(strcmp(token,"coor_names")==0){    
-    fscanf(inf,"%s",dumc); /* = */      
+  if(strcmp(token,"coor_names")==0){
+    fscanf(inf,"%s",dumc); /* = */
     for (i=0; i<ndim; i++){
-      fscanf(inf,"%s",dumc);    
-      getfirstquote(dumc,coord_name[i]);    
-    } 
+      fscanf(inf,"%s",dumc);
+      getfirstquote(dumc,coord_name[i]);
+    }
     continue;
   }
-  
+
   /* read and write nodal boundary conditions */
   if(strcmp(token,"ns_names")==0){
     printf("saving nodal BCs...");
-    fscanf(inf,"%s",dumc); /* = */      
+    fscanf(inf,"%s",dumc); /* = */
     for (i=0; i<nns; i++){
-      fscanf(inf,"%s",dumc);    
+      fscanf(inf,"%s",dumc);
       getfirstquote(dumc,ns_name[i]);
 
       /* count sides in each side BC */
@@ -325,25 +325,25 @@ while(!feof(inf)){
         }
       }
     }
-   
+
     /* open bc nodal files */
     /*sprintf(outfname,"%s_bcux",fonly);
     outf_nsbc[0]=fopen(outfname,"w");
     sprintf(outfname,"%s_bcuy",fonly);
     outf_nsbc[1]=fopen(outfname,"w");
     sprintf(outfname,"%s_bcuz",fonly);
-    outf_nsbc[2]=fopen(outfname,"w");*/      
+    outf_nsbc[2]=fopen(outfname,"w");*/
     continue;
   }
-  
+
   if(ns_stat!=ON){
-    for(i=0;i<nns;i++){   
+    for(i=0;i<nns;i++){
       sprintf(stag,"node_ns%d",i+1);
       if(strcmp(token,stag)==0){
         ns_nbc=0;
-        for(j=0;j<ns_maxnbc;j++){   
+        for(j=0;j<ns_maxnbc;j++){
           if (strstr(ns_name[i],ns_bcname[j])!=NULL){
-            sprintf(outfname,"%s_%s",fonly,ns_bcname[j]);       
+            sprintf(outfname,"%s_%s",fonly,ns_bcname[j]);
             if(ns_bcfilestat[j]==1){
               /* already opened */
               outf_nsbc[ns_nbc]=fopen(outfname,"a");
@@ -357,15 +357,15 @@ while(!feof(inf)){
             ns_nbc+=1;
           }
         } /* for(j=0 ..) */
-    
+
         if(ns_nbc==0){
           printf("WARNING: no BC name found in node side \"%s\"!\n",ns_name[i]);
         }
 
         fscanf(inf,"%s",dumc); /* = */
-        for(j=0;j<ns_nnode[i]; j++){      
+        for(j=0;j<ns_nnode[i]; j++){
           fscanf(inf,"%d,",&itmp); /* read comma separated data */
-          for(k=0;k<ns_nbc;k++){        
+          for(k=0;k<ns_nbc;k++){
             fprintf(outf_nsbc[k],"%d\n",itmp);
           }
         }
@@ -387,7 +387,7 @@ while(!feof(inf)){
           ns_nbc+=1;
         }
         fscanf(inf,"%s",dumc);
-        for(j=0; j<ns_nnode[i]; j++){       
+        for(j=0; j<ns_nnode[i]; j++){
           fscanf(inf,"%d,",&itmp);
           for(k=0;k<ns_nbc;k++){
             fprintf(outf_nsbc[ind_outf[k]],"%d\n",itmp);
@@ -404,51 +404,51 @@ while(!feof(inf)){
           free(ns_bcfilestat);
           free(ns_nnode);
           ns_stat=ON;
-            
+
           /*fclose(outf_nsbc[0]);
           fclose(outf_nsbc[1]);
           fclose(outf_nsbc[2]);*/
-          printf("complete!\n");          
-        } 
+          printf("complete!\n");
+        }
         continue;
-      }          
+      }
     }
   }
 
   /* read and write side boundary conditions */
   if(strcmp(token,"ss_names")==0){
     printf("saving side BCs...");
-    fscanf(inf,"%s",dumc); /* = */      
-    for (i=0; i<nss; i++){  
-      fscanf(inf,"%s",dumc);    
+    fscanf(inf,"%s",dumc); /* = */
+    for (i=0; i<nss; i++){
+      fscanf(inf,"%s",dumc);
       getfirstquote(dumc,ss_name[i]);
-      
+
       /* count sides in each side BC */
-      for(j=0;j<ss_maxnbc;j++){     
+      for(j=0;j<ss_maxnbc;j++){
         if (strstr(ss_name[i],ss_bcname[j])!=NULL){
           ss_bc_nside[j]+=ss_nside[i];
         }
       }
     }
- 
+
     /* open bc nodal files */
     /*sprintf(outfname,"%s_bcux",fonly);
     outf_nsbc[0]=fopen(outfname,"w");
     sprintf(outfname,"%s_bcuy",fonly);
     outf_nsbc[1]=fopen(outfname,"w");
     sprintf(outfname,"%s_bcuz",fonly);
-    outf_nsbc[2]=fopen(outfname,"w");*/      
+    outf_nsbc[2]=fopen(outfname,"w");*/
     continue;
   }
- 
+
   if(ss_stat!=ON){
-    for(i=0;i<nss;i++){   
-      sprintf(stag,"elem_ss%d",i+1);    
-      if(strcmp(token,stag)==0){      
+    for(i=0;i<nss;i++){
+      sprintf(stag,"elem_ss%d",i+1);
+      if(strcmp(token,stag)==0){
         ss_nbc=0;
-        for(j=0;j<ss_maxnbc;j++){     
-          if(strstr(ss_name[i],ss_bcname[j])!=NULL){ 
-            sprintf(outfname,"%s_%s",fonly,ss_bcname[j]);       
+        for(j=0;j<ss_maxnbc;j++){
+          if(strstr(ss_name[i],ss_bcname[j])!=NULL){
+            sprintf(outfname,"%s_%s",fonly,ss_bcname[j]);
             if(ss_bcfilestat[j]==1){
               /* already opened */
               outf_ssbc[ss_nbc]=fopen(outfname,"a");
@@ -458,37 +458,37 @@ while(!feof(inf)){
               fprintf(outf_ssbc[ss_nbc],"%d\n",ss_bc_nside[j]);
             }
 
-            ss_bcfilestat[j]=1; /* this file is now opened */ 
+            ss_bcfilestat[j]=1; /* this file is now opened */
             ss_nbc+=1;
           }
         }
-    
+
         /*if(ss_nbc==0){
           printf("WARNING: no BC name found in sideset name \"%s\"!\n",ss_name[i]);
-          // Open a filename with a name of sideset name 
+          // Open a filename with a name of sideset name
           outf_dum=fopen(ss_name[i],"w");
         }*/
 
         ss_elmt=malloc(ss_nside[i]*sizeof(int));
         fscanf(inf,"%s",dumc); /* = */
-        for(j=0;j<ss_nside[i]; j++){        
+        for(j=0;j<ss_nside[i]; j++){
           fscanf(inf,"%d,",&ss_elmt[j]); /* read comma separated data */
-          /*for(k=0;k<ns_nbc;k++){        
+          /*for(k=0;k<ns_nbc;k++){
             fprintf(outf_nsbc[k],"%d\n",itmp);
           }*/
         }
-        
-        fscanf(inf,"%s",dumc); /* ; */    
+
+        fscanf(inf,"%s",dumc); /* ; */
         fscanf(inf,"%s",token);
         /*printf("%s\n",token);
         exit(-1)*/
-        sprintf(stag,"side_ss%d",i+1);    
+        sprintf(stag,"side_ss%d",i+1);
         if(strcmp(token,stag)==0){
           ss_side=malloc(ss_nside[i]*sizeof(int));
           fscanf(inf,"%s",dumc); /* = */
-          for(j=0;j<ss_nside[i]; j++){        
+          for(j=0;j<ss_nside[i]; j++){
             fscanf(inf,"%d,",&ss_side[j]); /* read comma separated data */
-            /*for(k=0;k<ns_nbc;k++){        
+            /*for(k=0;k<ns_nbc;k++){
             fprintf(outf_nsbc[k],"%d\n",itmp);
             }*/
           }
@@ -498,7 +498,7 @@ while(!feof(inf)){
           for(k=0;k<ss_nbc;k++){
             for(j=0;j<ss_nside[i];j++){
               fprintf(outf_ssbc[k],"%d %d\n",ss_elmt[j],ss_side[j]);
-            } 
+            }
           }
         }else{
           /* write to a dummy file with a name of ss_name */
@@ -534,7 +534,7 @@ while(!feof(inf)){
           ns_nbc+=1;
         }
         fscanf(inf,"%s",dumc);
-        for(j=0; j<ns_nnode[i]; j++){       
+        for(j=0; j<ns_nnode[i]; j++){
           fscanf(inf,"%d,",&itmp);
           for(k=0;k<ns_nbc;k++){
             fprintf(outf_nsbc[ind_outf[k]],"%d\n",itmp);
@@ -548,52 +548,52 @@ while(!feof(inf)){
           for(i=0;i<nss;i++){
             free(ss_name[i]);
           }
-          free(ss_bcfilestat);      
+          free(ss_bcfilestat);
           free(ss_nside);
           ss_stat=ON;
-            
+
           /*fclose(outf_nsbc[0]);
           fclose(outf_nsbc[1]);
           fclose(outf_nsbc[2]);*/
-          printf("complete!\n");          
-        } 
+          printf("complete!\n");
+        }
         continue;
-      }          
+      }
     }
   }
- 
+
   /* Connectivity */
-  if(nblk>0 && con_stat!=ON){   
-   
-    /* write connectivity and material id */  
+  if(nblk>0 && con_stat!=ON){
+
+    /* write connectivity and material id */
     for(i=0;i<nblk;i++){
       sprintf(stag,"connect%d",i+1);
       if(strcmp(token,stag)==0){
         blk_count++;
-        
+
         /* open connectivity and material files */
-        if(blk_count==1){          
-          printf("saving connectivity and materials..."); 
+        if(blk_count==1){
+          printf("saving connectivity and materials...");
           sprintf(outfname,"%s_connectivity",fonly);
-          outf_con=fopen(outfname,"w");          
+          outf_con=fopen(outfname,"w");
           fprintf(outf_con,"%d\n",nelmt);
-          
+
           sprintf(outfname,"%s_material_id",fonly);
-          outf_mat=fopen(outfname,"w");       
+          outf_mat=fopen(outfname,"w");
           fprintf(outf_mat,"%d\n",nelmt);
         }
-        
+
         fscanf(inf,"%s",dumc); /* = */
         for(j=0;j<blk_nelmt[i];j++){
           for(k=0;k<blk_nenod[i];k++){
             fscanf(inf,"%d,",&itmp);
-            fprintf(outf_con,"%d ",itmp);       
-          }          
+            fprintf(outf_con,"%d ",itmp);
+          }
           elmt_count++;
           fprintf(outf_con,"\n");/* new line */
           fprintf(outf_mat,"%d\n",i+1);
-        }        
-        
+        }
+
         if(blk_count==nblk){
           con_stat=ON;
           mat_stat=ON;
@@ -602,45 +602,45 @@ while(!feof(inf)){
           printf("complete!\n");
           fclose(outf_con);
           fclose(outf_mat);
-        }        
+        }
         continue;
-      }        
+      }
     }
-  }   
- 
+  }
+
  /* Coordinates */
    if(strcmp(token,"coordx")==0){
         printf("reading x coordinates...");
         fscanf(inf,"%s",dumc);
         for(j=0;j<nnode;j++){
-            fscanf(inf,"%lf,",&dtmp); /* read comma separated data */ 
+            fscanf(inf,"%lf,",&dtmp); /* read comma separated data */
             coord[0][j]=fac*dtmp;
             node_countx++;
-        }   
+        }
         coordx_stat=ON;
         printf("complete!\n");
         continue;
-    }   
+    }
     if(strcmp(token,"coordy")==0){
         printf("reading y coordinates...");
         fscanf(inf,"%s",dumc);
         for(j=0;j<nnode;j++){
-            fscanf(inf,"%lf,",&dtmp); /* read comma separated data */ 
+            fscanf(inf,"%lf,",&dtmp); /* read comma separated data */
             coord[1][j]=fac*dtmp;
             node_county++;
-        }   
+        }
         coordy_stat=ON;
         printf("complete!\n");
         continue;
-    }   
+    }
     if(strcmp(token,"coordz")==0){
         printf("reading z coordinates...");
         fscanf(inf,"%s",dumc);
         for(j=0;j<nnode;j++){
-            fscanf(inf,"%lf,",&dtmp); /* read comma separated data */ 
+            fscanf(inf,"%lf,",&dtmp); /* read comma separated data */
             coord[2][j]=fac*dtmp;
             node_countz++;
-        }   
+        }
         coordz_stat=ON;
         printf("complete!\n");
         continue;
@@ -665,7 +665,7 @@ while(!feof(inf)){
   /* Coordinates */
   /*if(strcmp(token,"coord")==0){
     printf("saving coordinates...");
-    fscanf(inf,"%s",dumc);      
+    fscanf(inf,"%s",dumc);
     for(i=0;i<ndim;i++){
       sprintf(outfname,"%s_coord_%s",fonly,coord_name[i]);
       outf_coord[i]=fopen(outfname,"w");
@@ -680,12 +680,12 @@ while(!feof(inf)){
     f(r(i=0;i<ndim;i++){
       free(coord_name[i]);
     }
-  
+
     coord_stat=ON;
     printf("complete!\n");
     continue;
-  } 
- */ 
+  }
+ */
 
 /* check status */
 if(nnode!=node_countx || nnode!=node_county || nnode!=node_countz){

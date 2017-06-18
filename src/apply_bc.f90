@@ -101,25 +101,25 @@ bcux: do
   read(11,*,iostat=ios)bctype,val
   if(ios/=0)exit
   if(val/=zero)then
-    write(errtag,*)'ERROR: nonzero displacement BC not implemented!'               
-    return                                                                       
+    write(errtag,*)'ERROR: nonzero displacement BC not implemented!'
+    return
   endif
-  if(bctype==0)then ! point                                                      
-    write(errtag,*)'ERROR: nodal displacement BC not implemented!'               
-    return                                                                       
-  elseif(bctype==1)then ! edge                                                   
-    write(errtag,*)'ERROR: edge displacement BC not implemented!'                
-    return                                                                       
-  elseif(bctype==2)then ! face                                                   
-    read(11,*)nelpart                                                            
-    do i_elpart=1,nelpart                                                        
-      read(11,*)ielmt,iface ! This will read a line and proceed to next line     
-      gdof(1,g_num(face(iface)%nod,ielmt))=0                                    
-    enddo                                                                        
-  else                                                                           
-    write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype            
-    return                                                                       
-  endif                       
+  if(bctype==0)then ! point
+    write(errtag,*)'ERROR: nodal displacement BC not implemented!'
+    return
+  elseif(bctype==1)then ! edge
+    write(errtag,*)'ERROR: edge displacement BC not implemented!'
+    return
+  elseif(bctype==2)then ! face
+    read(11,*)nelpart
+    do i_elpart=1,nelpart
+      read(11,*)ielmt,iface ! This will read a line and proceed to next line
+      gdof(1,g_num(face(iface)%nod,ielmt))=0
+    enddo
+  else
+    write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype
+    return
+  endif
 enddo bcux
 close(11)
 
@@ -134,25 +134,25 @@ bcuy: do
   read(11,*,iostat=ios)bctype,val
   if(ios/=0)exit
   if(val/=zero)then
-    write(errtag,*)'ERROR: nonzero displacement BC not implemented!'               
-    return                                                                       
+    write(errtag,*)'ERROR: nonzero displacement BC not implemented!'
+    return
   endif
-  if(bctype==0)then ! point                                                      
-    write(errtag,*)'ERROR: nodal displacement BC not implemented!'               
-    return                                                                       
-  elseif(bctype==1)then ! edge                                                   
-    write(errtag,*)'ERROR: edge displacement BC not implemented!'                
-    return                                                                       
-  elseif(bctype==2)then ! face                                                   
-    read(11,*)nelpart                                                            
-    do i_elpart=1,nelpart                                                        
-      read(11,*)ielmt,iface ! This will read a line and proceed to next line     
-      gdof(2,g_num(face(iface)%nod,ielmt))=0                                    
-    enddo                                                                        
-  else                                                                           
-    write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype            
-    return                                                                       
-  endif                       
+  if(bctype==0)then ! point
+    write(errtag,*)'ERROR: nodal displacement BC not implemented!'
+    return
+  elseif(bctype==1)then ! edge
+    write(errtag,*)'ERROR: edge displacement BC not implemented!'
+    return
+  elseif(bctype==2)then ! face
+    read(11,*)nelpart
+    do i_elpart=1,nelpart
+      read(11,*)ielmt,iface ! This will read a line and proceed to next line
+      gdof(2,g_num(face(iface)%nod,ielmt))=0
+    enddo
+  else
+    write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype
+    return
+  endif
 enddo bcuy
 close(11)
 
@@ -167,25 +167,25 @@ bcuz: do
   read(11,*,iostat=ios)bctype,val
   if(ios/=0)exit
   if(val/=zero)then
-    write(errtag,*)'ERROR: nonzero displacement BC not implemented!'               
-    return                                                                       
+    write(errtag,*)'ERROR: nonzero displacement BC not implemented!'
+    return
   endif
-  if(bctype==0)then ! point                                                      
-    write(errtag,*)'ERROR: nodal displacement BC not implemented!'               
-    return                                                                       
-  elseif(bctype==1)then ! edge                                                   
-    write(errtag,*)'ERROR: edge displacement BC not implemented!'                
-    return                                                                       
-  elseif(bctype==2)then ! face                                                   
-    read(11,*)nelpart                                                            
-    do i_elpart=1,nelpart                                                        
-      read(11,*)ielmt,iface ! This will read a line and proceed to next line     
-      gdof(3,g_num(face(iface)%nod,ielmt))=0                                    
-    enddo                                                                        
-  else                                                                           
-    write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype            
-    return                                                                       
-  endif                       
+  if(bctype==0)then ! point
+    write(errtag,*)'ERROR: nodal displacement BC not implemented!'
+    return
+  elseif(bctype==1)then ! edge
+    write(errtag,*)'ERROR: edge displacement BC not implemented!'
+    return
+  elseif(bctype==2)then ! face
+    read(11,*)nelpart
+    do i_elpart=1,nelpart
+      read(11,*)ielmt,iface ! This will read a line and proceed to next line
+      gdof(3,g_num(face(iface)%nod,ielmt))=0
+    enddo
+  else
+    write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype
+    return
+  endif
 enddo bcuz
 close(11)
 

@@ -20,7 +20,7 @@ if(nst.ne.6)then
 endif
 nod=ubound(deriv,2)
 
-!bmat=0.0_kreal 
+!bmat=0.0_kreal
 !DO m=1,nod
 !  n=3*m !j3
 !  k=n-1 !j2
@@ -53,7 +53,7 @@ do n=1,nod
   bmat(3,j3)=dz
   bmat(4,j1)=dy
   bmat(4,j2)=dx
-  bmat(5,j2)=dz 
+  bmat(5,j2)=dz
   bmat(5,j3)=dy
   bmat(6,j1)=dz
   bmat(6,j3)=dx

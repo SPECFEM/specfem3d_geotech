@@ -448,7 +448,7 @@ excavation_stage: do i_excav=1,nexcav
 
   excavload=zero; extload=zero; ! extload1=zero
 
-  allocate(stress_intact(nst,ngll,nelmt_intact),stress_void(nst,ngll,nelmt_void)) 
+  allocate(stress_intact(nst,ngll,nelmt_intact),stress_void(nst,ngll,nelmt_void))
   stress_intact=zero
   stress_void=zero
 
@@ -683,12 +683,12 @@ excavation_stage: do i_excav=1,nexcav
 
   call save_data(ptail,format_str,i_excav,nnode_intact,nodalu_intact,          &
   scf_intact,vmeps_intact,stress_global_intact)
-  
+
   deallocate(nodalu_intact,scf_intact,vmeps_intact,stress_global_intact)
 
   ! deallocate those variables whose size depend on changing geometry
   deallocate(elmt_intact,node_intact,stat=istat)
-  
+
   deallocate(elmt_void,node_void)
   deallocate(stress_intact,stress_void)
 
