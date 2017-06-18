@@ -54,7 +54,8 @@ IF(BUILD_DOCUMENTATION)
   SET(ISDOCUMENTATION ON)
   FIND_PACKAGE(LATEX REQUIRED)
   IF(NOT PDFLATEX_COMPILER OR NOT BIBTEX_COMPILER)
-    MESSAGE(WARNING "LaTeX compiler/s not found! DOCUMENTATION cannot be built!"    )
+    MESSAGE(WARNING "LaTeX compiler/s not found! DOCUMENTATION cannot be \
+    built!")
   SET(ISDOCUMENTATION OFF)
   ENDIF(NOT PDFLATEX_COMPILER OR NOT BIBTEX_COMPILER)
 ENDIF(BUILD_DOCUMENTATION)
@@ -70,18 +71,21 @@ IF(BUILD_PARTMESH)
   FIND_PATH(SCOTCH_LIBRARY_PATH NAMES libscotch.a libscotcherr.a                 
   PATHS /usr/lib /usr/local/lib ENV LD_LIBRARY_PATH)                             
   IF(NOT SCOTCH_LIBRARY_PATH)                                                    
-    MESSAGE(WARNING "SCOTCH library not found! Please set correct SCOTCH_LIBRARY_PATH manually!")
+    MESSAGE(WARNING "SCOTCH library not found! Please set correct \
+    SCOTCH_LIBRARY_PATH manually!")
     SET(ISPARTMESH OFF)                                                          
   ENDIF(NOT SCOTCH_LIBRARY_PATH)                                                 
   # find include                                                                 
   FIND_PATH(SCOTCH_INCLUDE_PATH NAMES scotch.h ptscotch.h                        
   PATHS /usr/include /usr/local/include ENV LD_INCLUDE_PATH)                     
   IF(NOT SCOTCH_INCLUDE_PATH)                                                    
-    MESSAGE(WARNING "SCOTCH include not found! Please set correct SCOTCH_INCLUDE_PATH manually!")
+    MESSAGE(WARNING "SCOTCH include not found! Please set correct \
+    SCOTCH_INCLUDE_PATH manually!")
     SET(ISPARTMESH OFF)                                                          
   ENDIF(NOT SCOTCH_INCLUDE_PATH)                                                 
 ENDIF(BUILD_PARTMESH)
-SET(BUILD_UTILITIES_EXODUS2SEM OFF CACHE BOOL "Build exodus2sem program")
+SET(BUILD_UTILITIES_EXODUS2SEM OFF CACHE BOOL "Build exodus2semgeotech program")
+SET(BUILD_UTILITIES_GID2SEM OFF CACHE BOOL "Build gid2semgeotech program")
 SET(BUILD_UTILITIES_WRITE_SOS OFF CACHE BOOL "Build write_sos program")
 
 # MPI for parallel processing
@@ -97,7 +101,7 @@ IF(ENABLE_MPI)
   
   # Test MPI Fortran compiler
   #include_directories(${MPI_Fortran_INCLUDE_PATH})
-  TRY_COMPILE(TEST_MPI ${CMAKE_BINARY_DIR}/CMakeTmp \
+  TRY_COMPILE(TEST_MPI ${CMAKE_BINARY_DIR}/CMakeTmp 
                        ${CMAKE_SOURCE_DIR}/src/testmpi.f90
   #COMPILE_DEFINITIONS ${MPI_Fortran_LINK_FLAGS}
   #CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${MPI_Fortran_INCLUDE_PATH}"
@@ -115,7 +119,7 @@ ENDIF(ENABLE_MPI)
 # process CMakeLists.txt in other subdirectories
 ADD_SUBDIRECTORY(doc)
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(utilities)
+ADD_SUBDIRECTORY(util)
 
 # notes
 #SET_SOURCE_FILES_PROPERTIES(${SRC} PROPERTIES LANGUAGE "C")
