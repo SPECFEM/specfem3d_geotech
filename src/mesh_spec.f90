@@ -356,7 +356,7 @@ end subroutine swap_all
 
 subroutine get_global_indirect_addressing(nnode,npoint,ibool)
 !- we can create a new indirect addressing to reduce cache misses
-! (put into this subroutine but compiler keeps on complaining that it can't 
+! (put into this subroutine but compiler keeps on complaining that it can't
 ! vectorize loops...)
 implicit none
 integer :: nnode,npoint

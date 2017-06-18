@@ -704,109 +704,109 @@ nglob=ig
 end subroutine sort_array_coord
 !===============================================================================
 
-subroutine heap_sort_multi(N, dx, dy, dz, ia, ib)                              
-implicit none                                                                  
-integer, intent(in) :: N                                                       
-double precision, dimension(N), intent(inout) :: dx                            
-double precision, dimension(N), intent(inout) :: dy                            
-double precision, dimension(N), intent(inout) :: dz                            
-integer, dimension(N), intent(inout) :: ia                                     
-integer, dimension(N), intent(inout) :: ib                                     
-                                                                               
-integer :: i                                                                   
-                                                                               
-! checks if anything to do                                                     
-if (N < 2) return                                                              
-                                                                               
-! builds heap                                                                  
-do i = N/2, 1, -1                                                              
-  call heap_sort_siftdown(i, n)                                                
-enddo                                                                          
-                                                                               
-! sorts array                                                                  
-do i = N, 2, -1                                                                
-  ! swaps last and first entry in this section                                 
-  call dswap(dx, 1, i)                                                         
-  call dswap(dy, 1, i)                                                         
-  call dswap(dz, 1, i)                                                         
-  call iswap(ia, 1, i)                                                         
-  call iswap(ib, 1, i)                                                         
-  call heap_sort_siftdown(1, i - 1)                                            
-enddo                                                                          
-                                                                               
-contains                                                                       
-                                                                               
+subroutine heap_sort_multi(N, dx, dy, dz, ia, ib)
+implicit none
+integer, intent(in) :: N
+double precision, dimension(N), intent(inout) :: dx
+double precision, dimension(N), intent(inout) :: dy
+double precision, dimension(N), intent(inout) :: dz
+integer, dimension(N), intent(inout) :: ia
+integer, dimension(N), intent(inout) :: ib
+
+integer :: i
+
+! checks if anything to do
+if (N < 2) return
+
+! builds heap
+do i = N/2, 1, -1
+  call heap_sort_siftdown(i, n)
+enddo
+
+! sorts array
+do i = N, 2, -1
+  ! swaps last and first entry in this section
+  call dswap(dx, 1, i)
+  call dswap(dy, 1, i)
+  call dswap(dz, 1, i)
+  call iswap(ia, 1, i)
+  call iswap(ib, 1, i)
+  call heap_sort_siftdown(1, i - 1)
+enddo
+
+contains
+
 !-------------------------------------------------------------------------------
-subroutine dswap(A, i, j)                                                    
-implicit none                                                                             
-double precision, dimension(:), intent(inout) :: A                           
-integer, intent(in) :: i                                                     
-integer, intent(in) :: j                                                     
-                                                                             
-double precision :: tmp                                                      
-                                                                             
-tmp = A(i)                                                                   
-A(i) = A(j)                                                                  
-A(j) = tmp                                                                   
-                                                                             
-end subroutine                                                               
+subroutine dswap(A, i, j)
+implicit none
+double precision, dimension(:), intent(inout) :: A
+integer, intent(in) :: i
+integer, intent(in) :: j
+
+double precision :: tmp
+
+tmp = A(i)
+A(i) = A(j)
+A(j) = tmp
+
+end subroutine
 !===============================================================================
-                                                                             
+
 subroutine iswap(A, i, j)
-implicit none                                                                             
-integer, dimension(:), intent(inout) :: A                                    
-integer, intent(in) :: i                                                     
-integer, intent(in) :: j                                                     
-                                                                             
-integer :: tmp                                                               
-                                                                             
-tmp = A(i)                                                                   
-A(i) = A(j)                                                                  
-A(j) = tmp                                                                   
-                                                                             
-end subroutine                                                               
+implicit none
+integer, dimension(:), intent(inout) :: A
+integer, intent(in) :: i
+integer, intent(in) :: j
+
+integer :: tmp
+
+tmp = A(i)
+A(i) = A(j)
+A(j) = tmp
+
+end subroutine
 !===============================================================================
-                                                                             
-subroutine heap_sort_siftdown(start, bottom)                                 
-implicit none                                                                             
-integer, intent(in) :: start                                                 
-integer, intent(in) :: bottom                                                
-                                                                             
-integer :: i, j                                                              
-double precision :: xtmp, ytmp, ztmp                                         
-integer :: atmp, btmp                                                        
-                                                                             
-i = start                                                                    
-xtmp = dx(i)                                                                 
-ytmp = dy(i)                                                                 
-ztmp = dz(i)                                                                 
-atmp = ia(i)                                                                 
-btmp = ib(i)                                                                 
-                                                                             
-j = 2 * i                                                                    
-do while (j <= bottom)                                                       
-  ! chooses larger value first in this section                               
-  if (j < bottom) then                                                       
-    if (dx(j) <= dx(j+1)) j = j + 1                                          
-  endif                                                                      
-                                                                             
-  ! checks if section already smaller than initial value                     
-  if (dx(j) < xtmp) exit                                                     
-                                                                             
-  dx(i) = dx(j)                                                              
-  dy(i) = dy(j)                                                              
-  dz(i) = dz(j)                                                              
-  ia(i) = ia(j)                                                              
-  ib(i) = ib(j)                                                              
-  i = j                                                                      
-  j = 2 * i                                                                  
-enddo                                                                        
-                                                                             
-dx(i) = xtmp                                                                 
-dy(i) = ytmp                                                                 
-dz(i) = ztmp                                                                 
-ia(i) = atmp                                                                 
-ib(i) = btmp    
+
+subroutine heap_sort_siftdown(start, bottom)
+implicit none
+integer, intent(in) :: start
+integer, intent(in) :: bottom
+
+integer :: i, j
+double precision :: xtmp, ytmp, ztmp
+integer :: atmp, btmp
+
+i = start
+xtmp = dx(i)
+ytmp = dy(i)
+ztmp = dz(i)
+atmp = ia(i)
+btmp = ib(i)
+
+j = 2 * i
+do while (j <= bottom)
+  ! chooses larger value first in this section
+  if (j < bottom) then
+    if (dx(j) <= dx(j+1)) j = j + 1
+  endif
+
+  ! checks if section already smaller than initial value
+  if (dx(j) < xtmp) exit
+
+  dx(i) = dx(j)
+  dy(i) = dy(j)
+  dz(i) = dz(j)
+  ia(i) = ia(j)
+  ib(i) = ib(j)
+  i = j
+  j = 2 * i
+enddo
+
+dx(i) = xtmp
+dy(i) = ytmp
+dz(i) = ztmp
+ia(i) = atmp
+ib(i) = btmp
 
 end subroutine heap_sort_siftdown
 !===============================================================================

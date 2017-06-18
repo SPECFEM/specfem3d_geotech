@@ -23,6 +23,8 @@ CC_COMPILE = $(CC) $(CFLAGS)
 
 LIB =
 #LIBMPI = -L/~/openmpi-1.4.3/lib/lmpi # OR path to appropriate MPI library
+#LIBSCOTCH = -L/home/hgharti/lsoft/scotch_6.0.4-gcc-5.3.1/lib -lscotch -lscotcherr
+#INCSCOTCH = -I$(HOME)/lsoft/scotch_6.0.4-gcc-5.3.1/include
 LIBSCOTCH = -L/home/hgharti/lsoft/scotch_6.0.4-intel17/lib -lscotch -lscotcherr
 INCSCOTCH = -I$(HOME)/lsoft/scotch_6.0.4-intel17/include
 

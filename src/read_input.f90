@@ -106,11 +106,11 @@ else
 endif
 out_path='./output/'
 
-if(present(ispartmesh))then                                                      
-  if(ispartmesh)then                                                             
-    part_path='./partition/'                                                     
-  endif                                                                          
-endif 
+if(present(ispartmesh))then
+  if(ispartmesh)then
+    part_path='./partition/'
+  endif
+endif
 
 eqkx=0.0_kreal
 eqky=0.0_kreal
@@ -158,13 +158,13 @@ do
     endif
     preinfo_stat=-1;
     call split_string(tag,',',args,narg)
-    if(ismpi.or. (present(ispartmesh).and.ispartmesh))then                       
-      nproc_inp=get_integer('nproc',args,narg);                                  
-      if(present(ispartmesh).and.ispartmesh)nproc=nproc_inp                      
-      if(nproc_inp/=nproc)then                                                   
-        write(errtag,*)'ERROR: number of processors and images must be equal!'   
-        return                                                                   
-      endif                                                                      
+    if(ismpi.or. (present(ispartmesh).and.ispartmesh))then
+      nproc_inp=get_integer('nproc',args,narg);
+      if(present(ispartmesh).and.ispartmesh)nproc=nproc_inp
+      if(nproc_inp/=nproc)then
+        write(errtag,*)'ERROR: number of processors and images must be equal!'
+        return
+      endif
     endif
     call seek_string('method',strval,args,narg)
     if (.not. isblank(strval))method=trim(strval)
@@ -191,12 +191,12 @@ do
     if (.not. isblank(strval))inp_path=trim(strval)
     slen=len_trim(inp_path)
     if(inp_path(slen:slen)/='/')inp_path=trim(inp_path)//'/'
-    if(ismpi .or. (present(ispartmesh).and.ispartmesh))then                      
-      call seek_string('part_path',strval,args,narg)                             
-      if (.not. isblank(strval))part_path=trim(strval)                           
-      slen=len_trim(part_path)                                                   
-      if(part_path(slen:slen)/='/')part_path=trim(part_path)//'/'                
-    endif 
+    if(ismpi .or. (present(ispartmesh).and.ispartmesh))then
+      call seek_string('part_path',strval,args,narg)
+      if (.not. isblank(strval))part_path=trim(strval)
+      slen=len_trim(part_path)
+      if(part_path(slen:slen)/='/')part_path=trim(part_path)//'/'
+    endif
     call seek_string('out_path',strval,args,narg)
     if (.not. isblank(strval))out_path=trim(strval)
     slen=len_trim(out_path)
@@ -536,7 +536,7 @@ else
 endif
 close(11)
 
-! for partmesh library following information is read in the library itself       
+! for partmesh library following information is read in the library itself
 if(.not.present(ispartmesh).or. .not.ispartmesh)then
   ! read material lists
   if(ismatpart==0)then ! material file not partitioned
@@ -553,53 +553,53 @@ if(.not.present(ispartmesh).or. .not.ispartmesh)then
     return
   endif
   read(11,*)
-  read(11,*)nmatblk                                                              
-  allocate(mat_domain(nmatblk),type_blk(nmatblk),gam_blk(nmatblk),             & 
-  rho_blk(nmatblk),ym_blk(nmatblk),coh_blk(nmatblk),nu_blk(nmatblk),           & 
-  phi_blk(nmatblk),psi_blk(nmatblk),water(nmatblk))                              
-  allocate(mfile_blk(nmatblk))                                                   
-  allocate(bulkmod_blk(nmatblk),shearmod_blk(nmatblk))                           
-  ! initilize                                                                    
-  type_blk=-10000                                                                
-  mfile_blk=""                                                                   
-  gam_blk=-inftol                                                                
-  ym_blk=-inftol                                                                 
-  nu_blk=-inftol                                                                 
-  coh_blk=-inftol                                                                
-  phi_blk=-inftol                                                                
-  psi_blk=-inftol                                                                
-  do i=1,nmatblk                                                                 
-    ! This will read a line and proceed to next line                             
-    ! if the input line is long enough only the part of the lineword will be     
-    ! filled                                                                     
-    lineword=""                                                                  
-    read(11,*,iostat=ios)lineword                                                
-    imat=str2int(lineword(1))                                                    
-    mat_domain(i)=str2int(lineword(2))                                           
-    type_blk(i)=str2int(lineword(3))                                             
-    if(type_blk(i).eq.0)then                                                     
-      ! block material properties                                                
-      gam_blk(i)=str2real(lineword(4))                                           
-      ym_blk(i)=str2real(lineword(5))                                            
-      nu_blk(i)=str2real(lineword(6))                                            
-      phi_blk(i)=str2real(lineword(7))                                           
-      coh_blk(i)=str2real(lineword(8))                                           
-      psi_blk(i)=str2real(lineword(9))                                           
+  read(11,*)nmatblk
+  allocate(mat_domain(nmatblk),type_blk(nmatblk),gam_blk(nmatblk),             &
+  rho_blk(nmatblk),ym_blk(nmatblk),coh_blk(nmatblk),nu_blk(nmatblk),           &
+  phi_blk(nmatblk),psi_blk(nmatblk),water(nmatblk))
+  allocate(mfile_blk(nmatblk))
+  allocate(bulkmod_blk(nmatblk),shearmod_blk(nmatblk))
+  ! initilize
+  type_blk=-10000
+  mfile_blk=""
+  gam_blk=-inftol
+  ym_blk=-inftol
+  nu_blk=-inftol
+  coh_blk=-inftol
+  phi_blk=-inftol
+  psi_blk=-inftol
+  do i=1,nmatblk
+    ! This will read a line and proceed to next line
+    ! if the input line is long enough only the part of the lineword will be
+    ! filled
+    lineword=""
+    read(11,*,iostat=ios)lineword
+    imat=str2int(lineword(1))
+    mat_domain(i)=str2int(lineword(2))
+    type_blk(i)=str2int(lineword(3))
+    if(type_blk(i).eq.0)then
+      ! block material properties
+      gam_blk(i)=str2real(lineword(4))
+      ym_blk(i)=str2real(lineword(5))
+      nu_blk(i)=str2real(lineword(6))
+      phi_blk(i)=str2real(lineword(7))
+      coh_blk(i)=str2real(lineword(8))
+      psi_blk(i)=str2real(lineword(9))
       !read(11,*)imat,mat_domain(i),gam_blk(i),ym_blk(i),nu_blk(i),phi_blk(i), &
-      !coh_blk(i),psi_blk(i)                                                     
-                                                                                 
-      ! convert to bulk modulus and shear modulus                                
-      bulkmod_blk(i)=ym_blk(i)/(THREE*(one-two*nu_blk(i)))                       
-      shearmod_blk(i)=half*ym_blk(i)/(one+nu_blk(i))                             
-    elseif(type_blk(i).eq.-1)then                                                
-      ! tomographic model defined on regular structured grid                     
-      mfile_blk(i)=trim(lineword(4))                                             
-    else                                                                         
-      print*,'ERROR: type_blk:',type_blk(i),' is unsupported!'                   
-      stop                                                                       
-    endif                                                                        
-                                                                                 
-  enddo                            
+      !coh_blk(i),psi_blk(i)
+
+      ! convert to bulk modulus and shear modulus
+      bulkmod_blk(i)=ym_blk(i)/(THREE*(one-two*nu_blk(i)))
+      shearmod_blk(i)=half*ym_blk(i)/(one+nu_blk(i))
+    elseif(type_blk(i).eq.-1)then
+      ! tomographic model defined on regular structured grid
+      mfile_blk(i)=trim(lineword(4))
+    else
+      print*,'ERROR: type_blk:',type_blk(i),' is unsupported!'
+      stop
+    endif
+
+  enddo
   if(minval(mat_id)<1 .or. maxval(mat_id)>nmatblk)then
     write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined&
     & material regions!'

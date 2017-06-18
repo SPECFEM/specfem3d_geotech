@@ -12,20 +12,20 @@
 *
 * ## Compile:
 *  gcc gid2semgeotech.c -o gid2semgeotech
-*  
+*
 * ## Usage:
 *  gid2semgeotech <inputfile> <OPTIONS>
 *  Example: gid2semgeotech gid2semgeotech_example.dat
 *  or
 *  gid2semgeotech gid2semgeotech_example.dat -fac=0.001
-*  
+*
 * ## Options:
 * - -fac: use this option to multiply coordinates. this is importantn for unit
 *        conversion, e.g., to convert m to km use -fac=0.001
 * # Basic steps starting from GID:
 *
 * ### step1: export mesh file in ASCII format "mesh.dat"
-* 
+*
 * ### step2: produce mesh and BC files
 *  >>gid2semgeotech mesh.dat
 *  OR
@@ -37,7 +37,7 @@
 * - _connectivity : total number of elements followed by connectivity list
 *
 * - _material_id : total number of elements followed by material IDs
-*  
+*
 * - ??bcu? : node IDs which have u? = 0 as the boundary conditions (?? -> ns or ss, ? -> x, y, z)
 */
 #include <stdio.h>
@@ -174,12 +174,12 @@ while(!feof(inf)){
   sscanf(line,"%s",token);
   /* read problem size */
   if(dim_stat!=ON && strcmp(token,"Number")==0){
-    fscanf(inf,"%d %d %d",&nelmt,&nnode,&nblk);     
-  
+    fscanf(inf,"%d %d %d",&nelmt,&nnode,&nblk);
+
     printf(" number of elements: %d\n",nelmt);
     printf(" number of nodes: %d\n",nnode);
     printf(" number of blocks: %d\n",nblk);
-    dim_stat=ON;     
+    dim_stat=ON;
     continue;
   }
   /* read and save coordinates */
@@ -205,7 +205,7 @@ while(!feof(inf)){
     fclose(outf_coord[0]);
     fclose(outf_coord[1]);
     fclose(outf_coord[2]);
-    
+
     coord_stat=ON;
     printf("complete!\n");
     continue;
@@ -255,7 +255,7 @@ while(!feof(inf)){
   if(strcmp(token,"$")==0 && strstr(line,"$ Boundary")!=NULL){
     printf("saving boundary conditions...");
     fgets(line,100,inf);/* discard this line */
-    
+
     tempf=fopen("temp_bc","w");
     nelmt_bc=0;
     nbcx=0;
@@ -287,9 +287,9 @@ while(!feof(inf)){
     }
     fclose(tempf);
     unlink("temp_bc");
-    fclose(outf_bc[0]);    
-    fclose(outf_bc[1]);    
-    fclose(outf_bc[2]);    
+    fclose(outf_bc[0]);
+    fclose(outf_bc[1]);
+    fclose(outf_bc[2]);
     printf("complete!\n");
     continue;
 exit(0);

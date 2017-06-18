@@ -61,13 +61,10 @@ return
 end subroutine prepare_ghost
 !===============================================================================
 
-subroutine prepare_ghost_gdof()                                              
-use global,only:gdof                                                      
-                                                                                 
-implicit none                                                                    
-                                                                                 
-return                                                                           
-end subroutine prepare_ghost_gdof                                                
+subroutine prepare_ghost_gdof()
+implicit none
+return
+end subroutine prepare_ghost_gdof
 !===============================================================================
 
 subroutine modify_ghost(isnode)

@@ -84,7 +84,7 @@ if(.not.isfile)then
  if(myrank==0)then
    write(stdout,*)'Input file: "',trim(inp_fname),'" doesn''t exist!'
  endif
- call close_process()  
+ call close_process()
 endif
 ! read input data
 call read_input(ismpi,inp_fname,errcode,errtag)

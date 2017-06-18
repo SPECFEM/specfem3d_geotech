@@ -1,4 +1,4 @@
-! this subroutine computes hydrostatic pressure at staurated nodes given the 
+! this subroutine computes hydrostatic pressure at staurated nodes given the
 ! freesurface profile
 ! z always + up
 ! AUTHOR

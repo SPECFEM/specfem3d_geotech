@@ -1,11 +1,11 @@
 COMPILE:
   gcc gid2semgeotech.c -o gid2semgeotech
-USAGE: 
+USAGE:
   gid2semgeotech <inputfile> <OPTIONS>
   Example: gid2semgeotech gid2semgeotech_example.dat
   or
   gid2semgeotech  gid2semgeotech_example.date -fac=0.001
 OPTIONS:
-  -fac: use this option to multiply coordinates. this is importantn for unit 
+  -fac: use this option to multiply coordinates. this is importantn for unit
         conversion, e.g., to convert m to km use -fac=0.001
 TODO:
