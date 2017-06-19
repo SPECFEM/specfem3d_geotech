@@ -54,16 +54,26 @@ endif
 call get_command_argument(1, arg1)
 if(trim(arg1)==('--help'))then
   if(myrank==0)then
-    write(stdout,'(a)')'Usage: '//trim(prog)//' [Options] [input_file]'
-    write(stdout,'(a)')'Options:'
+    write(stdout,'(a)')'Usage:'
+    write(stdout,'(a)')'For information:'
+    write(stdout,'(a)')'  '//trim(prog)//' [Options]'
+    write(stdout,'(a)')'  Options:'
     write(stdout,'(a)')'    --help        : Display this information.'
     write(stdout,'(a)')'    --version     : Display version information.'
+    if(trim(prog).eq.'./bin/semgeotech')then
+      write(stdout,'(a)')'For a serial run:'
+      write(stdout,'(a)')'  '//trim(prog)//' [input_file]'
+    elseif(trim(prog).eq.'./bin/psemgeotech')then
+      write(stdout,'(a)')'For a parallel run:'
+      write(stdout,'(a)')'  mpirun -n [NP] p'//trim(prog)//' [input_file]'
+    endif
+    write(stdout,'(a)')'See doc/manual_SPECFEM3D_GEOTECH.pdf for details.'
   endif
   !call sync_process
   call close_process()
 elseif(trim(arg1)==('--version'))then
   if(myrank==0)then
-    write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.2 Beta'
+    write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.2'
     write(stdout,'(a)')'This is free software; see the source for copying '
     write(stdout,'(a)')'conditions.  There is NO warranty; not even for '
     write(stdout,'(a)')'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.'
