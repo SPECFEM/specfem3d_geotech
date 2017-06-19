@@ -1,8 +1,13 @@
 ! this module contains preprocessing library routines
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 07,2011
 module preprocess
+
 contains
+
+!-------------------------------------------------------------------------------
 ! this subroutine computes strain-displacement matrix (B)
 subroutine compute_bmat(deriv,bmat)
 use set_precision
@@ -61,7 +66,8 @@ enddo
 !print*,'Bmat discrepancy:',maxval(abs(bmat-bbmat))
 return
 end subroutine compute_bmat
-!===========================================
+!===============================================================================
+
 ! this subrotine computes the stiffness matrix, diagonal preconditioner, and
 ! body loads (gravity and pseudostatic loads) optionally
 ! TODO: optional precoditioner,optional assembly of stiffness
@@ -86,19 +92,19 @@ real(kind=kreal),intent(inout),optional :: extload(0:neq)
 logical,intent(in),optional :: gravity,pseudoeq
 
 real(kind=kreal) :: detjac,zero=0.0_kreal
-real(kind=kreal) :: cmat(nst,nst),coord(ngnode,ndim),jac(ndim,ndim),deriv(ndim,nenod), &
-bmat(nst,nedof),eld(nedof),eqload(nedof),km(nedof,nedof)
+real(kind=kreal) :: cmat(nst,nst),coord(ngnode,ndim),jac(ndim,ndim),           &
+deriv(ndim,nenod),bmat(nst,nedof),eld(nedof),eqload(nedof),km(nedof,nedof)
 integer :: egdof(nedof),num(nenod)
 integer :: i,idof,i_elmt,k
 
 if(present(extload).and.(.not.present(gravity) .or. .not.present(pseudoeq)))then
-  write(*,'(/,a)')'ERROR: both "gravity" and "pseudoeq" must be defined for "extload"!'
+  write(*,'(/,a)')'ERROR: both "gravity" and "pseudoeq" must be defined for &
+  &"extload"!'
   stop
 endif
 
 ! compute stiffness matrices
 storekm=zero; dprecon=zero
-!----element stiffness integration, storage and preconditioner----
 do i_elmt=1,nelmt
   call compute_cmat(cmat,ym(mat_id(i_elmt)),nu(mat_id(i_elmt)))
   num=g_num(:,i_elmt)
@@ -140,5 +146,7 @@ end do ! i_elmt=1,nelmt
 dprecon(0)=zero
 if(present(extload))extload(0)=zero
 end subroutine stiffness_bodyload
+!===============================================================================
 end module preprocess
+!===============================================================================
 
