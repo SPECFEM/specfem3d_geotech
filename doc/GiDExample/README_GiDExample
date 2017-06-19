@@ -1,0 +1,14 @@
+AUTHOR
+  Zhenzhen Yan
+
+1 check that the GiD software is available
+2 copy the zhen.gid into the installation directory of GID/problemtypes/.
+  Modify the file name of zhen.111 to zhen.BAT
+3 open GiD software, create model
+4 choose Data-Problemtype-zhen
+5 choose Data-Conditions-Surface-Constraints
+6 choose Data-Materials
+7 generate mesh
+8 calculate
+9 a mesh file *.dat containing mesh and boundary conditions is generated
+10 use gid2semgeotech tool to convert *.dat into the files needed by SPECFEM3D_GEOTECH.
