@@ -86,9 +86,18 @@ If not already compiled, compile exodus2semgeotech.c located at util/ folder\\
 \\
 Copy all generated files to input/ folder.
 
-\section*{Step 5: Create a material properties file}
+\section*{Step 5: Prepare BC files}
+
+Open BC files "input/cubit\_example\_ssbcux", "input/cubit\_example\_ssbcuy", "input/cubit\_example\_ssbcuz". Add a line containing\\
+\\
+\texttt{2 0.0}\\
+\\
+on the top of each file and save.
+
+\section*{Step 6: Create a material properties file}
 
 Create a file "cubit\_example\_material\_list" in input/ folder with the following content:
+\\
 \\
 \colorbox{gray}{
 \parbox{16cm}{
@@ -98,7 +107,7 @@ Create a file "cubit\_example\_material\_list" in input/ folder with the followi
 }}
 }}
 
-\section*{Step 6: Create a main input file}
+\section*{Step 7: Create a main input file}
 
 Create a file "cubit\_example.sem" in input/ folder with the following content:
 \\
@@ -127,7 +136,7 @@ save: disp=1\\
 }}
 }}
 
-\section*{Step 7: Run prgroam}
+\section*{Step 8: Run prgroam}
 
 go to SPECFEM3D\_GEOTECH folder in terminal and type\\
 \\
@@ -135,7 +144,7 @@ go to SPECFEM3D\_GEOTECH folder in terminal and type\\
 \\
 \textbf{\emph{Note}}: You must have compiled SPECFEM3D\_GEOTECH. For more detail please see Chapter~\ref{chap:2}.
 
-\section*{Step 8: Visualize result}
+\section*{Step 9: Visualize result}
 
 Start ParaView and Open "output/cubit\_example.case" file\\
 \\
