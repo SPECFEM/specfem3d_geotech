@@ -8,6 +8,7 @@
 \usepackage{float,textcomp,amsmath,paralist,calc}
 \usepackage{natbib}
 \usepackage{xr}
+\usepackage[titletoc]{appendix}
 \geometry{verbose,a4paper,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
 \newcommand{\ap}{\textquotesingle}
 \newcommand{\sq}[1]{\textquotesingle{#1}\textquotesingle}
@@ -69,6 +70,10 @@ User Manual}}
 \input{chap3_input.tex}
 \input{chap4_output_and_visualization.tex}
 \input{chap5_utilities.tex}
+
+\begin{appendices}
+  \input{a1_cubit_example}
+\end{appendices}
 
 \bibliographystyle{chicago}
 \bibliography{manual_SPECFEM3D_GEOTECH}
