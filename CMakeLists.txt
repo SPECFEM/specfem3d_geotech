@@ -84,9 +84,9 @@ IF(BUILD_PARTMESH)
     SET(ISPARTMESH OFF)                                                          
   ENDIF(NOT SCOTCH_INCLUDE_PATH)                                                 
 ENDIF(BUILD_PARTMESH)
-SET(BUILD_UTILITIES_EXODUS2SEM OFF CACHE BOOL "Build exodus2semgeotech program")
-SET(BUILD_UTILITIES_GID2SEM OFF CACHE BOOL "Build gid2semgeotech program")
-SET(BUILD_UTILITIES_WRITE_SOS OFF CACHE BOOL "Build write_sos program")
+SET(BUILD_EXODUS2SEMGEOTECH OFF CACHE BOOL "Build exodus2semgeotech program")
+SET(BUILD_GID2SEMGEOTECH OFF CACHE BOOL "Build gid2semgeotech program")
+SET(BUILD_WRITE_SOS OFF CACHE BOOL "Build write_sos program")
 
 # MPI for parallel processing
 SET(ENABLE_MPI OFF CACHE BOOL "Build semgeotech with MPI support")

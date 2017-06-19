@@ -1,6 +1,20 @@
-\chapter{Building and simulation of a slope model using CUBIT/Trelis and SPECFEM3D\_GEOTECH}
-\label{app:cubit}
-\section*{Step 1: Create a mesh in CUBIT/Trelis}
+\chapter{Tutorials}
+\label{chap:tutorials}
+
+%\section[Building a slope model from scratch]{Building and simulation of a slope model using CUBIT/Trelis and SPECFEM3D\_GEOTECH}
+\section{Building a slope model from scratch}
+\label{sec:cubit}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.4]{slope_model}
+\caption{A slope model.}
+\label{fig:slope}
+\end{figure}
+
+In this tutorial we build a slope model as shown in Figure~\ref{fig:slope} using CUBIT/Trelis and simulate slope failure using SPECFEM3D\_GEOTECH.
+
+\subsection*{Step 1: Create a mesh in CUBIT/Trelis}
 
 Create a journal file "cubit\_example.jou" with following content:\\
 \\
@@ -66,13 +80,13 @@ Then open "cubit\_example.jou" file in CUBIT/Trelis and run.\\
 \\
 \textbf{\emph{Note}}: Above procedure can also be performed manually using CUBIT's GUI.
 
-\section*{Step 2: Convert "Binary" EXODUS file to "ASCII" format}
+\subsection*{Step 2: Convert "Binary" EXODUS file to "ASCII" format}
 \texttt{ncdump cubit\_example.e > cubit\_example.txt}\\
 
 \textbf{\emph{Note}}: You must have installed NetCDF libraries. NetCDF is a free software which can be downloaded from
 \texttt{http://www.unidata.ucar.edu/downloads/netcdf/index.jsp}
 
-\section*{Step 3: Compile exodus2semgeotech tool}
+\subsection*{Step 3: Compile exodus2semgeotech tool}
 If not already compiled, compile exodus2semgeotech.c located at util/ folder\\
 \\
 \texttt{gcc exodus2semgeotech.c -o exodus2semgeotech}
@@ -80,13 +94,13 @@ If not already compiled, compile exodus2semgeotech.c located at util/ folder\\
 \\
 \textbf{\emph{Note}}: For more information, please check the header in exodus2semgeotech.c file.
 
-\section*{Step 4: Convert exodus file to SPECFEM3D\_GEOTECH files}
+\subsection*{Step 4: Convert exodus file to SPECFEM3D\_GEOTECH files}
 
 \texttt{./exodus2sem cubit\_example.txt}\\
 \\
 Copy all generated files to input/ folder.
 
-\section*{Step 5: Prepare BC files}
+\subsection*{Step 5: Prepare BC files}
 
 Open BC files "input/cubit\_example\_ssbcux", "input/cubit\_example\_ssbcuy", "input/cubit\_example\_ssbcuz". Add a line containing\\
 \\
@@ -94,7 +108,7 @@ Open BC files "input/cubit\_example\_ssbcux", "input/cubit\_example\_ssbcuy", "i
 \\
 on the top of each file and save.
 
-\section*{Step 6: Create a material properties file}
+\subsection*{Step 6: Create a material properties file}
 
 Create a file "cubit\_example\_material\_list" in input/ folder with the following content:
 \\
@@ -107,7 +121,7 @@ Create a file "cubit\_example\_material\_list" in input/ folder with the followi
 }}
 }}
 
-\section*{Step 7: Create a main input file}
+\subsection*{Step 7: Create a main input file}
 
 Create a file "cubit\_example.sem" in input/ folder with the following content:
 \\
@@ -136,7 +150,7 @@ save: disp=1\\
 }}
 }}
 
-\section*{Step 8: Run prgroam}
+\subsection*{Step 8: Run prgroam}
 
 go to SPECFEM3D\_GEOTECH folder in terminal and type\\
 \\
@@ -144,7 +158,7 @@ go to SPECFEM3D\_GEOTECH folder in terminal and type\\
 \\
 \textbf{\emph{Note}}: You must have compiled SPECFEM3D\_GEOTECH. For more detail please see Chapter~\ref{chap:2}.
 
-\section*{Step 9: Visualize result}
+\subsection*{Step 9: Visualize result}
 
 Start ParaView and Open "output/cubit\_example.case" file\\
 \\
