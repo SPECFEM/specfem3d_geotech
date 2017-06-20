@@ -115,7 +115,8 @@ end type savedata_options
 type(savedata_options) :: savedata
 
 ! others
-character(len=1),parameter :: CR=achar(13) ! carriage return to overwrite
+! this is no longer necessary with new compilers!! OBSOLETE
+!character(len=1),parameter :: CR=achar(13) ! carriage return to overwrite
 !previous line
 
 !character(len=80) :: phead
