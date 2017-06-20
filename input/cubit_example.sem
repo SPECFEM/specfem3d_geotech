@@ -1,0 +1,19 @@
+#pre information
+preinfo: method='sem', ngllx=3, nglly=3, ngllz=3, nenod=8, ngnode=8, inp_path='./input', out_path='./output/'
+
+#mesh information
+mesh: xfile='cubit_example_coord_x', yfile='cubit_example_coord_y', zfile='cubit_example_coord_z', &
+confile='cubit_example_connectivity', idfile='cubit_example_material_id'
+
+#boundary conditions
+bc: uxfile='cubit_example_ssbcux', uyfile='cubit_example_ssbcuy', uzfile='cubit_example_ssbcuz'
+
+#material list
+material: matfile='cubit_example_material_list'
+
+#control parameters
+control: cg_tol=1e-8, cg_maxiter=5000, nl_tol=0.0005, nl_maxiter=3000, nsrf=3, srf=1.0 1.5 2.0
+
+#save data options
+save: disp=1
+
