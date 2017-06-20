@@ -1,4 +1,6 @@
 ! collection of solvers
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
 module solver
@@ -9,14 +11,17 @@ use math_constants, only : zero
 contains
 
 ! diagonally preconditioned conjuate-gradient solver
-subroutine pcg_solver(myid,ngpart,maxngnode,neq,nelmt,k,u,f,dprecon,gdof_elmt,cg_iter,errcode,errtag)
+subroutine pcg_solver(neq,nelmt,k,u,f,dprecon,gdof_elmt,cg_iter,errcode,errtag)
 implicit none
-integer,intent(in) :: myid,ngpart,maxngnode,neq,nelmt ! nelmt (for intact) may not be same as global nelmt
-real(kind=kreal),dimension(nedof,nedof,nelmt),intent(in) :: k ! only for intact elements
+integer,intent(in) :: neq,nelmt
+! nelmt (for intact) may not be same as global nelmt
+real(kind=kreal),dimension(nedof,nedof,nelmt),intent(in) :: k
+! only for intact elements
 real(kind=kreal),dimension(0:neq),intent(inout) :: u
 real(kind=kreal),dimension(0:neq),intent(in) :: f,dprecon
-!integer,dimension(nndof,nnode),intent(in) :: gdof
-integer,dimension(nedof,nelmt),intent(in) :: gdof_elmt ! only for intact elements
+!integer,dimension(nedof,nelmt),intent(in) :: gdof_elmt
+integer,dimension(:,:),intent(in) :: gdof_elmt
+! only for intact elements
 integer,intent(out) :: cg_iter
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
@@ -30,11 +35,10 @@ real(kind=kreal),dimension(nedof,nedof) :: km
 errtag="ERROR: unknown!"
 errcode=-1
 
-!---PCG solver
 kp=zero
 if(maxval(abs(u)).gt.zero)then
   do i_elmt=1,nelmt
-    egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,i_elmt)),(/nedof/))
+    egdof=gdof_elmt(:,i_elmt)
     km=k(:,:,i_elmt)
     kp(egdof)=kp(egdof)+matmul(km,u(egdof))
   end do
@@ -44,11 +48,11 @@ r=f-kp
 z=dprecon*r
 
 p=z
-!----pcg iteration----
+! pcg iteration
 pcg: do cg_iter=1,cg_maxiter
   kp=zero
   do i_elmt=1,nelmt
-    egdof=gdof_elmt(:,i_elmt) !reshape(gdof(:,g_num(:,i_elmt)),(/nedof/))
+    egdof=gdof_elmt(:,i_elmt)
     km=k(:,:,i_elmt)
     kp(egdof)=kp(egdof)+matmul(km,p(egdof))
   end do
@@ -73,6 +77,7 @@ end do pcg
 write(errtag,'(a)')'ERROR: PCG solver doesn''t converge!'
 return
 end subroutine pcg_solver
-!============================================
+!===============================================================================
 
 end module solver
+!===============================================================================

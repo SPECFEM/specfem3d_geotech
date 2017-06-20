@@ -1,11 +1,13 @@
 ! this is a main program SPECFEM3D_GEOTECH
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
 program semgeotech
 ! import necessary libraries
 use global
 use string_library, only : parse_file
-!use math_constants
+use input
 use mesh_spec
 #if (USE_MPI)
 use mpi_library
@@ -15,14 +17,13 @@ use serial_library
 use math_library_serial
 #endif
 use visual
-
 implicit none
-integer :: funit,i,ios,istat,j,k,neq
-integer :: i_elmt,i_node,i_inc,i_srf,ielmt,igdof,imat,inode
+integer :: funit,i,ios,j,k
+integer :: i_elmt
 
-integer :: gnod(8),map2exodus(8),ngllxy,node_hex8(8)
+integer :: gnod(8),gnum_hex(8),map2exodus(8),ngllxy,node_hex8(8)
 
-character(len=250) :: arg1,inp_fname,out_fname,prog
+character(len=250) :: arg1,inp_fname,prog
 character(len=250) :: path
 character(len=20), parameter :: wild_char='********************'
 character(len=20) :: ensight_etype
@@ -31,41 +32,48 @@ character(len=20) :: ext,format_str,ptail
 character(len=250) :: case_file,geo_file,sum_file
 integer :: npart,nt,tinc,tstart,twidth,ts ! ts: time set for ensight gold
 
-real(kind=kreal) :: cpu_tstart,cpu_tend,telap,step_telap,max_telap,mean_telap
+real(kind=kreal) :: cpu_tstart,cpu_tend,telap,max_telap,mean_telap
 
 logical :: ismpi !.true. : MPI, .false. : serial
-integer :: myid,nproc
 integer :: tot_nelmt,max_nelmt,min_nelmt,tot_nnode,max_nnode,min_nnode
 
 character(len=250) :: errtag ! error message
 integer :: errcode
-logical :: isopen ! flag to check whether the file is opened
+logical :: isfile,isopen ! flag to check whether the file is opened
 
-myid=1; nproc=1;
+myrank=0; nproc=1;
 errtag=""; errcode=-1
 
-call start_process(ismpi,myid,nproc,stdout)
-!ipart=myid-1 ! partition id starts from 0
+call start_process(ismpi,stdout)
 
 call get_command_argument(0, prog)
-!----input and initialisation----
 if (command_argument_count() <= 0) then
-  call error_stop('ERROR: no input file!',stdout,myid)
+  call error_stop('ERROR: no input file!',stdout,myrank)
 endif
 
 call get_command_argument(1, arg1)
 if(trim(arg1)==('--help'))then
-  if(myid==1)then
-    write(stdout,'(a)')'Usage: '//trim(prog)//' [Options] [input_file]'
-    write(stdout,'(a)')'Options:'
+  if(myrank==0)then
+    write(stdout,'(a)')'Usage:'
+    write(stdout,'(a)')'For information:'
+    write(stdout,'(a)')'  '//trim(prog)//' [Options]'
+    write(stdout,'(a)')'  Options:'
     write(stdout,'(a)')'    --help        : Display this information.'
     write(stdout,'(a)')'    --version     : Display version information.'
+    if(trim(prog).eq.'./bin/semgeotech')then
+      write(stdout,'(a)')'For a serial run:'
+      write(stdout,'(a)')'  '//trim(prog)//' [input_file]'
+    elseif(trim(prog).eq.'./bin/psemgeotech')then
+      write(stdout,'(a)')'For a parallel run:'
+      write(stdout,'(a)')'  mpirun -n [NP] p'//trim(prog)//' [input_file]'
+    endif
+    write(stdout,'(a)')'See doc/manual_SPECFEM3D_GEOTECH.pdf for details.'
   endif
   !call sync_process
   call close_process()
 elseif(trim(arg1)==('--version'))then
-  if(myid==1)then
-    write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.2 Beta'
+  if(myrank==0)then
+    write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.2'
     write(stdout,'(a)')'This is free software; see the source for copying '
     write(stdout,'(a)')'conditions.  There is NO warranty; not even for '
     write(stdout,'(a)')'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.'
@@ -80,28 +88,37 @@ call cpu_time(cpu_tstart)
 ! get input file name
 call get_command_argument(1, inp_fname)
 
+if(myrank==0)write(stdout,*)'Input file name: "',trim(inp_fname),'"'
+inquire(file=trim(inp_fname),exist=isfile)
+if(.not.isfile)then
+ if(myrank==0)then
+   write(stdout,*)'Input file: "',trim(inp_fname),'" doesn''t exist!'
+ endif
+ call close_process()
+endif
 ! read input data
-call read_input(ismpi,myid,nproc,inp_fname,errcode,errtag)
-if(errcode/=0)call error_stop(errtag,stdout,myid)
-!call sync_process()
+call read_input(ismpi,inp_fname,errcode,errtag)
+if(errcode/=0)call error_stop(errtag,stdout,myrank)
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
 min_nelmt=minscal(nelmt); min_nnode=minscal(nnode)
-if(myid==1)then
-write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',min_nelmt
-write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',min_nnode
+if(myrank==0)then
+write(stdout,*)'elements => total:',tot_nelmt,' max:',&
+max_nelmt,' min:',min_nelmt
+write(stdout,*)'nodes    => total:',tot_nnode,' max:',&
+max_nnode,' min:',min_nnode
 endif
 
 if (trim(method)/='sem')then
   write(errtag,'(a)')'ERROR: wrong input for sem3d!'
-  call error_stop(errtag,stdout,myid)
+  call error_stop(errtag,stdout,myrank)
 endif
 
 call parse_file(inp_fname,path,file_head,ext)
 
 ! get processor tag
-ptail=proc_tag(myid,nproc)
+ptail=proc_tag()
 
 ensight_etype='hexa8'
 ts=1 ! time set
@@ -122,7 +139,7 @@ geo_file=trim(file_head)//'_original'//trim(ptail)//'.geo'
 open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
-  call error_stop(errtag,stdout,myid)
+  call error_stop(errtag,stdout,myrank)
 endif
 
 write(11,'(a)')'FORMAT'
@@ -142,22 +159,21 @@ call write_ensight_geo(geo_file,ensight_etype,destag,npart,nelmt,nnode,        &
 real(g_coord),g_num)
 
 ! create spectral elements
-if(myid==1)write(stdout,'(a)',advance='no')'creating spectral elements...'
-call hex2spec(ndim,ngnod,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
-if(errcode/=0)call error_stop(errtag,stdout,myid)
-if(myid==1)write(stdout,*)'complete!'
+if(myrank==0)write(stdout,'(a)',advance='no')'creating spectral elements...'
+call hex2spec(ndim,ngnode,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
+if(errcode/=0)call error_stop(errtag,stdout,myrank)
+if(myrank==0)write(stdout,*)'complete!'
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
 min_nelmt=minscal(nelmt); min_nnode=minscal(nnode)
-if(myid==1)then
-write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',min_nelmt
-write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',min_nnode
+if(myrank==0)then
+write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',       &
+min_nelmt
+write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',       &
+min_nnode
 endif
 
-!call sync_process
-
-!stop
 nenod=ngll !(ngllx*nglly*ngllz) ! number of elemental nodes (nodes per element)
 ! number of elemental degrees of freedom
 nedof=nndof*nenod
@@ -183,37 +199,33 @@ case_file=trim(out_path)//trim(file_head)//trim(ptail)//'.case'
 open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
-  call error_stop(errtag,stdout,myid)
+  call error_stop(errtag,stdout,myrank)
 endif
 
 write(11,'(a)')'FORMAT'
 write(11,'(a,/)')'type:  ensight gold'
 
 write(11,'(a)')'GEOMETRY'
-!write(11,'(a,a,/)')'model:    ',trim(geo_file)
 if(nexcav==0)then
   write(11,'(a,a/)')'model:    ',trim(file_head)//trim(ptail)//'.geo'
 else
-  write(11,'(a,i10,a,a/)')'model:    ',ts,' ',trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.geo'
+  write(11,'(a,i10,a,a/)')'model:    ',ts,' ',trim(file_head)//'_step'//      &
+  wild_char(1:twidth)//trim(ptail)//'.geo'
 endif
 
 write(11,'(a)')'VARIABLE'
-!write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' displacement ', &
-!trim(file_head)//'_step'//wild_char(1:twidth)//'.dis'
-!write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' principal_stress ', &
-!trim(file_head)//'_step'//wild_char(1:twidth)//'.sig'
 
 if(savedata%disp)then
-  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','displacement',' ',  &
+  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','displacement',' ', &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.dis'
 endif
 if(savedata%stress)then
-  write(11,'(a,i10,a,a,a,a,/)')'tensor symm per node: ',ts,' ','stress',' ',   &
+  write(11,'(a,i10,a,a,a,a,/)')'tensor symm per node: ',ts,' ','stress',' ',  &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.sig'
 endif
 if(savedata%psigma)then
-  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','principal_stress',' ', &
-  trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.psig'
+  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','principal_stress',  &
+  ' ',trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.psig'
 endif
 if(savedata%porep)then
    write(11,'(a,a,a,a,a,/)')'scalar per node: ',' ','pore_pressure',' ', &
@@ -224,12 +236,13 @@ if(savedata%vmeps)then
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.eps'
 endif
 if(savedata%scf)then
-  write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','stress_concentration_factor',' ', &
-  trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.scf'
+  write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ',                     &
+  'stress_concentration_factor',' ',trim(file_head)//'_step'//                 &
+  wild_char(1:twidth)//trim(ptail)//'.scf'
 endif
 if(savedata%maxtau)then
-  write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','max_shear_stress',' ', &
-  trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.mtau'
+  write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','max_shear_stress',  &
+  ' ',trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.mtau'
 endif
 if(savedata%nsigma)then
   write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','normal_stress',' ', &
@@ -255,14 +268,17 @@ close(11)
 
 ! Format string
 write(format_str,*)twidth
-format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//',a)'
+format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))// &
+',a)'
 
 ! write geo file for inital stage (original)
 ! open Ensight Gold geo file to store mesh data
 if(nexcav==0)then
-  write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//trim(ptail)//'.geo'
+  write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//trim(ptail)// &
+  '.geo'
 else
-  write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//'_step',0,trim(ptail)//'.geo'
+  write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//'_step',0,    &
+  trim(ptail)//'.geo'
 endif
 npart=1
 destag='unstructured meshes'
@@ -291,7 +307,8 @@ do i_elmt=1,nelmt
         node_hex8(7)=node_hex8(5)+ngllx
         node_hex8(8)=node_hex8(7)+1
         ! map to exodus/cubit numbering and write
-        write(funit)g_num(node_hex8(map2exodus),i_elmt)
+        gnum_hex=g_num(node_hex8(map2exodus),i_elmt)
+        write(funit)gnum_hex
       enddo
     enddo
   enddo
@@ -306,17 +323,17 @@ write(10,*)'Result summary produced by SPECFEM3D_GEOTECH'
 write(10,*)'--------------------------------------------'
 close(10)
 
-if(myid==1)write(stdout,'(a)')'--------------------------------------------'
+if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 
 ! call main routines
 if(nexcav==0)then
   ! slope stability
-  call semslope3d(ismpi,myid,nproc,gnod,sum_file,ptail,format_str)
+  call semslope3d(ismpi,gnod,sum_file,ptail,format_str)
 else
   ! excavation
-  call semexcav3d(ismpi,myid,nproc,gnod,sum_file,ptail,format_str)
+  call semexcav3d(ismpi,gnod,sum_file,ptail,format_str)
 endif
-!-----------------------------------
+!-------------------------------------------------------------------------------
 
 ! compute elapsed time
 call cpu_time(cpu_tend)
@@ -330,9 +347,9 @@ open(10,file=trim(sum_file),status='old',position='append',action='write')
 write(10,*)'ELAPSED TIME, MAX ELAPSED TIME, MEAN ELAPSED TIME'
 write(10,fmt=format_str)telap,max_telap,mean_telap
 close(10)
-!-----------------------------------
+!-------------------------------------------------------------------------------
 
-if(myid==1)then
+if(myrank==0)then
   write(stdout,*) ! write new line
   write(stdout,'(a)')'--------------------------------------------'
   inquire(stdout,opened=isopen)
@@ -343,5 +360,5 @@ call sync_process
 call close_process()
 
 end program semgeotech
-!===========================================
+!===============================================================================
 

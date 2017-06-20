@@ -1,4 +1,6 @@
 # build main programs
+# AUTHOR
+#   Hom Nath Gharti
 # REVISION:
 #   HNG, Sep 06,2011;
 
@@ -8,8 +10,7 @@ SET(srcsem
    string_library.f90
    math_library.f90
    shape_library.f90
-   compute_bmat.f90
-   compute_cmat.f90
+   elastic.f90
    read_input.f90
    gll_library.f90
    mesh_spec.f90
@@ -63,7 +64,8 @@ SET(srcgeotech
 #ADD_DEFINITIONS(CMAKE_Fortran_FLAGS "-DUSE_MPI")
 IF(ISPARALLEL)
   SET_PROPERTY(SOURCE ${srcgeotech} PROPERTY COMPILE_DEFINITIONS USE_MPI)
-  #SET_PROPERTY(SOURCE ${srcgeotech} PROPERTY INCLUDE_DIRECTORIES ${MPI_Fortran_INCLUDE_PATH})
+  #SET_PROPERTY(SOURCE ${srcgeotech} PROPERTY INCLUDE_DIRECTORIES 
+  #                    ${MPI_Fortran_INCLUDE_PATH})
 ENDIF(ISPARALLEL)
 ADD_LIBRARY(geotech ${srcgeotech})
 IF(ISPARALLEL)
@@ -74,10 +76,12 @@ ENDIF(ISPARALLEL)
 
 # build semgeotech
 #TARGET_LINK_LIBRARIES(geotech ${semall})
-#SET_TARGET_PROPERTIES(geotech PROPERTIES LINK_FLAGS "${MPI_Fortran_LINK_FLAGS}")
+#SET_TARGET_PROPERTIES(geotech PROPERTIES LINK_FLAGS 
+#                     "${MPI_Fortran_LINK_FLAGS}")
 IF(ISPARALLEL)
   SET_PROPERTY(SOURCE semgeotech.F90 PROPERTY COMPILE_DEFINITIONS USE_MPI)
-  #SET_PROPERTY(SOURCE semgeotech.F90 PROPERTY INCLUDE_DIRECTORIES ${MPI_Fortran_INCLUDE_PATH})
+  #SET_PROPERTY(SOURCE semgeotech.F90 PROPERTY INCLUDE_DIRECTORIES
+  #             ${MPI_Fortran_INCLUDE_PATH})
   SET(LIBS geotech parallel sem ${MPI_Fortran_LIBRARIES})
   SET(mainprog psemgeotech)
 ELSE(ISPARALLEL)
@@ -100,10 +104,16 @@ IF(ISPARTMESH)
   SET(srcpartmesh
      global.f90
      string_library.f90
+     serial_library.f90
+     math_library.f90
      partmesh_library.f90
+     read_input.f90
      partmesh_scotch.f90
+     partmesh.f90
   )
   ADD_LIBRARY(partscotch ${srcpartmesh})
+  TARGET_INCLUDE_DIRECTORIES(partscotch PUBLIC
+  ${SCOTCH_INCLUDE_PATH})
   ADD_EXECUTABLE(partmesh
               partmesh.f90)
   TARGET_LINK_LIBRARIES(partmesh partscotch

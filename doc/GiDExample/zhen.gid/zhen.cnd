@@ -1,0 +1,32 @@
+CONDITION: Point-Constraints
+CONDTYPE: over points
+CONDMESHTYPE: over nodes
+QUESTION: X-Constraint:#CB#(1,0)
+VALUE: 1
+QUESTION: Y-Constraint:#CB#(1,0)
+VALUE: 1
+QUESTION: Z-Constraint:#CB#(1,0)
+VALUE: 1
+END CONDITION
+
+CONDITION: Line-Constraints
+CONDTYPE: over lines
+CONDMESHTYPE: over nodes
+QUESTION: X-Constraint:#CB#(1,0)
+VALUE: 1
+QUESTION: Y-Constraint:#CB#(1,0)
+VALUE: 1
+QUESTION: Z-Constraint:#CB#(1,0)
+VALUE: 1
+END CONDITION
+
+CONDITION: Surface-Constraints
+CONDTYPE: over surfaces
+CONDMESHTYPE: over face elements
+QUESTION: X-Constraint#CB#(1,0)
+VALUE: 1
+QUESTION: Y-Constraint#CB#(1,0)
+VALUE: 1
+QUESTION: Z-Constraint#CB#(1,0)
+VALUE: 1
+END CONDITION

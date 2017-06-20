@@ -1,14 +1,18 @@
 ! this module contains routines to compute Gauss-Legendre-Lobatto quadrature
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
 module gll_library
 use set_precision
-
 private :: endw1,endw2,gammaf,jacg
 
 contains
+
+!-------------------------------------------------------------------------------
 ! this subroutine computes GLL quadrature points and weights for 3D
-subroutine gll_quadrature(ndim,ngllx,nglly,ngllz,ngll,gll_points,gll_weights,lagrange_gll,dlagrange_gll)
+subroutine gll_quadrature(ndim,ngllx,nglly,ngllz,ngll,gll_points,gll_weights,  &
+lagrange_gll,dlagrange_gll)
 implicit none
 integer,intent(in) :: ndim,ngllx,nglly,ngllz,ngll
 real(kind=kreal),dimension(ngll),intent(out) :: gll_weights
@@ -76,10 +80,11 @@ do ii=1,ngll ! ngllx*nglly*ngllz
 enddo
 return
 end subroutine gll_quadrature
-!===========================================
+!===============================================================================
 
 ! this subroutine computes GLL quadrature points and weights for 2D
-subroutine gll_quadrature2d(ndim,ngllx,nglly,ngll,gll_points2d,gll_weights2d,lagrange_gll2d,dlagrange_gll2d)
+subroutine gll_quadrature2d(ndim,ngllx,nglly,ngll,gll_points2d,gll_weights2d,  &
+lagrange_gll2d,dlagrange_gll2d)
 implicit none
 integer,intent(in) :: ndim,ngllx,nglly,ngll
 real(kind=kreal),dimension(ngll),intent(out) :: gll_weights2d
@@ -88,7 +93,7 @@ real(kind=kreal),dimension(ngll,ngll),intent(out) :: lagrange_gll2d
 real(kind=kreal),dimension(ndim,ngll,ngll),intent(out) :: dlagrange_gll2d
 
 real(kind=kreal),parameter :: jacobi_alpha=0.0_kreal,jacobi_beta=0.0_kreal
-integer :: i,ii,j,k,n
+integer :: i,ii,j,n
 real(kind=kreal) :: xi,eta !,zeta
 real(kind=kreal),dimension(ngllx) :: gllpx,gllwx ! gll points and weights
 real(kind=kreal),dimension(nglly) :: gllpy,gllwy ! gll points and weights
@@ -96,11 +101,6 @@ real(kind=kreal),dimension(ngllx) :: lagrange_x,lagrange_dx
 real(kind=kreal),dimension(nglly) :: lagrange_y,lagrange_dy
 
 ! compute everything in indexed order
-
-! gll points and weights (source: http://mathworld.wolfram.com/lobattoquadrature.html)
-!gllp(1)=-1.0_kreal   ; gllw(1)=1.0_kreal/3.0_kreal
-!gllp(2)= 0.0_kreal   ; gllw(2)=4.0_kreal/3.0_kreal
-!gllp(3)= 1.0_kreal   ; gllw(3)=gllw(1)
 
 ! get gll points
 ! for alpha=beta=0, jacobi polynomial is legendre polynomial
@@ -142,10 +142,11 @@ enddo
 
 return
 end subroutine gll_quadrature2d
-!===========================================
+!===============================================================================
 
 ! this subroutine computes GLL quadrature points and weights for 1D
-subroutine gll_quadrature1d(ndim,ngllx,ngll,gll_points1d,gll_weights1d,lagrange_gll1d,dlagrange_gll1d)
+subroutine gll_quadrature1d(ndim,ngllx,ngll,gll_points1d,gll_weights1d,        &
+lagrange_gll1d,dlagrange_gll1d)
 implicit none
 integer,intent(in) :: ndim,ngllx,ngll
 real(kind=kreal),dimension(ngll),intent(out) :: gll_weights1d
@@ -154,17 +155,12 @@ real(kind=kreal),dimension(ngll,ngll),intent(out) :: lagrange_gll1d
 real(kind=kreal),dimension(ndim,ngll,ngll),intent(out) :: dlagrange_gll1d
 
 real(kind=kreal),parameter :: jacobi_alpha=0.0_kreal,jacobi_beta=0.0_kreal
-integer :: i,ii,j,k,n
+integer :: i,ii,n
 real(kind=kreal) :: xi
 real(kind=kreal),dimension(ngllx) :: gllpx,gllwx ! gll points and weights
 real(kind=kreal),dimension(ngllx) :: lagrange_x,lagrange_dx
 
 ! compute everything in indexed order
-
-! gll points and weights (source: http://mathworld.wolfram.com/lobattoquadrature.html)
-!gllp(1)=-1.0_kreal   ; gllw(1)=1.0_kreal/3.0_kreal
-!gllp(2)= 0.0_kreal   ; gllw(2)=4.0_kreal/3.0_kreal
-!gllp(3)= 1.0_kreal   ; gllw(3)=gllw(1)
 
 ! get gll points
 ! for alpha=beta=0, jacobi polynomial is legendre polynomial
@@ -198,7 +194,7 @@ enddo
 
 return
 end subroutine gll_quadrature1d
-!===========================================
+!===============================================================================
 
 ! this subroutine computes the 1d lagrange interpolation functions and their
 ! derivatives at a given point xi.
@@ -206,7 +202,8 @@ subroutine lagrange1dGEN(nenod,xi,phi,dphi_dxi)
 implicit none
 integer,intent(in) :: nenod ! number of nodes in an 1d element
 integer :: i,j,k
-real(kind=kreal),intent(in) :: xi ! point where to calculate lagrange function and
+! point where to calculate lagrange function and
+real(kind=kreal),intent(in) :: xi
 !its derivative
 real(kind=kreal),dimension(nenod),intent(out) :: phi,dphi_dxi
 real(kind=kreal),dimension(nenod) :: xii,term,dterm,sum_term
@@ -253,7 +250,7 @@ enddo
 
 return
 end subroutine lagrange1dGEN
-!===========================================
+!===============================================================================
 
 ! this subroutine computes the 1d lagrange interpolation functions and their
 ! derivatives at a given point xi.
@@ -261,13 +258,13 @@ subroutine lagrange1dGLL(nenod,xii,xi,phi,dphi_dxi)
 implicit none
 integer,intent(in) :: nenod ! number of nodes in an 1d element
 real(kind=kreal),dimension(nenod),intent(in) :: xii
-real(kind=kreal),intent(in) :: xi ! point where to calculate lagrange function and
+! point where to calculate lagrange function and
+real(kind=kreal),intent(in) :: xi
 !its derivative
 real(kind=kreal),dimension(nenod),intent(out) :: phi,dphi_dxi
 
 integer :: i,j,k
 real(kind=kreal),dimension(nenod) :: term,dterm,sum_term
-real(kind=kreal) :: dx
 
 do i=1,nenod
   k=0
@@ -300,15 +297,12 @@ enddo
 
 return
 end subroutine lagrange1dGLL
-!===========================================
+!===============================================================================
 
-!===========================================
-!
 !  Library to compute the Gauss-Lobatto-Legendre points and weights
 !  Based on Gauss-Lobatto routines from M.I.T.
 !  Department of Mechanical Engineering
-!
-!===========================================
+!===============================================================================
 
 real(kind=kreal) function endw1(n,alpha,beta) !double precision
 
@@ -317,7 +311,8 @@ implicit none
 integer n
 real(kind=kreal) alpha,beta !double precision
 
-real(kind=kreal), parameter :: zero=0._kreal,one=1._kreal,two=2._kreal,three=3._kreal,four=4._kreal !double precision
+real(kind=kreal), parameter :: zero=0._kreal,one=1._kreal,two=2._kreal,        &
+three=3._kreal,four=4._kreal !double precision
 real(kind=kreal) apb,f1,fint1,fint2,f2,di,abn,abnn,a1,a2,a3,f3 !double precision
 !double precision, external :: gammaf
 integer i
@@ -357,7 +352,7 @@ enddo
 endw1  = f3
 
 end function endw1
-!=======================================================================
+!===============================================================================
 
 real(kind=kreal) function endw2(n,alpha,beta) !double precision
 
@@ -366,7 +361,8 @@ implicit none
 integer n
 real(kind=kreal) alpha,beta !double precision
 
-real(kind=kreal), parameter :: zero=0._kreal,one=1._kreal,two=2._kreal,three=3._kreal,four=4._kreal !double precision
+real(kind=kreal), parameter :: zero=0._kreal,one=1._kreal,two=2._kreal,        &
+three=3._kreal,four=4._kreal !double precision
 real(kind=kreal) apb,f1,fint1,fint2,f2,di,abn,abnn,a1,a2,a3,f3 !double precision
 !real(kind=kreal), external :: gammaf
 integer i
@@ -406,20 +402,15 @@ enddo
 endw2  = f3
 
 end function endw2
-
-!
-!=======================================================================
-!
+!===============================================================================
 
 real(kind=kreal) function gammaf (x) !double precision
-
 implicit none
-
-real(kind=kreal), parameter :: pi = 3.141592653589793_kreal !double precision
-
 real(kind=kreal) x !double precision
 
-real(kind=kreal), parameter :: half=0.5_kreal,one=1._kreal,two=2._kreal !double precision
+real(kind=kreal), parameter :: pi = 3.141592653589793_kreal !double precision
+!double precision
+real(kind=kreal), parameter :: half=0.5_kreal,one=1._kreal,two=2._kreal
 
 gammaf = one
 
@@ -436,25 +427,16 @@ if (x ==  5._kreal ) gammaf = 24._kreal
 if (x ==  6._kreal ) gammaf = 120._kreal
 
 end function gammaf
-
-!
-!=====================================================================
-!
+!===============================================================================
 
 subroutine jacg (xjac,np,alpha,beta)
-
-!=======================================================================
-!
 ! computes np Gauss points, which are the zeros of the
 ! Jacobi polynomial with parameters alpha and beta
 !
 !                  .alpha = beta =  0.0  ->  Legendre points
 !                  .alpha = beta = -0.5  ->  Chebyshev points
 !
-!=======================================================================
-
 implicit none
-
 integer np
 real(kind=kreal) alpha,beta !double precision
 real(kind=kreal) xjac(np) !double precision
@@ -464,7 +446,8 @@ real(kind=kreal) xlast,dth,x,x1,x2,recsum,delx,xmin,swap !double precision
 real(kind=kreal) p,pd,pm1,pdm1,pm2,pdm2 !double precision
 
 integer, parameter :: K_MAX_ITER = 10
-real(kind=kreal), parameter :: zero = 0._kreal, eps = 1.0e-12_kreal !double precision
+real(kind=kreal), parameter :: zero = 0._kreal, eps = 1.0e-12_kreal
+!double precision
 
 pm1 = zero
 pm2 = zero
@@ -516,25 +499,17 @@ do i=1,np
 enddo
 
 end subroutine jacg
-
-!
-!=====================================================================
-!
+!===============================================================================
 
 subroutine jacobf (poly,pder,polym1,pderm1,polym2,pderm2,n,alp,bet,x)
-
-!=======================================================================
-!
 ! Computes the Jacobi polynomial of degree n and its derivative at x
-!
-!=======================================================================
-
 implicit none
-
-real(kind=kreal) poly,pder,polym1,pderm1,polym2,pderm2,alp,bet,x !double precision
+real(kind=kreal) poly,pder,polym1,pderm1,polym2,pderm2,alp,bet,x
+!double precision
 integer n
 
-real(kind=kreal) apb,polyl,pderl,dk,a1,a2,b3,a3,a4,polyn,pdern,psave,pdsave !double precision
+real(kind=kreal) apb,polyl,pderl,dk,a1,a2,b3,a3,a4,polyn,pdern,psave,pdsave
+!double precision
 integer k
 
 apb  = alp+bet
@@ -574,19 +549,11 @@ polym2 = psave
 pderm2 = pdsave
 
 end subroutine jacobf
-
-!
-!------------------------------------------------------------------------
-!
+!===============================================================================
 
 real(kind=kreal) FUNCTION PNDLEG (Z,N) !double precision
-
-!------------------------------------------------------------------------
-!
 !     Compute the derivative of the Nth order Legendre polynomial at Z.
 !     Based on the recursion formula for the Legendre polynomials.
-!
-!------------------------------------------------------------------------
 implicit none
 
 real(kind=kreal) z !double precision
@@ -604,7 +571,8 @@ P3D  = 1._kreal
 do K = 1, N-1
   FK  = dble(K)
   P3  = ((2._kreal*FK+1._kreal)*Z*P2 - FK*P1)/(FK+1._kreal)
-  P3D = ((2._kreal*FK+1._kreal)*P2 + (2._kreal*FK+1._kreal)*Z*P2D - FK*P1D) / (FK+1._kreal)
+  P3D = ((2._kreal*FK+1._kreal)*P2 + (2._kreal*FK+1._kreal)*Z*P2D - FK*P1D) /  &
+        (FK+1._kreal)
   P1  = P2
   P2  = P3
   P1D = P2D
@@ -614,19 +582,11 @@ enddo
 PNDLEG = P3D
 
 end function pndleg
-
-!
-!------------------------------------------------------------------------
-!
+!===============================================================================
 
 real(kind=kreal) FUNCTION PNLEG (Z,N) !double precision
-
-!------------------------------------------------------------------------
-!
 !     Compute the value of the Nth order Legendre polynomial at Z.
 !     Based on the recursion formula for the Legendre polynomials.
-!
-!------------------------------------------------------------------------
 implicit none
 
 real(kind=kreal) z !double precision
@@ -649,13 +609,9 @@ enddo
 PNLEG = P3
 
 end function pnleg
-
-!
-!------------------------------------------------------------------------
-!
+!===============================================================================
 
 real(kind=kreal) function pnormj (n,alpha,beta) !double precision
-
 implicit none
 
 real(kind=kreal) alpha,beta !double precision
@@ -691,25 +647,17 @@ enddo
 pnormj = prod * two**const/(two*dn+const)
 
 end function pnormj
-
-!
-!------------------------------------------------------------------------
-!
+!===============================================================================
 
 subroutine zwgjd(z,w,np,alpha,beta)
-
-!=======================================================================
-!
 !     Z w g j d : Generate np Gauss-Jacobi points and weights
 !                 associated with Jacobi polynomial of degree n = np-1
 !
 !     Note : Coefficients alpha and beta must be greater than -1.
-!     ----
-!=======================================================================
-
 implicit none
 
-real(kind=kreal), parameter :: zero=0._kreal,one=1._kreal,two=2._kreal !double precision
+real(kind=kreal), parameter :: zero=0._kreal,one=1._kreal,two=2._kreal
+!double precision
 
 integer np
 real(kind=kreal) z(np),w(np) !double precision
@@ -764,15 +712,9 @@ do i=1,np
 enddo
 
 end subroutine zwgjd
-
-!
-!------------------------------------------------------------------------
-!
+!===============================================================================
 
 subroutine zwgljd(z,w,np,alpha,beta)
-
-!=======================================================================
-!
 !     Z w g l j d : Generate np Gauss-Lobatto-Jacobi points and the
 !     -----------   weights associated with Jacobi polynomials of degree
 !                   n = np-1.
@@ -780,12 +722,9 @@ subroutine zwgljd(z,w,np,alpha,beta)
 !     Note : alpha and beta coefficients must be greater than -1.
 !            Legendre polynomials are special case of Jacobi polynomials
 !            just by setting alpha and beta to 0.
-!
-!=======================================================================
-
 implicit none
-
-real(kind=kreal), parameter :: zero=0._kreal,one=1._kreal,two=2._kreal !double precision
+real(kind=kreal), parameter :: zero=0._kreal,one=1._kreal,two=2._kreal
+!double precision
 
 integer np
 real(kind=kreal) alpha,beta !double precision
@@ -842,6 +781,6 @@ call jacobf(p,pd,pm1,pdm1,pm2,pdm2,n,alpha,beta,z(np))
 w(np) = endw2(n,alpha,beta)/(two*pd)
 
 end subroutine zwgljd
+!===============================================================================
 end module gll_library
-
-
+!===============================================================================

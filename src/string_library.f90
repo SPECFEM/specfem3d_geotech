@@ -5,6 +5,67 @@ module string_library
 use set_precision
 contains
 
+! this function modified from specfem3d
+function count_word(str) result(nword)
+implicit none
+character(len=*),intent(in) :: str
+
+integer :: nword
+
+! local parameters
+integer :: i
+logical :: isdelim
+character(len=1), parameter :: space = ' '
+character(len=1), parameter :: comma = ','
+character(len=1), parameter :: tab = achar(9) ! tab delimiter
+
+nword = 0
+
+! checks length of the string
+if (len_trim(str) == 0)return
+
+! counts word
+nword = 1
+isdelim = .true.
+do i = 1, len_trim(str)
+  ! finds next delimiter (space or tab or comma)
+  if (str(i:i) == space .or. str(i:i) == tab)then
+    if (.not. isdelim)then
+      nword = nword + 1
+      isdelim = .true.
+    endif
+  else
+    if (isdelim)isdelim = .false.
+  endif
+enddo
+
+end function count_word
+!===========================================
+
+integer function str2int(str)
+implicit none
+character(len=*),intent(in) :: str
+integer :: ios
+read(str,*,iostat=ios)str2int
+if(ios.ne.0)then
+  write(*,*)'ERROR: "',trim(adjustl(str)),'" isn''t the valid integer!'
+  stop
+endif
+end function str2int
+!===========================================
+
+real(kind=kreal) function str2real(str)
+implicit none
+character(len=*),intent(in) :: str
+integer :: ios
+read(str,*,iostat=ios)str2real
+if(ios.ne.0)then
+  write(*,*)'ERROR: "',trim(adjustl(str)),'" isn''t the valid real!'
+  stop
+endif
+end function str2real
+!===========================================
+
 ! parse file name and return path, file head, and extension
 subroutine parse_file(fname,path,head,ext)
 character(len=*),intent(in) :: fname
@@ -193,11 +254,11 @@ end subroutine split_string
 
 ! get string value from string list which contain a character '=' that separates
 ! variable name and variable vlue
-character(len=250) function get_string(vname,slist,nvar)
+character(len=80) function get_string(vname,slist,nvar)
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*) :: slist
 integer,intent(in) :: nvar
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 do i=1,nvar
@@ -221,7 +282,7 @@ character(len=*),intent(in) :: vname
 character(len=*),intent(out) :: strval
 character(len=*),dimension(*) :: slist
 integer,intent(in) :: nvar
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 strval=''
@@ -245,11 +306,11 @@ end subroutine seek_string
 function get_string_vect(vname,n,slist,nvar)
 implicit none
 integer,intent(in) :: n
-character(len=250),dimension(n) :: get_string_vect
+character(len=80),dimension(n) :: get_string_vect
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 do i=1,nvar
@@ -272,7 +333,7 @@ integer function get_integer(vname,slist,nvar)
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 do i=1,nvar
@@ -296,7 +357,7 @@ character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
 integer,intent(out) :: ival,istat
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,narg
 ival=0
 istat=-1
@@ -325,7 +386,7 @@ integer,dimension(n) :: get_integer_vect
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,ios,narg
 
 do i=1,nvar
@@ -353,7 +414,7 @@ character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
 integer,intent(out) :: istat
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,ios,narg
 ivect=0
 istat=-1
@@ -379,7 +440,7 @@ real(kind=kreal) function get_real(vname,slist,nvar)
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 do i=1,nvar
@@ -404,7 +465,7 @@ character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
 integer,intent(out) :: istat
 real(kind=kreal),intent(out) :: rval
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,narg
 rval=0_kreal
 istat=-1
@@ -428,7 +489,7 @@ double precision function get_double(vname,slist,nvar)
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,narg
 
 do i=1,nvar
@@ -454,7 +515,7 @@ real(kind=kreal),dimension(n) :: get_real_vect
 character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,ios,narg
 
 do i=1,nvar
@@ -483,7 +544,7 @@ character(len=*),intent(in) :: vname
 character(len=*),dimension(*),intent(in) :: slist
 integer,intent(in) :: nvar
 integer,intent(out) :: istat
-character(len=250),dimension(2) :: args
+character(len=80),dimension(2) :: args
 integer :: i,ios,narg
 rvect=0.0_kreal
 istat=-1
@@ -506,7 +567,7 @@ end subroutine seek_real_vect
 !=====================================================
 
 ! get format string for intger
-character(len=250) function form4int(n)
+character(len=80) function form4int(n)
 integer,intent(in) :: n
 
 ! format for integer n

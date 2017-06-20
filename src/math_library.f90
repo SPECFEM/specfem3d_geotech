@@ -1,27 +1,13 @@
-! this module contains math constants
-! math parameters
-! REVISION
-!   HNG, Jul 12,2011; HNG, Apr 09,2010
-module math_constants
-use set_precision
-implicit none
-real(kind=kreal),parameter :: zero=0.0_kreal,half=0.5_kreal,one=1.0_kreal,     &
-two=2.0_kreal
-real(kind=kreal),parameter :: pi=3.141592653589793_kreal
-real(kind=kreal),parameter :: deg2rad=pi/180.0_kreal,rad2deg=180.0_kreal/pi
-
-! tolerance value for zero
-real(kind=kreal),parameter :: inftol=1.0e32_kreal,zerotol = 1.0e-12_kreal
-end module math_constants
-!=======================================================
-
-! this module coatins math routines
+! this module contains math routines
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
 module math_library
 use set_precision
+use math_constants
 
 contains
+
+!-------------------------------------------------------------------------------
 function get_normal(x1,x2,x3) result(nx)
 real(kind=kreal),dimension(3),intent(in) :: x1,x2,x3
 real(kind=kreal),dimension(3) :: nx
@@ -45,19 +31,17 @@ endif
 nx=nx/norm
 return
 end function get_normal
-!=======================================================
+!===============================================================================
 
 function norm(x) result(l2n)
-!
 ! this function calculates the l2 norm of vector x
-!
 implicit none
 real(kind=kreal),intent(in) :: x(:)
 real(kind=kreal)::l2n
 l2n=sqrt(sum(x**2))
 return
 end function norm
-!=======================================================
+!===============================================================================
 
 recursive function factorial(n) result(nfact)
 implicit none
@@ -73,7 +57,7 @@ else
   stop
 end if
 end function factorial
-!=======================================================
+!===============================================================================
 
 ! this function returns the determinant of a 1x1, 2x2 or 3x3
 ! matrix.
@@ -99,7 +83,7 @@ case default
 end select
 return
 end function determinant
-!=======================================================
+!===============================================================================
 
 ! this subroutine inverts a small square matrix onto itself.
 ! this routine was copied and modified from
@@ -152,18 +136,18 @@ else
 end if
 return
 end subroutine invert
-!=======================================================
+!===============================================================================
 
 ! this subroutine forms the stress invariants 3d.
 ! this routine was copied and modified from
 ! Smith and Griffiths (2004): Programming the finite element method
 subroutine stress_invariant(stress,sigm,dsbar,theta)
 implicit none
-real(kind=kreal),intent(in)::stress(:)
-real(kind=kreal),intent(out),optional::sigm,dsbar,theta
-real(kind=kreal)::sx,sy,sz,txy,dx,dy,dz,xj3,sine,s1,s2,s3,s4,s5,s6,ds1,ds2,  &
+real(kind=kreal),intent(in) :: stress(:)
+real(kind=kreal),intent(out),optional :: sigm,dsbar,theta
+real(kind=kreal) :: sine,s1,s2,s3,s4,s5,s6,ds1,ds2,  &
 ds3,d2,d3,sq3,zero=0.0_kreal,small=1.e-12_kreal,one=1.0_kreal,two=2.0_kreal, &
-three=3.0_kreal,six=6.0_kreal,thpt5=13.5_kreal
+three=3.0_kreal,six=6.0_kreal
 integer :: nst
 
 ! check size
@@ -200,10 +184,10 @@ else
 end if
 return
 end subroutine stress_invariant
-!=======================================================
+!===============================================================================
 
 ! quick sort of integer list
-function quick_sort(x,n) result(xnew)
+function iquick_sort(x,n) result(xnew)
 integer,intent(in) :: n ! size of the vector data x
 integer, dimension(n) :: x ! data vector to sort
 integer :: temp
@@ -220,8 +204,8 @@ do i = 2, n
   x(j+1) = temp
 end do
 xnew=x
-end function quick_sort
-!=======================================================
+end function iquick_sort
+!===============================================================================
 
 ! quick sort of real list
 function rquick_sort(x,n) result(xnew)
@@ -242,7 +226,7 @@ do i = 2, n
 end do
 xnew=x
 end function rquick_sort
-!=======================================================
+!===============================================================================
 
 ! insertion sort of integer list
 subroutine insertion_sort(x,n)
@@ -261,6 +245,7 @@ do i = 2, n
   x(j+1) = temp
 end do
 end subroutine insertion_sort
-!=======================================================
+!===============================================================================
 
 end module math_library
+!===============================================================================

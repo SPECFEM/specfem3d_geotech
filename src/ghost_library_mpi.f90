@@ -4,17 +4,19 @@
 !   - better to avoid using allocatable component of derived type variable which
 !     is fortran 95 standard? How much influence will be on the performance with
 !     repeated allocate and deallocate
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, APR 15,2011; HNG, Apr 09,2010
 module ghost_library_mpi
 use set_precision_mpi
 use mpi_library
-
+use global,only:myrank,nproc
 private :: sort_array_coord,rank_buffers,swap_all_buffers
-
+integer :: ngpart,maxngnode
 ! ghost partitions
 type ghost_partition
-  integer :: id,mindex,nnode
+  integer :: rank,mindex,nnode
   integer,dimension(:),allocatable :: node,gdof
   logical,dimension(:),allocatable :: isnode
   ! whether the node on the interface is intact (.true.) or void (.false.)
@@ -24,16 +26,13 @@ type(ghost_partition),dimension(:),allocatable :: gpart
 contains
 
 !-----------------------------------------------------------
-subroutine prepare_ghost(myid,nproc,gdof,ngpart,maxngnode)
+subroutine prepare_ghost()
 use global,only:ndim,nnode,nndof,ngllx,nglly,ngllz,g_num,g_coord,gfile,        &
 part_path,stdout
-use math_library, only : quick_sort
+use math_library, only : iquick_sort
 use math_library_mpi, only : maxvec
 
 implicit none
-integer,intent(in) :: myid,nproc
-integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
-integer,intent(out) :: ngpart,maxngnode
 integer :: istat
 
 integer,dimension(8) :: ign,jgn,kgn ! ith, jth, and kth GLL indices of node
@@ -43,26 +42,25 @@ integer,dimension(6,4) :: node_face ! local node numbers in each face
 integer,dimension(12,2) :: node_edge ! local node numbers in each edge
 
 character(len=20) :: format_str
-character(len=80) :: fname
+character(len=20) :: proc_str
+character(len=80) :: fname, ofname
 
-integer :: mypart ! my partition
-integer :: mpartid,maxngpart ! partition ID
-integer :: i_elmt,i_gpart,gpartid,melmt,ngelmt,igllp,inode,maxngelmt
+integer :: mrank,maxngpart ! partition ID
+integer :: i_elmt,i_gpart,grank,melmt,ngelmt,igllp,inode,maxngelmt
 integer :: etype,eid
 integer :: ncount,new_ncount,ngllxy,maxngll_face
 logical,dimension(nnode) :: switch_node
 integer,dimension(:),allocatable :: itmp_array ! temporary integer array
 double precision,dimension(:),allocatable :: xp,yp,zp
 integer,dimension(3) :: ngll_vec ! (/ngllx,nglly,ngllz/) in ascending order
-integer :: i,j,inum,imax
+integer :: i
 character(len=250) :: errtag
-
-mypart=myid-1 ! partition ID starts from 0
 
 ! find maximum ngll points in a face
 ! this is needed only for memory allocation
-ngll_vec=quick_sort((/ngllx,nglly,ngllz/),3)
-maxngll_face=ngll_vec(3)*ngll_vec(2)
+ngll_vec=(/ ngllx,nglly,ngllz /)
+ngll_vec=iquick_sort(ngll_vec,NDIM)
+maxngll_face=ngll_vec(NDIM)*ngll_vec(NDIM-1)
 
 ! local node numbering in each face CUBIT/EXODUS convention
 node_face(1,:)=(/1,2,6,5/) ! front
@@ -99,21 +97,19 @@ ngllxy=ngllx*nglly
 ! open appropriate ghost file
 write(format_str,*)ceiling(log10(real(nproc)+1))
 format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-write(fname, fmt=format_str)trim(part_path)//trim(gfile)//'_proc',mypart
-!print*,fname
+write(fname, fmt=format_str)trim(part_path)//trim(gfile)//'_proc',myrank
 open(unit=11,file=trim(fname),status='old',action='read',iostat = istat)
 if( istat /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
-  call error_stop(errtag,stdout,myid)
+  call error_stop(errtag,stdout,myrank)
 endif
 
 read(11,*) ! skip 1 line
-read(11,*)mpartid ! master partition ID
-!print*,'mpart',mpartid
+read(11,*)mrank ! master partition ID
 
-if(mpartid/=mypart)then
-  write(errtag,*)'ERROR: wrong gpart file partition ',mpartid,' !'
-  call error_stop(errtag,stdout,myid)
+if(mrank/=myrank)then
+  write(errtag,*)'ERROR: wrong gpart file partition ',mrank,' !'
+  call error_stop(errtag,stdout,myrank)
 endif
 
 read(11,*) ! skip 1 line
@@ -122,26 +118,29 @@ read(11,*)ngpart,maxngpart,maxngelmt; !print*,'ngpart',ngpart
 ! allocate gpart
 allocate(gpart(ngpart))
 gpart(1:ngpart)%nnode=0
-gpart(1:ngpart)%id=-1
+gpart(1:ngpart)%rank=-1
 gpart(1:ngpart)%mindex=-1
-!allocate(cghost(ngpart)[*]) ! it will not work here, why?!:(
+write(proc_str,'(i10)')myrank !matches numbering scheme used by gindex
+ofname=trim(part_path)//'partitioninfo'//trim(adjustl(proc_str))
+open(22,file=ofname,action='write',status='replace')
+write(22,*)nnode
+write(22,*)ngpart
 
 do i_gpart=1,ngpart ! ghost partitions loop
   read(11,*) ! skip 1 line
-  read(11,*)gpartid,gpart(i_gpart)%mindex !gpart_mindex(i_gpart)
-  gpartid=gpartid+1 ! index coarray starts from 1
+  read(11,*)grank,gpart(i_gpart)%mindex !gpart_mindex(i_gpart)
+  write(22,*)grank
 
   read(11,*) ! skip 1 line
   read(11,*)ngelmt; !print*,'ngelmt',ngelmt
-  allocate(itmp_array(ngelmt*maxngll_face)) ! I don't know why this doesn't work!
+  ! I don't know why this doesn't work!
+  allocate(itmp_array(ngelmt*maxngll_face))
   itmp_array=-1
-  !print*,ngelmt,ngelmt*maxngll_face,'istat=',istat
   switch_node=.false.
   ncount=0
   !call error_stop(errtag,stdout)
-  !if(this_image()==6)print*,'what0!',i_gpart,' of ',ngpart
   do i_elmt=1,ngelmt ! ghost elements loop
-    read(11,*)melmt,etype,eid; !print*,'melmt',melmt,etype,eid
+    read(11,*)melmt,etype,eid;
 
     ! initialize
     ig0=-1; ig1=-1
@@ -161,13 +160,11 @@ do i_gpart=1,ngpart ! ghost partitions loop
       jg0=minval(jgn(node_face(eid,:))); jg1=maxval(jgn(node_face(eid,:)))
       kg0=minval(kgn(node_face(eid,:))); kg1=maxval(kgn(node_face(eid,:)))
     else
-      write(errtag,*)'ERROR: wrong etype:',etype,' for ghost partition ',mpartid,'!'
-      call error_stop(errtag,stdout,myid)
+      write(errtag,*)'ERROR: wrong etype:',etype,' for ghost partition ',      &
+      mrank,'!'
+      call error_stop(errtag,stdout,myrank)
     endif
 
-    !print*,ig0,ig1,jg0,jg1,kg0,kg1
-    !sync all
-    !call error_stop(errtag,stdout)
     do k_g=kg0,kg1
       do j_g=jg0,jg1
         do i_g=ig0,ig1
@@ -184,102 +181,93 @@ do i_gpart=1,ngpart ! ghost partitions loop
   enddo ! do i_elmt
 
   gpart(i_gpart)%nnode=ncount
-  gpart(i_gpart)%id=gpartid
+  gpart(i_gpart)%rank=grank
   allocate(gpart(i_gpart)%node(ncount),gpart(i_gpart)%isnode(ncount))
-  !gpart(i_gpart)%node=-1
   gpart(i_gpart)%isnode=.true. ! all nodes are active
   allocate(gpart(i_gpart)%gdof(ncount*nndof))
-  !gpart(i_gpart)%gdof=-1
-  !print*,'i_gpart',i_gpart
-  !print*,gpart_node(i_gpart,:)
-  !if (mypart==2 .and. i_gpart==1)then
-  !  print*,gpart_nnode(1)
-  !  print*,gpart_node(1,:)
-  !  print*,itmp_array
-  !  call error_stop(errtag,stdout)
-  !endif
 
   gpart(i_gpart)%node=itmp_array(1:ncount)
-  !if (mypart==2 .and. i_gpart==1)then
-  !  print*,gpart_nnode(1)
-  !  print*,gpart_node(1,:)
-  !  print*,itmp_array
-  !  call error_stop(errtag,stdout)
-  !endif
-  !print*,'myid',myid,ncount,size(gpart(i_gpart)%order)
 
   !order nodal array to match with ghost partitions
   !extract coordinates
   allocate(xp(ncount),yp(ncount),zp(ncount))
 
-  xp=g_coord(1,itmp_array(1:ncount))
-  yp=g_coord(2,itmp_array(1:ncount))
-  zp=g_coord(3,itmp_array(1:ncount))
+  !xp=g_coord(1,itmp_array(1:ncount))
+  !yp=g_coord(2,itmp_array(1:ncount))
+  !zp=g_coord(3,itmp_array(1:ncount))
+  do i=1,ncount
+    xp(i)=g_coord(1,itmp_array(i))
+    yp(i)=g_coord(2,itmp_array(i))
+    zp(i)=g_coord(3,itmp_array(i))
+  enddo
   deallocate(itmp_array)
 
   !sort nodes
   call sort_array_coord(ndim,ncount,xp,yp,zp,gpart(i_gpart)%node,new_ncount)
-  !call sort_array_coord(ndim,ncount,xp,yp,zp,gpart_node(i_gpart,1:ncount),    &
-  !new_ncount)
   deallocate(xp,yp,zp)
   if(ncount/=new_ncount)then
     write(errtag,*)'ERROR: number of ghost nodes mismatched after sorting!'
-    call error_stop(errtag,stdout,myid)
+    call error_stop(errtag,stdout,myrank)
   endif
 
   ! find ghost gdof
-  gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
-  !print*,gpart(i_gpart)%gdof
-  !print*,'Total 0s:',myid,ncount,count(gpart(i_gpart)%gdof==0)
+  !gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
+  write(22,*)gpart(i_gpart)%nnode
+  write(22,*)gpart(i_gpart)%node
 
 enddo ! do i_gpart
+close(22)
 close(11)
-!stop
 maxngnode=maxvec(gpart(1:ngpart)%nnode)
-
+call sync_process
 return
 end subroutine prepare_ghost
-!=======================================================
+!===============================================================================
+
+! this subroutine prepare GDOFs. note that the variable gpart(i_gpart)%gdof is
+! allocated in the previous routine
+subroutine prepare_ghost_gdof()
+use global,only:gdof,nndof
+implicit none
+integer :: i_gpart
+
+do i_gpart=1,ngpart ! ghost partitions loop
+  ! find ghost gdof
+  gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node), &
+                             (/gpart(i_gpart)%nnode*nndof/))
+enddo ! do i_gpart
+return
+end subroutine prepare_ghost_gdof
+!===============================================================================
 
 ! modify ghost gdof based on the modified gdof
-subroutine modify_ghost(myid,nproc,gdof,ngpart,isnode)
-use global,only:nnode,nndof
+subroutine modify_ghost(isnode)
+use global,only:nnode,nndof,gdof
 
 implicit none
-integer,intent(in) :: myid,nproc
-integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
-integer,intent(in) :: ngpart
 logical,intent(in) :: isnode(nnode)
 
-integer :: mypart ! my partition
-integer :: mpartid,maxngpart ! partition ID
 integer :: i,i_gpart,ncount
-
-mypart=myid-1 ! partition ID starts from 0
 
 ! modify ghost gdof based on the modified gdof
 do i_gpart=1,ngpart
   ncount=gpart(i_gpart)%nnode
   gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
-  !print*,gpart(i_gpart)%gdof
-  !print*,'Total 0s:',myid,ncount,count(gpart(i_gpart)%gdof==0)
   do i=1,ncount
     gpart(i_gpart)%isnode(i)=isnode(gpart(i_gpart)%node(i))
   enddo
-  !print*,mypart,i_gpart,gpart(i_gpart)%isnode
 enddo ! do i_gpart
 return
 end subroutine modify_ghost
-!=======================================================
+!===============================================================================
 
 ! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
-subroutine assemble_ghosts(myid,ngpart,maxngnode,nndof,neq,array,array_g)
-!use math_library, only : maxscal_par
+subroutine assemble_ghosts(neq,array,array_g)
+use global,only:nndof
 use mpi
 implicit none
-integer,intent(in) :: myid,ngpart,maxngnode
-integer,intent(in) :: nndof,neq
+integer,intent(in) :: neq
 real(kind=kreal),dimension(0:neq),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
 real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array
@@ -289,27 +277,18 @@ integer,dimension(ngpart) :: send_req,recv_req
 real(kind=kreal),parameter :: zero=0.0_kreal
 
 integer :: ierr,i_gpart,ncount
-!call sync_process()
-!if(array(0)>zero)then
-!print*,'From:',myid,array(0)
-!endif
+
 array_g=array
 send_array=zero; recv_array=zero
-!do i_gpart=1,ngpart
-!  ncount=gpart(i_gpart)%nnode*nndof
-  ! array to send
-!  send_array(1:ncount,i_gpart)=array(gpart(i_gpart)%gdof)
-!enddo
-!call sync_process()
 do i_gpart=1,ngpart
   ncount=gpart(i_gpart)%nnode*nndof
   ! array to send
   send_array(1:ncount,i_gpart)=array(gpart(i_gpart)%gdof)
   ! send
-  call MPI_ISSEND(send_array(1,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%id-1,  &
+  call MPI_ISSEND(send_array(:,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%rank,  &
   tag,MPI_COMM_WORLD,send_req(i_gpart),ierr)
   ! receive
-  call MPI_IRECV(recv_array(1,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%id-1,   &
+  call MPI_IRECV(recv_array(:,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%rank,   &
   tag,MPI_COMM_WORLD,recv_req(i_gpart),ierr)
 enddo
 
@@ -323,8 +302,6 @@ do i_gpart=1,ngpart
   ncount=gpart(i_gpart)%nnode*nndof
   array_g(gpart(i_gpart)%gdof)=array_g(gpart(i_gpart)%gdof)+ &
   recv_array(1:ncount,i_gpart)
-  !print*,recv_array(1:ncount,i_gpart)
-  !print*
 enddo
 
 ! wait for send communications completion (send)
@@ -335,33 +312,25 @@ call sync_process()
 array_g(0)=zero
 return
 end subroutine assemble_ghosts
-!=======================================================
+!===============================================================================
 
 ! this subroutine assembles the contributions of all ghost partitions
 ! at gdof locations
-subroutine assemble_ghosts_nodal(myid,gdof,ngpart,maxngnode,nndof,neq,         &
-ngpart_node,array,array_g)
+subroutine assemble_ghosts_nodal(nndof,array,     &
+array_g)
 use mpi
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid,ngpart,maxngnode
-integer,intent(in) :: nndof,neq
-integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
-! number of active ghost partitions for a node
-integer,dimension(nnode),intent(in) :: ngpart_node
+integer,intent(in) :: nndof
 real(kind=kreal),dimension(nndof,nnode),intent(in) :: array
 real(kind=kreal),dimension(nndof,nnode),intent(out) :: array_g
 
-real(kind=kreal),dimension(nndof,nnode) :: tarray
-!logical,dimension(maxngnode,ngpart) :: lsend_array,lrecv_array
 real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array
-real(kind=kreal),dimension(nndof,maxngnode) :: garray
 integer,parameter :: tag=0
 integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
-!integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node
 real(kind=kreal),parameter :: zero=0.0_kreal
-integer :: i,j,ierr,i_gpart,igdof,ignode,ncount,ngnode
+integer :: ierr,i_gpart,ncount,ngnode
 
 array_g=array
 send_array=zero; recv_array=zero
@@ -372,10 +341,10 @@ do i_gpart=1,ngpart
   send_array(1:ncount,i_gpart)=reshape(array(:,gpart(i_gpart)%node),(/ncount/))
 
   ! send
-  call MPI_ISSEND(send_array(1,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%id-1,  &
+  call MPI_ISSEND(send_array(:,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%rank,  &
   tag,MPI_COMM_WORLD,send_req(i_gpart),ierr)
   ! receive
-  call MPI_IRECV(recv_array(1,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%id-1,   &
+  call MPI_IRECV(recv_array(:,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%rank,   &
   tag,MPI_COMM_WORLD,recv_req(i_gpart),ierr)
 enddo
 
@@ -390,7 +359,6 @@ do i_gpart=1,ngpart
   ncount=ngnode*nndof
   array_g(:,gpart(i_gpart)%node)=array_g(:,gpart(i_gpart)%node)+ &
   reshape(recv_array(1:ncount,i_gpart),(/nndof,ngnode/))
-  !print*,recv_array(1:ncount,i_gpart)
 enddo
 
 ! wait for send communications completion (send)
@@ -400,17 +368,82 @@ enddo
 call sync_process()
 return
 end subroutine assemble_ghosts_nodal
-!=======================================================
+!===============================================================================
+
+! this subroutine assembles the contributions of all ghost partitions
+! at gdof locations
+subroutine undo_unmatching_displacementBC(gdof,nndof,    &
+bcnodalu)
+use mpi
+use global,only:nnode
+implicit none
+integer,intent(in) :: nndof
+integer,dimension(nndof,nnode),intent(inout) :: gdof ! global degree of freedom
+real(kind=kreal),dimension(nndof,nnode),intent(inout) :: bcnodalu
+
+real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array
+real(kind=kreal),dimension(nndof,maxngnode) :: garray
+integer,parameter :: tag=0
+integer, dimension(MPI_STATUS_SIZE) :: mpistatus
+integer,dimension(ngpart) :: send_req,recv_req
+real(kind=kreal),parameter :: zero=0.0_kreal
+integer :: ierr,i_dof,i_node,i_gpart,ignode,ncount,ngnode
+
+send_array=zero; recv_array=zero
+do i_gpart=1,ngpart
+  ngnode=gpart(i_gpart)%nnode
+  ncount=ngnode*nndof
+  ! store array-to-send
+  send_array(1:ncount,i_gpart)=reshape(bcnodalu(:,gpart(i_gpart)%node), &
+                                      (/ncount/))
+
+  ! send
+  call MPI_ISSEND(send_array(:,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%rank,  &
+  tag,MPI_COMM_WORLD,send_req(i_gpart),ierr)
+  ! receive
+  call MPI_IRECV(recv_array(:,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%rank,   &
+  tag,MPI_COMM_WORLD,recv_req(i_gpart),ierr)
+enddo
+
+! wait for receive-communications completion (recv)
+do i_gpart=1,ngpart
+  call MPI_WAIT(recv_req(i_gpart),mpistatus,ierr)
+enddo
+
+! adding contributions of all ghost neighbours
+do i_gpart=1,ngpart
+  ngnode=gpart(i_gpart)%nnode
+  ncount=ngnode*nndof
+  garray(:,1:ngnode)=reshape(recv_array(1:ncount,i_gpart),(/nndof,ngnode/))
+  do i_node=1,ngnode
+    ignode=gpart(i_gpart)%node(i_node)
+    do i_dof=1,nndof
+      if(bcnodalu(i_dof,ignode).ne.garray(i_dof,i_node))then
+        ! undo
+        bcnodalu(i_dof,ignode)=zero
+        gdof(i_dof,gpart(i_gpart)%node(i_node))=1
+      endif
+    enddo
+  enddo
+enddo
+
+! wait for send communications completion (send)
+do i_gpart=1,ngpart
+  call MPI_WAIT(send_req(i_gpart),mpistatus,ierr)
+enddo
+call sync_process()
+return
+end subroutine undo_unmatching_displacementBC
+!===============================================================================
 
 ! this subroutine counts the active ghost partitions for each node on the
 ! interfaces.
 ! logical flag representing whether the nodes in the interfaces are intact or
 ! void has to be communicated across the processors
-subroutine count_active_nghosts(myid,ngpart,maxngnode,nndof,ngpart_node)
+subroutine count_active_nghosts(ngpart_node)
 use mpi
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid,ngpart,maxngnode,nndof
 ! number of active ghost partitions for a node
 integer,dimension(nnode),intent(out) :: ngpart_node
 ! only the interfacial nodes can be saved for the storage (TODO)
@@ -419,7 +452,7 @@ logical,dimension(maxngnode,ngpart) :: lsend_array,lrecv_array
 integer,parameter :: tag=0
 integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
-integer :: i,j,ierr,i_gpart,ignode,ngnode
+integer :: i,ierr,i_gpart,ignode,ngnode
 
 ngpart_node=0
 lsend_array=.true.; lrecv_array=.true.
@@ -430,10 +463,10 @@ do i_gpart=1,ngpart
   lsend_array(1:ngnode,i_gpart)=gpart(i_gpart)%isnode(1:ngnode)
 
   ! send
-  call MPI_ISSEND(lsend_array(1,i_gpart),ngnode,MPI_LOGICAL,gpart(i_gpart)%id-1,&
-  tag,MPI_COMM_WORLD,send_req(i_gpart),ierr)
+  call MPI_ISSEND(lsend_array(:,i_gpart),ngnode,MPI_LOGICAL,                   &
+  gpart(i_gpart)%rank,tag,MPI_COMM_WORLD,send_req(i_gpart),ierr)
   ! receive
-  call MPI_IRECV(lrecv_array(1,i_gpart),ngnode,MPI_LOGICAL,gpart(i_gpart)%id-1,&
+  call MPI_IRECV(lrecv_array(:,i_gpart),ngnode,MPI_LOGICAL,gpart(i_gpart)%rank,&
   tag,MPI_COMM_WORLD,recv_req(i_gpart),ierr)
 enddo
 
@@ -463,12 +496,11 @@ end subroutine count_active_nghosts
 ! this subroutine distributes the excavation loads discarded by a processors due
 ! to the special geoemtry partition. it will not distribute if the load is used
 ! within the partition
-subroutine distribute2ghosts(myid,gdof,ngpart,maxngnode,nndof,neq,ngpart_node, &
+subroutine distribute2ghosts(gdof,nndof,neq,ngpart_node, &
 array,array_g)
 use mpi
 use global,only:nnode
 implicit none
-integer,intent(in) :: myid,ngpart,maxngnode
 integer,intent(in) :: nndof,neq
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 ! number of active ghost partitions for a node
@@ -477,13 +509,11 @@ real(kind=kreal),dimension(nndof,nnode),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
 
 real(kind=kreal),dimension(nndof,nnode) :: tarray
-!logical,dimension(maxngnode,ngpart) :: lsend_array,lrecv_array
 real(kind=kreal),dimension(nndof*maxngnode,ngpart) :: send_array,recv_array
 real(kind=kreal),dimension(nndof,maxngnode) :: garray
 integer,parameter :: tag=0
 integer, dimension(MPI_STATUS_SIZE) :: mpistatus
 integer,dimension(ngpart) :: send_req,recv_req
-!integer,dimension(nnode) :: ngpart_node ! number of ghost partition for a node
 real(kind=kreal),parameter :: zero=0.0_kreal
 integer :: i,j,ierr,i_gpart,igdof,ignode,ncount,ngnode
 
@@ -518,14 +548,13 @@ do i_gpart=1,ngpart
       endif
     enddo
   enddo
-  !print*,'ID:',myid,minval(garray),maxval(garray)
   send_array(1:ncount,i_gpart)=reshape(garray(:,1:ngnode),(/ncount/))
 
   ! send
-  call MPI_ISSEND(send_array(1,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%id-1,  &
+  call MPI_ISSEND(send_array(:,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%rank,  &
   tag,MPI_COMM_WORLD,send_req(i_gpart),ierr)
   ! receive
-  call MPI_IRECV(recv_array(1,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%id-1,   &
+  call MPI_IRECV(recv_array(:,i_gpart),ncount,MPI_KREAL,gpart(i_gpart)%rank,   &
   tag,MPI_COMM_WORLD,recv_req(i_gpart),ierr)
 enddo
 
@@ -540,7 +569,6 @@ do i_gpart=1,ngpart
   ncount=ngnode*nndof
   tarray(:,gpart(i_gpart)%node)=tarray(:,gpart(i_gpart)%node)+ &
   reshape(recv_array(1:ncount,i_gpart),(/nndof,ngnode/))
-  !print*,recv_array(1:ncount,i_gpart)
 enddo
 
 ! wait for send communications completion (send)
@@ -558,94 +586,86 @@ do j=1,nnode
 enddo
 array_g(0)=zero
 return
-!if(myid==1)print*,minval(array_g),maxval(array_g),minval(array),maxval(array)
-!call error_stop(errtag,stdout)
 end subroutine distribute2ghosts
-!===========================================
+!===============================================================================
 
 ! deallocate ghost variables
-subroutine free_ghost(ngpart)
+subroutine free_ghost()
 implicit none
-integer,intent(in) :: ngpart
 integer :: i
 do i=1,ngpart
   deallocate(gpart(i)%node,gpart(i)%gdof)
 enddo
-deallocate(gpart)
+
+if(allocated(gpart))deallocate(gpart)
 return
 end subroutine free_ghost
-!===========================================
+!===============================================================================
 
 ! routines below are imported and modified from SPECFEM3D
 
 ! subroutines to sort MPI buffers to assemble between chunks
 subroutine sort_array_coord(ndim,npoint,x,y,z,ibool,nglob)
-
 ! this routine MUST be in double precision to avoid sensitivity
 ! to roundoff errors in the coordinates of the points
 !
 ! returns: sorted indexing array (ibool),  reordering array (iglob) &
 ! number of global points (nglob)
+use math_constants, only : zerotol
+implicit none
+integer,intent(in) :: ndim,npoint
+double precision,dimension(npoint),intent(inout) :: x,y,z
+integer,dimension(npoint),intent(inout) :: ibool
+integer,intent(out) :: nglob
 
- use math_constants, only : zerotol
- implicit none
+integer,dimension(npoint) :: iglob
+integer,dimension(npoint) :: iloc,ninseg
+logical,dimension(npoint) :: ifseg
 
- integer,intent(in) :: ndim,npoint
- double precision,dimension(npoint),intent(in) :: x,y,z
- integer,dimension(npoint),intent(inout) :: ibool
- integer,intent(out) :: nglob
-
- integer,dimension(npoint) :: iglob
- integer,dimension(npoint) :: iloc,ind,ninseg
- logical,dimension(npoint) :: ifseg
-
- integer,dimension(npoint) :: iwork(npoint)
- double precision,dimension(npoint) :: work(npoint)
-
- integer :: i,j
- integer :: nseg,ioff,iseg,ig
- double precision :: xtol
+integer :: i,j
+integer :: nseg,ioff,iseg,ig
+double precision :: xtol
 
 ! establish initial pointers
- do i=1,npoint
-   iloc(i)=i
- enddo
+do i=1,npoint
+  iloc(i)=i
+enddo
 
-! define a tolerance, normalized radius is 1., so let's use a small value
- xtol = zerotol !SMALLVAL_TOL
+! define a tolerance
+! xtol must be scaled otherwise ordering may not be accurate for large
+! coordinates!
+xtol = zerotol!*absmaxcoord !SMALLVAL_TOL
 
- ifseg(:)=.false.
+ifseg(:)=.false.
 
- nseg=1
- ifseg(1)=.true.
- ninseg(1)=npoint
+nseg=1
+ifseg(1)=.true.
+ninseg(1)=npoint
 
- do j=1,NDIM
-
-! sort within each segment
+do j=1,NDIM
+  ! sort within each segment
   ioff=1
   do iseg=1,nseg
     if(j == 1) then
-
-      call rank_buffers(x(ioff),ind,ninseg(iseg))
+      call heap_sort_multi(ninseg(iseg),x(ioff),y(ioff),z(ioff),ibool(ioff),   &
+      iloc(ioff))
 
     else if(j == 2) then
 
-      call rank_buffers(y(ioff),ind,ninseg(iseg))
+      call heap_sort_multi(ninseg(iseg),y(ioff),x(ioff),z(ioff),ibool(ioff),   &
+      iloc(ioff))
 
     else
 
-      call rank_buffers(z(ioff),ind,ninseg(iseg))
+      call heap_sort_multi(ninseg(iseg),z(ioff),x(ioff),y(ioff),ibool(ioff),   &
+      iloc(ioff))
 
     endif
-
-    call swap_all_buffers(ibool(ioff),iloc(ioff), &
-            x(ioff),y(ioff),z(ioff),iwork,work,ind,ninseg(iseg))
 
     ioff=ioff+ninseg(iseg)
   enddo
 
-! check for jumps in current coordinate
+  ! check for jumps in current coordinate
   if(j == 1) then
     do i=2,npoint
       if(dabs(x(i)-x(i-1)) > xtol) ifseg(i)=.true.
@@ -660,7 +680,7 @@ subroutine sort_array_coord(ndim,npoint,x,y,z,ibool,nglob)
     enddo
   endif
 
-! count up number of different segments
+  ! count up number of different segments
   nseg=0
   do i=1,npoint
     if(ifseg(i)) then
@@ -670,126 +690,231 @@ subroutine sort_array_coord(ndim,npoint,x,y,z,ibool,nglob)
       ninseg(nseg)=ninseg(nseg)+1
     endif
   enddo
-  enddo
+enddo
 
 ! assign global node numbers (now sorted lexicographically)
-  ig=0
-  do i=1,npoint
-    if(ifseg(i)) ig=ig+1
-    iglob(iloc(i))=ig
-  enddo
+ig=0
+do i=1,npoint
+  if(ifseg(i)) ig=ig+1
+  iglob(iloc(i))=ig
+enddo
 
-  nglob=ig
+nglob=ig
 
-  end subroutine sort_array_coord
-!===========================================
+end subroutine sort_array_coord
+!===============================================================================
+
+subroutine heap_sort_multi(N, dx, dy, dz, ia, ib)
+implicit none
+integer, intent(in) :: N
+double precision, dimension(N), intent(inout) :: dx
+double precision, dimension(N), intent(inout) :: dy
+double precision, dimension(N), intent(inout) :: dz
+integer, dimension(N), intent(inout) :: ia
+integer, dimension(N), intent(inout) :: ib
+
+integer :: i
+
+! checks if anything to do
+if (N < 2) return
+
+! builds heap
+do i = N/2, 1, -1
+  call heap_sort_siftdown(i, n)
+enddo
+
+! sorts array
+do i = N, 2, -1
+  ! swaps last and first entry in this section
+  call dswap(dx, 1, i)
+  call dswap(dy, 1, i)
+  call dswap(dz, 1, i)
+  call iswap(ia, 1, i)
+  call iswap(ib, 1, i)
+  call heap_sort_siftdown(1, i - 1)
+enddo
+
+contains
+
+!-------------------------------------------------------------------------------
+subroutine dswap(A, i, j)
+implicit none
+double precision, dimension(:), intent(inout) :: A
+integer, intent(in) :: i
+integer, intent(in) :: j
+
+double precision :: tmp
+
+tmp = A(i)
+A(i) = A(j)
+A(j) = tmp
+
+end subroutine
+!===============================================================================
+
+subroutine iswap(A, i, j)
+implicit none
+integer, dimension(:), intent(inout) :: A
+integer, intent(in) :: i
+integer, intent(in) :: j
+
+integer :: tmp
+
+tmp = A(i)
+A(i) = A(j)
+A(j) = tmp
+
+end subroutine
+!===============================================================================
+
+subroutine heap_sort_siftdown(start, bottom)
+implicit none
+integer, intent(in) :: start
+integer, intent(in) :: bottom
+
+integer :: i, j
+double precision :: xtmp, ytmp, ztmp
+integer :: atmp, btmp
+
+i = start
+xtmp = dx(i)
+ytmp = dy(i)
+ztmp = dz(i)
+atmp = ia(i)
+btmp = ib(i)
+
+j = 2 * i
+do while (j <= bottom)
+  ! chooses larger value first in this section
+  if (j < bottom) then
+    if (dx(j) <= dx(j+1)) j = j + 1
+  endif
+
+  ! checks if section already smaller than initial value
+  if (dx(j) < xtmp) exit
+
+  dx(i) = dx(j)
+  dy(i) = dy(j)
+  dz(i) = dz(j)
+  ia(i) = ia(j)
+  ib(i) = ib(j)
+  i = j
+  j = 2 * i
+enddo
+
+dx(i) = xtmp
+dy(i) = ytmp
+dz(i) = ztmp
+ia(i) = atmp
+ib(i) = btmp
+
+end subroutine heap_sort_siftdown
+!===============================================================================
+
+end subroutine heap_sort_multi
+!===============================================================================
 
 ! -------------------- library for sorting routine ------------------
 
 ! sorting routines put here in same file to allow for inlining
 
-  subroutine rank_buffers(A,IND,N)
-!
+subroutine rank_buffers(A,IND,N)
 ! Use Heap Sort (Numerical Recipes)
-!
-  implicit none
+implicit none
 
-  integer :: n
-  double precision :: A(n)
-  integer :: IND(n)
+integer :: n
+double precision :: A(n)
+integer :: IND(n)
 
-  integer :: i,j,l,ir,indx
-  double precision :: q
+integer :: i,j,l,ir,indx
+double precision :: q
 
-  do j=1,n
-    IND(j)=j
-  enddo
+do j=1,n
+  IND(j)=j
+enddo
 
-  if(n == 1) return
+if(n == 1) return
 
-  L=n/2+1
-  ir=n
-  100 CONTINUE
-   IF(l>1) THEN
-      l=l-1
-      indx=ind(l)
-      q=a(indx)
-   ELSE
-      indx=ind(ir)
-      q=a(indx)
-      ind(ir)=ind(1)
-      ir=ir-1
-      if (ir == 1) then
-         ind(1)=indx
-         return
-      endif
-   ENDIF
-   i=l
-   j=l+l
-  200    CONTINUE
-   IF(J <= IR) THEN
-      IF(J < IR) THEN
-         IF(A(IND(j)) < A(IND(j+1))) j=j+1
-      ENDIF
-      IF (q < A(IND(j))) THEN
-         IND(I)=IND(J)
-         I=J
-         J=J+J
-      ELSE
-         J=IR+1
-      ENDIF
-   goto 200
-   ENDIF
-   IND(I)=INDX
-  goto 100
-  end subroutine rank_buffers
-!===========================================
+L=n/2+1
+ir=n
+100 CONTINUE
+ IF(l>1) THEN
+    l=l-1
+    indx=ind(l)
+    q=a(indx)
+ ELSE
+    indx=ind(ir)
+    q=a(indx)
+    ind(ir)=ind(1)
+    ir=ir-1
+    if (ir == 1) then
+       ind(1)=indx
+       return
+    endif
+ ENDIF
+ i=l
+ j=l+l
+200    CONTINUE
+ IF(J <= IR) THEN
+    IF(J < IR) THEN
+       IF(A(IND(j)) < A(IND(j+1))) j=j+1
+    ENDIF
+    IF (q < A(IND(j))) THEN
+       IND(I)=IND(J)
+       I=J
+       J=J+J
+    ELSE
+       J=IR+1
+    ENDIF
+ goto 200
+ ENDIF
+ IND(I)=INDX
+goto 100
+end subroutine rank_buffers
+!===============================================================================
 
-  subroutine swap_all_buffers(IA,IB,A,B,C,IW,W,ind,n)
-!
+subroutine swap_all_buffers(IA,IB,A,B,C,IW,W,ind,n)
 ! swap arrays IA, IB, A, B and C according to addressing in array IND
-!
-  implicit none
+implicit none
 
-  integer :: n
+integer :: n
 
-  integer :: IND(n)
-  integer :: IA(n),IB(n),IW(n)
-  double precision :: A(n),B(n),C(n),W(n)
+integer :: IND(n)
+integer :: IA(n),IB(n),IW(n)
+double precision :: A(n),B(n),C(n),W(n)
 
-  integer :: i
+integer :: i
 
-  do i=1,n
-    W(i)=A(i)
-    IW(i)=IA(i)
-  enddo
+do i=1,n
+  W(i)=A(i)
+  IW(i)=IA(i)
+enddo
 
-  do i=1,n
-    A(i)=W(ind(i))
-    IA(i)=IW(ind(i))
-  enddo
+do i=1,n
+  A(i)=W(ind(i))
+  IA(i)=IW(ind(i))
+enddo
 
-  do i=1,n
-    W(i)=B(i)
-    IW(i)=IB(i)
-  enddo
+do i=1,n
+  W(i)=B(i)
+  IW(i)=IB(i)
+enddo
 
-  do i=1,n
-    B(i)=W(ind(i))
-    IB(i)=IW(ind(i))
-  enddo
+do i=1,n
+  B(i)=W(ind(i))
+  IB(i)=IW(ind(i))
+enddo
 
-  do i=1,n
-    W(i)=C(i)
-  enddo
+do i=1,n
+  W(i)=C(i)
+enddo
 
-  do i=1,n
-    C(i)=W(ind(i))
-  enddo
+do i=1,n
+  C(i)=W(ind(i))
+enddo
 
-  end subroutine swap_all_buffers
-!===========================================
+end subroutine swap_all_buffers
+!===============================================================================
 
 end module ghost_library_mpi
-
-
+!===============================================================================

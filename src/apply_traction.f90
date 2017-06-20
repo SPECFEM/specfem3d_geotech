@@ -1,17 +1,17 @@
 ! TODO: make use of the orthogonality
 ! this routine read and applies the traction specified in the traction file
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION
 !   HNG, Jul 12,2011; HNG, Apr 09,2010; HNG, Dec 08,2010
-subroutine apply_traction(ismpi,myid,nproc,gnod,gdof,neq,load,errcode,errtag)
+subroutine apply_traction(ismpi,gnod,neq,load,errcode,errtag)
 use global
 use math_constants
 use shape_library,only : dshape_function_quad4
 use gll_library,only : gll_quadrature2d,zwgljd
 implicit none
 logical,intent(in) :: ismpi
-integer,intent(in) :: myid,nproc
-integer,intent(in) :: gnod(ngnod)
-integer,intent(in) :: gdof(nndof,nnode)
+integer,intent(in) :: gnod(ngnode)
 integer,intent(in) :: neq
 real(kind=kreal),intent(inout) :: load(0:neq)
 integer,intent(out) :: errcode
@@ -35,17 +35,22 @@ real(kind=kreal),dimension(ngllx) :: xigll,wxgll !double precision
 real(kind=kreal),dimension(nglly) :: etagll,wygll !double precision
 real(kind=kreal),dimension(ngllz) :: zetagll,wzgll !double precision
 
-real(kind=kreal),dimension(:,:,:),allocatable :: dshape_quad4,dshape_quad4_xy,dshape_quad4_yz,dshape_quad4_zx
-real(kind=kreal),dimension(:),allocatable :: gll_weights,gll_weights_xy,gll_weights_yz,gll_weights_zx
-real(kind=kreal),dimension(:,:),allocatable :: gll_points_xy,gll_points_yz,gll_points_zx
-real(kind=kreal),dimension(:,:),allocatable :: lagrange_gll,lagrange_gll_xy,lagrange_gll_yz,lagrange_gll_zx
-real(kind=kreal),dimension(:,:,:),allocatable :: dlagrange_gll,dlagrange_gll_xy,dlagrange_gll_yz,dlagrange_gll_zx
+real(kind=kreal),dimension(:,:,:),allocatable :: dshape_quad4,dshape_quad4_xy, &
+dshape_quad4_yz,dshape_quad4_zx
+real(kind=kreal),dimension(:),allocatable :: gll_weights,gll_weights_xy,       &
+gll_weights_yz,gll_weights_zx
+real(kind=kreal),dimension(:,:),allocatable :: gll_points_xy,gll_points_yz,    &
+gll_points_zx
+real(kind=kreal),dimension(:,:),allocatable :: lagrange_gll,lagrange_gll_xy,   &
+lagrange_gll_yz,lagrange_gll_zx
+real(kind=kreal),dimension(:,:,:),allocatable :: dlagrange_gll,                &
+dlagrange_gll_xy,dlagrange_gll_yz,dlagrange_gll_zx
 
-real(kind=kreal) :: fsign(6) ! face sign or normal orientation (outward +, inward -)
+! face sign or normal orientation (outward +, inward -)
+real(kind=kreal) :: fsign(6)
 character(len=20) :: format_str,ptail
 character(len=80) :: fname
 character(len=80) :: data_path
-integer :: ipart ! partition ID
 
 type faces
   integer,allocatable :: nod(:) !ngllx*nglly) !,allocatable :: nod(:)
@@ -62,16 +67,15 @@ else
   data_path=trim(inp_path)
 endif
 
-ipart=myid-1 ! partition ID starts from 0
 if(ismpi)then
   write(format_str,*)ceiling(log10(real(nproc)+1))
-  format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-  write(ptail, fmt=format_str)'_proc',ipart
+  format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str)) &
+  //')'
+  write(ptail, fmt=format_str)'_proc',myrank
 else
   ptail=""
 endif
 
-!write(fname, fmt=format_str)trim(inp_path)//trim(uxfile)//'_proc',ipart
 fname=trim(data_path)//trim(trfile)//trim(ptail)
 open(unit=11,file=trim(fname),status='old',action='read',iostat=ios)
 if (ios /= 0)then
@@ -128,7 +132,6 @@ do k=1,ngllz
     enddo
   enddo
 enddo
-!print*,i1,i2,i3,i4,i5,i6
 ! find corners nodes
 do i_face=1,6 ! there are 6 faces in a hexahedron
   if(i_face==1 .or. i_face==3)then ! ZX plane
@@ -166,26 +169,32 @@ call zwgljd(etagll,wygll,nglly,jacobi_alpha,jacobi_beta)
 call zwgljd(zetagll,wzgll,ngllz,jacobi_alpha,jacobi_beta)
 
 allocate(fgdof(ndim*maxngll2d),ftracload(ndim*maxngll2d))
-allocate(dshape_quad4(2,4,maxngll2d),dshape_quad4_xy(2,4,ngllxy), &
+allocate(dshape_quad4(2,4,maxngll2d),dshape_quad4_xy(2,4,ngllxy),              &
 dshape_quad4_yz(2,4,ngllyz),dshape_quad4_zx(2,4,ngllzx))
-allocate(gll_weights_xy(ngllxy),gll_points_xy(2,ngllxy),lagrange_gll_xy(ngllxy,ngllxy),dlagrange_gll_xy(2,ngllxy,ngllxy))
-allocate(gll_weights_yz(ngllyz),gll_points_yz(2,ngllyz),lagrange_gll_yz(ngllyz,ngllyz),dlagrange_gll_yz(2,ngllyz,ngllyz))
-allocate(gll_weights_zx(ngllzx),gll_points_zx(2,ngllzx),lagrange_gll_zx(ngllzx,ngllzx),dlagrange_gll_zx(2,ngllzx,ngllzx))
-allocate(gll_weights(maxngll2d),lagrange_gll(maxngll2d,maxngll2d),dlagrange_gll(2,maxngll2d,maxngll2d))
+allocate(gll_weights_xy(ngllxy),gll_points_xy(2,ngllxy),                       &
+lagrange_gll_xy(ngllxy,ngllxy),dlagrange_gll_xy(2,ngllxy,ngllxy))
+allocate(gll_weights_yz(ngllyz),gll_points_yz(2,ngllyz),                       &
+lagrange_gll_yz(ngllyz,ngllyz),dlagrange_gll_yz(2,ngllyz,ngllyz))
+allocate(gll_weights_zx(ngllzx),gll_points_zx(2,ngllzx),                       &
+lagrange_gll_zx(ngllzx,ngllzx),dlagrange_gll_zx(2,ngllzx,ngllzx))
+allocate(gll_weights(maxngll2d),lagrange_gll(maxngll2d,maxngll2d),             &
+dlagrange_gll(2,maxngll2d,maxngll2d))
 call dshape_function_quad4(4,ngllx,nglly,xigll,etagll,dshape_quad4_xy)
 call dshape_function_quad4(4,nglly,ngllz,etagll,zetagll,dshape_quad4_yz)
 call dshape_function_quad4(4,ngllz,ngllx,zetagll,xigll,dshape_quad4_zx)
 
-call gll_quadrature2d(2,ngllx,nglly,ngllxy,gll_points_xy,gll_weights_xy,lagrange_gll_xy,dlagrange_gll_xy)
-call gll_quadrature2d(2,nglly,ngllz,ngllyz,gll_points_yz,gll_weights_yz,lagrange_gll_yz,dlagrange_gll_yz)
-call gll_quadrature2d(2,ngllz,ngllx,ngllzx,gll_points_zx,gll_weights_zx,lagrange_gll_zx,dlagrange_gll_zx)
+call gll_quadrature2d(2,ngllx,nglly,ngllxy,gll_points_xy,gll_weights_xy,       &
+lagrange_gll_xy,dlagrange_gll_xy)
+call gll_quadrature2d(2,nglly,ngllz,ngllyz,gll_points_yz,gll_weights_yz,       &
+lagrange_gll_yz,dlagrange_gll_yz)
+call gll_quadrature2d(2,ngllz,ngllx,ngllzx,gll_points_zx,gll_weights_zx,       &
+lagrange_gll_zx,dlagrange_gll_zx)
 
 !read(11,*)ntrac
 trac_stat=.true. ! necessary for empty trfile
 count_trac=0
 traction: do ! i_trac=1,ntrac
   read(11,*,iostat=ios)tractype
-  !print*,ios,ntrac,tractype
   if(ios/=0)exit traction
   count_trac=count_trac+1
   trac_stat=.false.
@@ -201,7 +210,6 @@ traction: do ! i_trac=1,ntrac
     enddo
     trac_stat=.true.
   elseif(tractype==1)then ! uniform loading
-    !print*,tractype
     read(11,*)q ! vector
     read(11,*)nface
     do i_face=1,nface
@@ -228,8 +236,8 @@ traction: do ! i_trac=1,ntrac
       nfdof=nfgll*ndim
 
       num=g_num(:,ielmt)
-      coord=g_coord(:,num(face(iface)%gnod)) !transpose(g_coord(:,num(face(iface)%gnod)))
-      fgdof(1:nfdof)=reshape(gdof(:,g_num(face(iface)%nod,ielmt)),(/nfdof/)) !g=g_g(:,ielmt)
+      coord=g_coord(:,num(face(iface)%gnod))
+      fgdof(1:nfdof)=reshape(gdof(:,g_num(face(iface)%nod,ielmt)),(/nfdof/))
 
       ftracload=zero
       ! compute numerical integration
@@ -237,8 +245,6 @@ traction: do ! i_trac=1,ntrac
         ! compute d(area)
         dx_dxi=matmul(coord,dshape_quad4(1,:,i_gll))
         dx_deta=matmul(coord,dshape_quad4(2,:,i_gll))
-        !print*,'dx_dxi',dx_dxi
-        !print*,'dx_deta',dx_deta
         ! Normal
         face_normal(1)=dx_dxi(2)*dx_deta(3)-dx_deta(2)*dx_dxi(3)
         face_normal(2)=dx_deta(1)*dx_dxi(3)-dx_dxi(1)*dx_deta(3)
@@ -246,22 +252,25 @@ traction: do ! i_trac=1,ntrac
 
         detjac=sqrt(dot_product(face_normal,face_normal))
         face_normal=fsign(iface)*face_normal/detjac
-        !print*,face_normal
         !stop
 
         ! TODO:for constant q this can be computed only once!!
         ftracload(1:nfdof:3)=ftracload(1:nfdof:3)+ &
-        q(1)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll) ! *face_normal(1) !only in X direction
+        q(1)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll)
+        ! *face_normal(1) !only in X direction
         ftracload(2:nfdof:3)=ftracload(2:nfdof:3)+ &
-        q(2)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll) ! *face_normal(2) !only in Y direction
+        q(2)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll)
+        ! *face_normal(2) !only in Y direction
         ftracload(3:nfdof:3)=ftracload(3:nfdof:3)+ &
-        q(3)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll) ! *face_normal(3) !only in Z direction
+        q(3)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll)
+        ! *face_normal(3) !only in Z direction
       enddo
       load(fgdof(1:nfdof))=load(fgdof(1:nfdof))+ftracload(1:nfdof)
     enddo
     trac_stat=.true.
   elseif(tractype==2)then ! linearly distributed loading
-    read(11,*)iaxis,x1,x2,q1,q2 ! q1 and q2 are vectors, x1 and x2 can be any coordinates
+    read(11,*)iaxis,x1,x2,q1,q2
+    ! q1 and q2 are vectors, x1 and x2 can be any coordinates
     dq_dx=(q2-q1)/(x2-x1)
     read(11,*)nface
     do i_face=1,nface
@@ -288,8 +297,8 @@ traction: do ! i_trac=1,ntrac
       nfdof=nfgll*ndim
 
       num=g_num(:,ielmt)
-      coord=g_coord(:,num(face(iface)%gnod)) !coord=transpose(g_coord(:,num(face(iface)%gnod)))
-      fgdof(1:nfdof)=reshape(gdof(:,g_num(face(iface)%nod,ielmt)),(/nfdof/)) !g=g_g(:,ielmt)
+      coord=g_coord(:,num(face(iface)%gnod))
+      fgdof(1:nfdof)=reshape(gdof(:,g_num(face(iface)%nod,ielmt)),(/nfdof/))
       ftracload=zero
       ! compute numerical integration
       do i_gll=1,nfgll
@@ -307,15 +316,16 @@ traction: do ! i_trac=1,ntrac
 
         detjac=sqrt(dot_product(face_normal,face_normal))
         face_normal=fsign(iface)*face_normal/detjac
-        !print*,face_normal
-        !stop
 
         ftracload(1:nfdof:3)=ftracload(1:nfdof:3)+ &
-        q(1)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll) ! *face_normal(1) !only in X direction
+        q(1)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll)
+        ! *face_normal(1) !only in X direction
         ftracload(2:nfdof:3)=ftracload(2:nfdof:3)+ &
-        q(2)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll) ! *face_normal(2) !only in Y direction
+        q(2)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll)
+        ! *face_normal(2) !only in Y direction
         ftracload(3:nfdof:3)=ftracload(3:nfdof:3)+ &
-        q(3)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll) ! *face_normal(3) !only in Z direction
+        q(3)*lagrange_gll(i_gll,:)*detjac*gll_weights(i_gll)
+        ! *face_normal(3) !only in Z direction
      enddo
      load(fgdof(1:nfdof))=load(fgdof(1:nfdof))+ftracload(1:nfdof)
    enddo
@@ -329,8 +339,6 @@ enddo traction
 close(11)
 
 deallocate(dshape_quad4,dshape_quad4_xy,dshape_quad4_yz,dshape_quad4_zx)
-!deallocate(ftracload)
-!deallocate(fgdof)
 deallocate(gll_weights_xy,gll_points_xy,lagrange_gll_xy,dlagrange_gll_xy)
 deallocate(gll_weights_yz,gll_points_yz,lagrange_gll_yz,dlagrange_gll_yz)
 deallocate(gll_weights_zx,gll_points_zx,lagrange_gll_zx,dlagrange_gll_zx)
@@ -348,3 +356,4 @@ errcode=0
 return
 
 end subroutine apply_traction
+!===============================================================================

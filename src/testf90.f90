@@ -1,4 +1,6 @@
 ! this program is intended to test the Fortran compiler
+! AUTHOR
+!   Hom Nath Gharti
 program testf90
 implicit none
 character(len=250) :: prog
@@ -30,3 +32,4 @@ enddo
 deallocate(derived)
 
 end program testf90
+!===============================================================================

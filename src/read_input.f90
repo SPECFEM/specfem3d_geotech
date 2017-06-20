@@ -1,39 +1,47 @@
+module input
+
+contains
+
+!-------------------------------------------------------------------------------
 ! this subroutine reads the input information from a structured ASCII text file
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 07,2011; HNG, Apr 09,2010
 ! TODO:
 !   - prompt warning or error for unknown argument/s
-subroutine read_input(ismpi,myid,nproc,inp_fname,errcode,errtag)
+subroutine read_input(ismpi,inp_fname,errcode,errtag,ispartmesh)
 use global
-use math_constants,only:zero,zerotol
+use math_constants,only:inftol,zero,zerotol,ONE,HALF,TWO,THREE
 use string_library
 implicit none
 
 integer :: i
 character(len=*),intent(in) :: inp_fname
 logical,intent(in) :: ismpi
-integer,intent(in) :: myid,nproc
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
+logical,optional,intent(in) :: ispartmesh
 character(len=250) :: line
+character(len=60) :: lineword(9)
 character(len=800) ::tag
 character(len=250) :: strval,token
 character(len=1) :: tmp_char
 character(len=250),dimension(50) :: args
-character(len=250) :: confile,idfile,matfile
-character(len=250),dimension(3) :: coordfile
+!character(len=250) :: confile,idfile,matfile
+!character(len=250),dimension(3) :: coordfile
 integer :: id,ind,ios,narg,slen
 
-integer :: bc_stat,preinfo_stat,mesh_stat,material_stat,control_stat,eqload_stat, &
-stress0_stat,traction_stat,water_stat,save_stat
+integer :: bc_stat,preinfo_stat,mesh_stat,material_stat,control_stat,         &
+eqload_stat,stress0_stat,traction_stat,water_stat,save_stat
 integer :: mat_count,nwmat
-integer :: i_elmt,ielmt,i_node,inode,i_mat,imat,mat_domain,tmp_nelmt,tmp_nnode
+integer :: ielmt,i_node,inode,imat,tmp_nelmt,tmp_nnode
 
 character(len=20) :: format_str,ptail
 character(len=250) :: fname
 character(len=250) :: data_path,mat_path
 
-integer :: ipart,nproc_inp ! partition ID
+integer :: nproc_inp ! partition ID
 integer :: iselastic,ismatpart,istat,ival,issave,nexcavid_all
 integer,allocatable :: ivect(:)
 real(kind=kreal) :: rval
@@ -42,17 +50,17 @@ real(kind=kreal),allocatable :: rvect(:)
 errtag="ERROR: unknown!"
 errcode=-1
 
-ipart=myid-1 ! partition ID starts from 0
 if(ismpi)then
   write(format_str,*)ceiling(log10(real(nproc)+1))
-  format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-  write(ptail, fmt=format_str)'_proc',ipart
+  format_str='(a,i'//trim(adjustl(format_str))//'.'//                         &
+  trim(adjustl(format_str))//')'
+  write(ptail, fmt=format_str)'_proc',myrank
 else
   ptail=""
 endif
 
 ! reading main input information
-if(myid==1)write(*,'(a)',advance='no')'reading main input file...'
+if(myrank==0)write(*,'(a)',advance='no')'reading main input file...'
 preinfo_stat=-1
 bc_stat=-1
 traction_stat=0
@@ -89,14 +97,20 @@ mat_count=0
 ! default value
 method='sem'
 if(ismpi)then
-  inp_path='../partition/'
-  part_path='../partition/'
-  mat_path='../partition/'
+  inp_path='./partition/'
+  part_path='./partition/'
+  mat_path='./partition/'
 else
-  inp_path='../input/'
-  mat_path='../input/'
+  inp_path='./input/'
+  mat_path='./input/'
 endif
-out_path='../output/'
+out_path='./output/'
+
+if(present(ispartmesh))then
+  if(ispartmesh)then
+    part_path='./partition/'
+  endif
+endif
 
 eqkx=0.0_kreal
 eqky=0.0_kreal
@@ -113,11 +127,13 @@ ninc=1 ! number of load increments
 ! open file to read
 open(unit=11,file=trim(inp_fname),status='old', action='read',iostat=ios)
 if (ios /= 0)then
-  write(errtag,'(a)')'ERROR: input file "'//trim(inp_fname)//'" cannot be opened!'
+  write(errtag,'(a)')'ERROR: input file "'//trim(inp_fname)//                 &
+  '" cannot be opened!'
   return
 endif
 do
-  read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
+  ! This will read a line and proceed to next line
+  read(11,'(a)',iostat=ios)line
   if (ios/=0)exit
   ! check for blank and comment line
   if (isblank(line) .or. iscomment(line,'#'))cycle
@@ -128,28 +144,27 @@ do
   if (tmp_char=='&')then
     slen=len(line)
     tag=trim(line(1:ind-1))
-    read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
+    ! This will read a line and proceed to next line
+    read(11,'(a)',iostat=ios)line
     tag=trim(tag)//trim(line)
   endif
   call first_token(tag,token)
 
   ! read pre information
   if (trim(token)=='preinfo:')then
-    !print*,preinfo_stat
-    !stop
     if(preinfo_stat==1)then
       write(errtag,*)'ERROR: copy of line type preinfo: not permitted!'
       return
     endif
     preinfo_stat=-1;
     call split_string(tag,',',args,narg)
-    if(ismpi)then
+    if(ismpi.or. (present(ispartmesh).and.ispartmesh))then
       nproc_inp=get_integer('nproc',args,narg);
+      if(present(ispartmesh).and.ispartmesh)nproc=nproc_inp
       if(nproc_inp/=nproc)then
         write(errtag,*)'ERROR: number of processors and images must be equal!'
         return
       endif
-      !phead=get_string('phead',args,narg)
     endif
     call seek_string('method',strval,args,narg)
     if (.not. isblank(strval))method=trim(strval)
@@ -165,9 +180,9 @@ do
     ! nedof=nndof*nenod
     if (method=='sem')then
       ! number of geometrical nodes
-      ngnod=get_integer('ngnod',args,narg);
+      ngnode=get_integer('ngnode',args,narg);
     elseif(method=='fem')then
-      ngnod=nenod ! default number of geometrical nodes
+      ngnode=nenod ! default number of geometrical nodes
     else
       write(errtag,*)'ERROR: wrong value for method!'
       return
@@ -176,7 +191,7 @@ do
     if (.not. isblank(strval))inp_path=trim(strval)
     slen=len_trim(inp_path)
     if(inp_path(slen:slen)/='/')inp_path=trim(inp_path)//'/'
-    if(ismpi)then
+    if(ismpi .or. (present(ispartmesh).and.ispartmesh))then
       call seek_string('part_path',strval,args,narg)
       if (.not. isblank(strval))part_path=trim(strval)
       slen=len_trim(part_path)
@@ -203,7 +218,6 @@ do
     confile=get_string('confile',args,narg)
     idfile=get_string('idfile',args,narg)
     if(ismpi)gfile=get_string('gfile',args,narg)
-    !nmat=get_integer('nmat',args,narg)
 
     mesh_stat=1
     cycle
@@ -256,7 +270,6 @@ do
     trfile=get_string('trfile',args,narg)
     traction_stat=1
     istraction=.true.
-    !print*,trfile
     cycle
   endif
 
@@ -270,8 +283,8 @@ do
     call split_string(tag,',',args,narg)
     call seek_integer('ispart',ival,args,narg,istat)
     if(istat==0)ismatpart=ival
-    ! if not partitioned default location is ../input
-    if(ismatpart==0)mat_path='../input/'
+    ! if not partitioned default location is ./input
+    if(ismatpart==0)mat_path='./input/'
     call seek_string('matpath',strval,args,narg)
     if (.not. isblank(strval))mat_path=trim(strval)
     slen=len_trim(mat_path)
@@ -279,15 +292,6 @@ do
     matfile=get_string('matfile',args,narg)
     call seek_integer('allelastic',iselastic,args,narg,istat)
     if(istat==0 .and. iselastic==1)allelastic=.true.
-    !print*,matfile
-    !mat_count=mat_count+1
-    !id=get_integer('id',args,narg)
-    !gam(id)=get_real('gamma',args,narg)
-    !ym(id)=get_real('ym',args,narg)
-    !nu(id)=get_real('nu',args,narg)
-    !phi(id)=get_real('phi',args,narg)
-    !coh(id)=get_real('coh',args,narg)
-    !psi(id)=get_real('psi',args,narg)
 
     material_stat=1
     cycle
@@ -328,10 +332,6 @@ do
       return
     endif
     call split_string(tag,',',args,narg)
-    !cg_tol=get_real('cg_tol',args,narg)
-    !cg_maxiter=get_integer('cg_maxiter',args,narg)
-    !nl_tol=get_real('nl_tol',args,narg)
-    !nl_maxiter=get_integer('nl_maxiter',args,narg)
     call seek_real('cg_tol',rval,args,narg,istat)
     if(istat==0)cg_tol=rval
     call seek_integer('cg_maxiter',ival,args,narg,istat)
@@ -346,7 +346,8 @@ do
     srf=1.0_kreal
     call seek_real_vect('srf',rvect,nsrf,args,narg,istat)
     if(nsrf>1 .and. istat/=0)then
-      write(errtag,'(a)')'ERROR: argument "srf" not found or insufficient list for "srf"!'
+      write(errtag,'(a)')'ERROR: argument "srf" not found or insufficient list&
+      & for "srf"!'
       return
     endif
     if(istat==0)srf=rvect
@@ -370,7 +371,8 @@ do
       excavid=get_integer_vect('excavid',nexcavid_all,args,narg)
     endif
     if(nsrf>1 .and. nexcav>1)then
-      write(errtag,'(a)')'ERROR: cannot run slope stabiliy and excavation simultaneously!'
+      write(errtag,'(a)')'ERROR: cannot run slope stabiliy and excavation&
+      & simultaneously!'
       return
     endif
     !---------------------------
@@ -416,43 +418,43 @@ do
 
 enddo ! do
 if(.not.iswater)savedata%porep=.false.
-! check for material list
-!if (mat_count/=nmat)then
-!  write(*,'(/,a)')'ERROR: number of materials doesn''t match with total number!'
-!  return
-!endif
 
 ! check input status
 if (preinfo_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read pre information! make sure the line with "preinfo:" token is correct.'
+  write(errtag,'(a)')'ERROR: cannot read pre information! make sure the line&
+  & with "preinfo:" token is correct.'
   return
 endif
 
 ! check input status
 if (mesh_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read mesh information! make sure the line with "mesh:" token is correct.'
+  write(errtag,'(a)')'ERROR: cannot read mesh information! make sure the line&
+  & with "mesh:" token is correct.'
   return
 endif
 
 ! check output status
 if (bc_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read BC information! make sure the line with "bc:" token is correct.'
+  write(errtag,'(a)')'ERROR: cannot read BC information! make sure the line&
+  & with "bc:" token is correct.'
   return
 endif
 
 ! check material status
 if (material_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read material information! make sure the line with "material:" token is correct.'
+  write(errtag,'(a)')'ERROR: cannot read material information! make sure the&
+  & line with "material:" token is correct.'
   return
 endif
 
 ! check control status
 if (control_stat /= 1)then
-  write(errtag,'(a)')'ERROR: cannot read control information! make sure the line with "control:" token is correct.'
+  write(errtag,'(a)')'ERROR: cannot read control information! make sure the&
+  & line with "control:" token is correct.'
   return
 endif
-if(myid==1)write(*,*)'complete!'
-!--------------------------------------------------------
+if(myrank==0)write(*,*)'complete!'
+!-------------------------------------------------------------------------------
 
 ! set data path
 if(ismpi)then
@@ -461,16 +463,10 @@ else
   data_path=trim(inp_path)
 endif
 
-if(myid==1)write(*,'(a)',advance='no')'reading mesh & material properties...'
-!write(format_str,*)ceiling(log10(real(nproc)+1))
-!format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
+if(myrank==0)write(*,'(a)',advance='no')'reading mesh & material properties...'
 ! read coordinates information
 do i=1,ndim
-  !open(unit=11,file=trim(inp_path)//trim(coordfile(i)),action='read',status='old')
-  ! open output file
-  !write(fname, fmt=format_str)trim(inp_path)//trim(coordfile(i))//'_proc',ipart
   fname=trim(data_path)//trim(coordfile(i))//trim(ptail)
-  !print*,fname
   open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
   if( ios /= 0 ) then
     write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -496,13 +492,8 @@ do i=1,ndim
   endif
 enddo
 close(11)
-!sync all
 ! read connectivity
-!open(unit=11,file=trim(inp_path)//trim(confile),action='read',status='old')
-! open output file
-!write(fname, fmt=format_str)trim(inp_path)//trim(confile)//'_proc',ipart
 fname=trim(data_path)//trim(confile)//trim(ptail)
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -510,7 +501,6 @@ if( ios /= 0 ) then
 endif
 read(11,*)nelmt
 allocate(g_num(nenod,nelmt))
-!print*,nenod,nelmt,ismpi,fname
 if(ismpi)then
   do i=1,nelmt
     read(11,*)ielmt,g_num(:,ielmt)
@@ -522,13 +512,8 @@ else
 endif
 close(11)
 
-
 ! read material id
-!open(unit=11,file=trim(inp_path)//trim(idfile),action='read',status='old')
-! open output file
-!write(fname, fmt=format_str)trim(inp_path)//trim(idfile)//'_proc',ipart
 fname=trim(data_path)//trim(idfile)//trim(ptail)
-!print*,fname
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
@@ -537,7 +522,6 @@ endif
 read(11,*)tmp_nelmt
 if(tmp_nelmt/=nelmt)then
   write(errtag,'(a)')'ERROR: total number of elements mismatch!'
-  !,fname,tmp_nelmt,nelmt
   return
 endif
 allocate(mat_id(nelmt))
@@ -552,51 +536,94 @@ else
 endif
 close(11)
 
-! read material lists
-! open output file
-!write(fname, fmt=format_str)trim(inp_path)//trim(matfile)//'_proc',ipart
-if(ismatpart==0)then ! material file not partitioned
-  fname=trim(mat_path)//trim(matfile)
-elseif(ismatpart==1)then ! material file partitioned
-  fname=trim(mat_path)//trim(matfile)//trim(ptail)
-else
-  write(errtag,'(a)')'ERROR: illegal ismatpart value!'
-  return
-endif
-!print*,fname
-open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
-if( ios /= 0 ) then
-  write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
-  return
-endif
-read(11,*)
-read(11,*)nmat
-allocate(gam(nmat),rho(nmat),ym(nmat),coh(nmat),nu(nmat),phi(nmat),psi(nmat),  &
-water(nmat))
-do i=1,nmat
-  read(11,*)imat,mat_domain,gam(i),ym(i),nu(i),phi(i),coh(i),psi(i)
-enddo
-if(minval(mat_id)<1 .or. maxval(mat_id)>nmat)then
-  write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined material regions!'
-  return
-endif
-water=.false.
-if(iswater)then
-  read(11,*,iostat=ios)nwmat
-  if( ios /= 0 ) then
-    write(errtag,'(a)')'ERROR: water IDs cannot be read from material list!'
+! for partmesh library following information is read in the library itself
+if(.not.present(ispartmesh).or. .not.ispartmesh)then
+  ! read material lists
+  if(ismatpart==0)then ! material file not partitioned
+    fname=trim(mat_path)//trim(matfile)
+  elseif(ismatpart==1)then ! material file partitioned
+    fname=trim(mat_path)//trim(matfile)//trim(ptail)
+  else
+    write(errtag,'(a)')'ERROR: illegal ismatpart value!'
     return
   endif
-  do i=1,nwmat
-    read(11,*)id
-    water(id)=.true.
-  enddo
-endif
-rho=gam/9.81_kreal ! Kg/m3
+  open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
+  if( ios /= 0 ) then
+    write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
+    return
+  endif
+  read(11,*)
+  read(11,*)nmatblk
+  allocate(mat_domain(nmatblk),type_blk(nmatblk),gam_blk(nmatblk),             &
+  rho_blk(nmatblk),ym_blk(nmatblk),coh_blk(nmatblk),nu_blk(nmatblk),           &
+  phi_blk(nmatblk),psi_blk(nmatblk),water(nmatblk))
+  allocate(mfile_blk(nmatblk))
+  allocate(bulkmod_blk(nmatblk),shearmod_blk(nmatblk))
+  ! initilize
+  type_blk=-10000
+  mfile_blk=""
+  gam_blk=-inftol
+  ym_blk=-inftol
+  nu_blk=-inftol
+  coh_blk=-inftol
+  phi_blk=-inftol
+  psi_blk=-inftol
+  do i=1,nmatblk
+    ! This will read a line and proceed to next line
+    ! if the input line is long enough only the part of the lineword will be
+    ! filled
+    lineword=""
+    read(11,*,iostat=ios)lineword
+    imat=str2int(lineword(1))
+    mat_domain(i)=str2int(lineword(2))
+    type_blk(i)=str2int(lineword(3))
+    if(type_blk(i).eq.0)then
+      ! block material properties
+      gam_blk(i)=str2real(lineword(4))
+      ym_blk(i)=str2real(lineword(5))
+      nu_blk(i)=str2real(lineword(6))
+      phi_blk(i)=str2real(lineword(7))
+      coh_blk(i)=str2real(lineword(8))
+      psi_blk(i)=str2real(lineword(9))
+      !read(11,*)imat,mat_domain(i),gam_blk(i),ym_blk(i),nu_blk(i),phi_blk(i), &
+      !coh_blk(i),psi_blk(i)
 
+      ! convert to bulk modulus and shear modulus
+      bulkmod_blk(i)=ym_blk(i)/(THREE*(one-two*nu_blk(i)))
+      shearmod_blk(i)=half*ym_blk(i)/(one+nu_blk(i))
+    elseif(type_blk(i).eq.-1)then
+      ! tomographic model defined on regular structured grid
+      mfile_blk(i)=trim(lineword(4))
+    else
+      print*,'ERROR: type_blk:',type_blk(i),' is unsupported!'
+      stop
+    endif
+
+  enddo
+  if(minval(mat_id)<1 .or. maxval(mat_id)>nmatblk)then
+    write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined&
+    & material regions!'
+    return
+  endif
+  water=.false.
+  if(iswater)then
+    read(11,*,iostat=ios)nwmat
+    if( ios /= 0 ) then
+      write(errtag,'(a)')'ERROR: water IDs cannot be read from material list!'
+      return
+    endif
+    do i=1,nwmat
+      read(11,*)id
+      water(id)=.true.
+    enddo
+  endif
+  rho_blk=gam_blk/9.81_kreal ! Kg/m3
+endif
 ! read bc
 errcode=0
-if(myid==1)write(*,*)'complete!'
+if(myrank==0)write(*,*)'complete!'
 
 end subroutine read_input
-
+!===============================================================================
+end module input
+!===============================================================================

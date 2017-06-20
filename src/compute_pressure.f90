@@ -1,15 +1,16 @@
-! this subroutine computes hydrostatic pressure at staurated nodes given the freesurface profile
+! this subroutine computes hydrostatic pressure at staurated nodes given the
+! freesurface profile
 ! z always + up
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 12,2011; HNG, Apr 09,2010; HNG, Dec 08,2010
 ! TODO:
 !   partially saturated
-subroutine compute_pressure(ismpi,myid,nproc,wpressure,submerged_node,errcode,errtag)
+subroutine compute_pressure(wpressure,submerged_node,errcode,errtag)
 use global
 use math_library,only:determinant
 implicit none
-logical,intent(in) :: ismpi
-integer,intent(in) :: myid,nproc
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
 real(kind=kreal),dimension(nnode) :: wpressure ! water pressure
@@ -25,10 +26,9 @@ integer :: i_wsurf,nwsurf ! number of water table surfaces
 ! unit weight of water
 real(kind=kreal),parameter :: zero=0.0_kreal,gamw=9.81_kreal !KN/m3
 
-character(len=20) :: format_str,ptail
+character(len=20) :: ptail
 character(len=250) :: fname
 character(len=150) :: data_path
-integer :: ipart ! partition ID
 
 logical :: wsurf_mesh
 
@@ -48,30 +48,21 @@ type (faces) :: face(6) ! hexahedral element has 6 faces
 
 errtag="ERROR: unknown!"
 errcode=-1
+
 ! set data path wsfile always stored in inp_path because no need to partition
-!if(ismpi)then
-!  data_path=trim(part_path)
-!else
-  data_path=trim(inp_path)
-!endif
+data_path=trim(inp_path)
 
 wsurf_mesh=.false.
 
-ipart=myid-1 ! partition ID starts from 0
 ! all processors read only one water file from the input folder
-!if(ismpi)then
-!  write(format_str,*)ceiling(log10(real(nproc)+1))
-!  format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')'
-!  write(ptail, fmt=format_str)'_proc',ipart
-!else
-  ptail=""
-!endif
+ptail=""
 
 ngllxy=ngllx*nglly
 ngllyz=nglly*ngllz
 ngllzx=ngllz*ngllx
 
-! segment just below can be computed only once!! it is computed in apply_bc,compute_pressure, and apply_traction!!!
+! segment just below can be computed only once!!
+! it is computed in apply_bc,compute_pressure, and apply_traction!!!
 allocate(face(1)%nod(ngllzx),face(3)%nod(ngllzx))
 allocate(face(2)%nod(ngllyz),face(4)%nod(ngllyz))
 allocate(face(5)%nod(ngllxy),face(6)%nod(ngllxy))
@@ -158,11 +149,16 @@ read(11,*)nwsurf
 allocate(wsurf(nwsurf))
 do i_wsurf=1,nwsurf
   read(11,*)wsurf(i_wsurf)%stype
-  if(wsurf(i_wsurf)%stype==0)then ! sweep horizontal line all across (z=constant)
-    read(11,*)wsurf(i_wsurf)%rdir,wsurf(i_wsurf)%rx1,wsurf(i_wsurf)%rx2,wsurf(i_wsurf)%z1
-  elseif(wsurf(i_wsurf)%stype==1)then ! sweep inclined line all across (z=linear)
-    read(11,*)wsurf(i_wsurf)%rdir,wsurf(i_wsurf)%rx1,wsurf(i_wsurf)%rx2,wsurf(i_wsurf)%z1,wsurf(i_wsurf)%z2
-  elseif(wsurf(i_wsurf)%stype==2)then ! meshed surface attached with the model
+  if(wsurf(i_wsurf)%stype==0)then
+    ! sweep horizontal line all across (z=constant)
+    read(11,*)wsurf(i_wsurf)%rdir,wsurf(i_wsurf)%rx1,wsurf(i_wsurf)%rx2,       &
+    wsurf(i_wsurf)%z1
+  elseif(wsurf(i_wsurf)%stype==1)then
+    ! sweep inclined line all across (z=linear)
+    read(11,*)wsurf(i_wsurf)%rdir,wsurf(i_wsurf)%rx1,wsurf(i_wsurf)%rx2,       &
+    wsurf(i_wsurf)%z1,wsurf(i_wsurf)%z2
+  elseif(wsurf(i_wsurf)%stype==2)then
+    ! meshed surface attached with the model
     read(11,*)wsurf(i_wsurf)%nface
     allocate(wsurf(i_wsurf)%ielmt(wsurf(i_wsurf)%nface))
     allocate(wsurf(i_wsurf)%iface(wsurf(i_wsurf)%nface))
@@ -181,13 +177,12 @@ nodal: do i_node=1,nnode
     xp=g_coord(:,i_node) ! coordinates of the node
 
     do i_wsurf=1,nwsurf
-      if(wsurf(i_wsurf)%stype==0)then ! sweep horizontal line all across (z=constant)
+      if(wsurf(i_wsurf)%stype==0)then
+      ! sweep horizontal line all across (z=constant)
         rdir=wsurf(i_wsurf)%rdir
         rx1=wsurf(i_wsurf)%rx1
         rx2=wsurf(i_wsurf)%rx2
         z=wsurf(i_wsurf)%z1
-        !print*,rdir,rx1,rx2,z,xp(3)
-        !stop
         if(xp(rdir)>=rx1 .and. xp(rdir)<=rx2 .and. xp(3)<=z)then
           ! point lies below this water surface
           ! compute pressure
@@ -196,19 +191,19 @@ nodal: do i_node=1,nnode
           endif
           cycle nodal
         endif
-      elseif(wsurf(i_wsurf)%stype==1)then ! sweep inclined line all across (z=linear)
+      elseif(wsurf(i_wsurf)%stype==1)then
+      ! sweep inclined line all across (z=linear)
         rdir=wsurf(i_wsurf)%rdir
         rx1=wsurf(i_wsurf)%rx1
         rx2=wsurf(i_wsurf)%rx2
         z1=wsurf(i_wsurf)%z1
         z2=wsurf(i_wsurf)%z2
 
-        if(xp(rdir)>=min(rx1,rx2) .and. xp(rdir)<=max(rx1,rx2) .and. xp(3)<=max(z1,z2))then
+        if(xp(rdir)>=min(rx1,rx2) .and. xp(rdir)<=max(rx1,rx2) .and.           &
+        xp(3)<=max(z1,z2))then
           ! point lies below this water surface
           !compute z
           z=z1+(z2-z1)*(xp(rdir)-rx1)/(rx2-rx1)
-          !print*,rdir,rx1,rx2,z1,z2,z,xp(rdir),xp(3)
-          !stop
           ! compute pressure
           if(z>xp(3))then
             wpressure(i_node)=gamw*(z-xp(3))
@@ -218,12 +213,14 @@ nodal: do i_node=1,nnode
       elseif(wsurf(i_wsurf)%stype==2)then ! meshed surface in the model
 
         do i_face=1,wsurf(i_wsurf)%nface
-          xf=g_coord(:,g_num(face(wsurf(i_wsurf)%iface(i_face))%gnod,wsurf(i_wsurf)%ielmt(i_face))) ! coordinates vector of the face
+          xf=g_coord(:,g_num(face(wsurf(i_wsurf)%iface(i_face))%gnod,          &
+          wsurf(i_wsurf)%ielmt(i_face))) ! coordinates vector of the face
           xmin=minval(xf(1,:)); xmax=maxval(xf(1,:))
           ymin=minval(xf(2,:)); ymax=maxval(xf(2,:))
           zmin=minval(xf(3,:)); zmax=maxval(xf(3,:))
 
-          if(xp(1)>=xmin .and. xp(1)<=xmax .and. xp(2)>=ymin .and. xp(2)<=ymax .and. xp(3)<=zmax)then
+          if(xp(1)>=xmin .and. xp(1)<=xmax .and. xp(2)>=ymin .and. xp(2)<=ymax &
+          .and. xp(3)<=zmax)then
             ! find equation of the plane
             ! Ax+By+Cz+D=0
             ! two vectors
@@ -272,5 +269,5 @@ deallocate(wsurf)
 errcode=0
 return
 end subroutine compute_pressure
-!=======================================================
+!===============================================================================
 

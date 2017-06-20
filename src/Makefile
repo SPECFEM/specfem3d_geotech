@@ -9,27 +9,31 @@ BIN = ../bin
 #FFLAGS = -g -std=f2003 -fbounds-check -fimplicit-none -O5 -pedantic -pedantic-errors -Wline-truncation -fno-trapping-math -fno-backslash
 
 # parallel fortran compiler
-FC = mpif90 # OR path to appropriate MPI forrtan compiler
-FFLAGS = -g -std=f2003 -fbounds-check -fimplicit-none -O5 -pedantic -pedantic-errors -Wline-truncation -fno-trapping-math -fno-backslash
-
+#FC = mpif90 # OR path to appropriate MPI forrtan compiler
+FC = mpiifort # OR path to appropriate MPI forrtan compiler
+#FFLAGS = -g -std=f2003 -fbounds-check -fimplicit-none -O5 -pedantic -pedantic-errors -Wline-truncation -fno-trapping-math -fno-backslash -Wunused
+FFLAGS = -std08 -O3 -g -axAVX -xHost -mcmodel medium -shared-intel -check all -check bounds -fp-stack-check -traceback -ftz -funroll-loops -unroll5 -align sequence -qopt-report0 -qopt-report-phase=vec -implicitnone -warn truncated_source -warn unused -warn declarations -warn alignments -warn ignore_loc -warn usage -check nobounds
 FC_COMPILE = $(FC) $(FFLAGS)
 
 # C compiler
-CC = gcc
+#CC = gcc
+CC = icc
 CFLAGS = -g -O3 -Werror -Wall -pedantic-errors
 CC_COMPILE = $(CC) $(CFLAGS)
 
 LIB =
-LIBMPI = -L/~/openmpi-1.4.3/lib/lmpi # OR path to appropriate MPI library
-LIBSCOTCH = -L/staff/homnath/lsoft/scotch_5.1.7/lib -lscotch -lscotcherr
+#LIBMPI = -L/~/openmpi-1.4.3/lib/lmpi # OR path to appropriate MPI library
+#LIBSCOTCH = -L/home/hgharti/lsoft/scotch_6.0.4-gcc-5.3.1/lib -lscotch -lscotcherr
+#INCSCOTCH = -I$(HOME)/lsoft/scotch_6.0.4-gcc-5.3.1/include
+LIBSCOTCH = -L/home/hgharti/lsoft/scotch_6.0.4-intel17/lib -lscotch -lscotcherr
+INCSCOTCH = -I$(HOME)/lsoft/scotch_6.0.4-intel17/include
 
 # object tree
 OBJ = $(BIN)/global.o           \
       $(BIN)/string_library.o   \
       $(BIN)/math_library.o     \
       $(BIN)/shape_library.o    \
-      $(BIN)/compute_bmat.o     \
-      $(BIN)/compute_cmat.o     \
+      $(BIN)/elastic.o     \
       $(BIN)/read_input.o       \
       $(BIN)/gll_library.o      \
       $(BIN)/mesh_spec.o        \
@@ -64,8 +68,11 @@ OBJ_SEM = $(BIN)/serial_library.o      \
 # object tree for PARTMESH
 OBJ_PARTMESH = $(BIN)/global.o           \
                $(BIN)/string_library.o   \
+               $(BIN)/serial_library.o   \
+               $(BIN)/math_library.o     \
                $(BIN)/partmesh_library.o \
-	       $(BIN)/partmesh_scotch.o  \
+               $(BIN)/read_input.o       \
+	             $(BIN)/partmesh_scotch.o  \
                $(BIN)/partmesh.o
 
 OBJ_semgeotech = $(OBJ) $(OBJ_SEM) $(BIN)/semslope3d.o $(OBJ_EXCAV) $(BIN)/semexcav3d.o $(BIN)/semgeotech.o
@@ -78,13 +85,10 @@ PARTMESH = $(BIN)/partmesh
 
 default: semgeotech psemgeotech
 
-test:
-	@echo $(FPFLAGS)
-
 clean:
 	rm -f *.mod $(BIN)/*.o core
 
-all: clean partmesh semgeotech psemgeotech
+all: partmesh semgeotech psemgeotech
 
 semgeotech: $(OBJ_semgeotech)
 	$(FC_COMPILE) -o $(semgeotech) $(OBJ_semgeotech) $(LIB)
@@ -132,11 +136,8 @@ $(BIN)/mesh_spec.o: mesh_spec.f90
 $(BIN)/shape_library.o: shape_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/shape_library.o shape_library.f90
 
-$(BIN)/compute_bmat.o: compute_bmat.f90
-	$(FC_COMPILE) -c -o $(BIN)/compute_bmat.o compute_bmat.f90
-
-$(BIN)/compute_cmat.o: compute_cmat.f90
-	$(FC_COMPILE) -c -o $(BIN)/compute_cmat.o compute_cmat.f90
+$(BIN)/elastic.o: elastic.f90
+	$(FC_COMPILE) -c -o $(BIN)/elastic.o elastic.f90
 
 $(BIN)/gauss_library.o: gauss_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/gauss_library.o gauss_library.f90
@@ -207,7 +208,7 @@ $(BIN)/partmesh_library.o: partmesh_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/partmesh_library.o partmesh_library.f90
 
 $(BIN)/partmesh_scotch.o: partmesh_scotch.f90 partmesh_library.f90
-	$(FC_COMPILE) -c -o $(BIN)/partmesh_scotch.o partmesh_scotch.f90
+	$(FC_COMPILE) -c -o $(BIN)/partmesh_scotch.o partmesh_scotch.f90 $(INCSCOTCH)
 
 $(BIN)/partmesh.o: partmesh.f90
 	$(FC_COMPILE) -c -o $(BIN)/partmesh.o partmesh.f90

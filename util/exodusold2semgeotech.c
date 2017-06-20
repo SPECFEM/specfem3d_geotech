@@ -1,6 +1,6 @@
 /* This program converts the Binary (provided that ncdump command exists)
 or ASCII exodus file exported from the CUBIT to several mesh files required
-by the SPECFEM3D_GEOTECH package. Basic steps starting from the CUBIT:
+by the fem3d and sem3d_solid packages. Basic steps starting from the CUBIT:
 in CUBIT:
 - blocks defines only the material regions
   -> actual material properties should not be defined within the CUBIT.
@@ -19,9 +19,9 @@ step1: export mesh file as exodus file say "mesh.e"
 step2: convert "mesh.e" to ASCII file using
   >>ncdump mesh.e > mesh.txt
 step3: produce mesh and BC files
-  >>exodus2sem mesh.txt
+  >>exodusold2semgeotech mesh.txt
   OR
-  >>exodus2sem mesh.txt 1000.0
+  >>exodusold2semgeotech mesh.txt 1000.0
 
 There will be several output files:
 *_coord_? : total number of nodes followed by nodal coordinate ? (? -> x, y, z)
@@ -36,12 +36,12 @@ DEVELOPER:
 DEPENDENCY:
   stringmanip.c: string manipulation routines
 COMPILE:
-  gcc exodus2sem.c -o exodus2sem
+  gcc exodusold2semgeotech.c -o exodusold2semgeotech
 USAGE:
-  exodus2sem <inputfile> <OPTIONS>
-  Example: exodus2sem sloep3d_mest.txt
+  exodusold2semgeotech <inputfile> <OPTIONS>
+  Example: exodusold2semgeotech sloep3d_mest.txt
   or
-  exodus2sem slope3d_mesh.e -fac=0.001 -bin=1
+  exodusold2semgeotech slope3d_mesh.e -fac=0.001 -bin=1
 OPTIONS:
   -fac: use this option to multiply coordinates. this is importantn for unit
         conversion, e.g., to convert m to km use -fac=0.001
@@ -53,6 +53,7 @@ OPTIONS:
 HISTORY:
   HNG,Apr 23,2010;HNG,Apr 17,2010;HNG,Feb 08,2009
 TODO:
+  - add support to side sets,i.e., surface boundary conditions
 -------------------------------------------------------*/
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,7 +70,6 @@ void removeExtension(char *, char *);
 int get_int(int *, char *, char *);
 int look_int(int *, char *, char *);
 int getfirstquote(char *, char *);
-
 
 /* main routine */
 int main(int argc,char **argv){
@@ -90,7 +90,7 @@ char *bulk,line[100],token[62],dumc[62],stag[62];
 char **coord_name; /* coordinates name */
 char fonly[62],infname[62],outfname[62];
 char **ns_name; /* node set names */
-char **ss_name; /* node set names */
+char **ss_name; /* side set names */
 int ns_maxnbc; /* maximum number of BC types */
 int ss_maxnbc; /* maximum number of BC types */
 
@@ -102,7 +102,7 @@ int *ns_bc_nnode; /* number of nodes in each nodal bc */
 
 /* change this line to look for other BCs in side sets */
 /* e.g., char *ss_bcname[4]={"ssbcux","ssbcuy","ssbcuz","ssbcfx"};*/
-char *ss_bcname[]={"ssbcux","ssbcuy","ssbcuz"};
+char *ss_bcname[]={"ssbcux","ssbcuy","ssbcuz","ssbcphi","ssbcphix","ssbcphiy"};
 int *ss_bcfilestat;
 int *ss_elmt,*ss_side;
 int *ss_bc_nside; /* number of sides in each side bc */
@@ -115,7 +115,7 @@ FILE *inf,*outf_dum,*outf_mat,*outf_con,*outf_coord[3],**outf_nsbc,**outf_ssbc;
 fac=1.0; isbin=OFF;
 
 if(argc<2){
-  fprintf(stderr,"ERROR: input file not entered!\n");
+  fprintf(stderr,"ERROR: no input file!\n");
   exit(-1);
 }
 
@@ -123,16 +123,16 @@ if(argc<2){
 if(argc>2){
   for(i=2;i<argc;i++){
     if(look_double(&ftmp,"-fac=",argv[i])==0){
-    fac=ftmp;
-    continue;
-  }
-  else if(look_int(&itmp,"-bin=",argv[i])==0){
-    isbin=itmp;
-    continue;
-  }else{
-    printf("ERROR: unrecognized option \"%s\"",argv[i]);
-    exit(-1);
-  }
+      fac=ftmp;
+      continue;
+    }
+    else if(look_int(&itmp,"-bin=",argv[i])==0){
+      isbin=itmp;
+      continue;
+    }else{
+      printf("ERROR: unrecognized option \"%s\"\n",argv[i]);
+      exit(-1);
+    }
   }
 }
 
@@ -152,8 +152,8 @@ if (isbin){
   /* convert binary netCDF file to ascii file */
   sprintf(dumc,"ncdump %s > %s.txt",argv[1],fonly);
   if (system(dumc)!=0){
-  printf("ERROR: command \"%s\" cannot be executed! use -bin=0 or no option for ascii input file! \n",dumc);
-  exit(-1);
+    printf("ERROR: command \"%s\" cannot be executed! use -bin=0 or no option for ascii input file! \n",dumc);
+    exit(-1);
   }
   printf("complete!\n");
 }
@@ -161,7 +161,7 @@ if (isbin){
 /* open input file */
 inf=fopen(infname,"r");
 if(inf==NULL){
-  fprintf(stderr,"ERROR: file \"%s\" not found!",argv[1]);
+  fprintf(stderr,"ERROR: file \"%s\" not found!\n",argv[1]);
   exit(-1);
 }
 /*printf("--------------------------------\n");*/
@@ -234,7 +234,7 @@ while(!feof(inf)){
       nns=0;
     }else{
       /* allocate memory */
-    ns_name=malloc(nns*sizeof(char *));
+      ns_name=malloc(nns*sizeof(char *));
       for(i=0;i<nns;i++){
         ns_name[i]=malloc(62*sizeof(char)); /* each name has maximum of 62 characters */
       }
@@ -291,7 +291,7 @@ while(!feof(inf)){
     fscanf(inf,"%s",dumc); /* = */
     for (i=0; i<ndim; i++){
       fscanf(inf,"%s",dumc);
-    getfirstquote(dumc,coord_name[i]);
+      getfirstquote(dumc,coord_name[i]);
     }
     continue;
   }
@@ -301,15 +301,15 @@ while(!feof(inf)){
     printf("saving nodal BCs...");
     fscanf(inf,"%s",dumc); /* = */
     for (i=0; i<nns; i++){
-    fscanf(inf,"%s",dumc);
-    getfirstquote(dumc,ns_name[i]);
+      fscanf(inf,"%s",dumc);
+      getfirstquote(dumc,ns_name[i]);
 
-    /* count sides in each side BC */
-    for(j=0;j<ns_maxnbc;j++){
-      if (strstr(ns_name[i],ns_bcname[j])!=NULL){
-        ns_bc_nnode[j]+=ns_nnode[i];
-    }
-    }
+      /* count sides in each side BC */
+      for(j=0;j<ns_maxnbc;j++){
+        if (strstr(ns_name[i],ns_bcname[j])!=NULL){
+          ns_bc_nnode[j]+=ns_nnode[i];
+        }
+      }
     }
 
     /* open bc nodal files */
@@ -327,22 +327,22 @@ while(!feof(inf)){
       sprintf(stag,"node_ns%d",i+1);
       if(strcmp(token,stag)==0){
         ns_nbc=0;
-    for(j=0;j<ns_maxnbc;j++){
-      if (strstr(ns_name[i],ns_bcname[j])!=NULL){
-        sprintf(outfname,"%s_%s",fonly,ns_bcname[j]);
-      if(ns_bcfilestat[j]==1){
-        /* already opened */
-        outf_nsbc[ns_nbc]=fopen(outfname,"a");
-      }else{
-        /* create new */
-        outf_nsbc[ns_nbc]=fopen(outfname,"w");
-        fprintf(outf_nsbc[ns_nbc],"%d\n",ns_bc_nnode[j]);
-      }
+        for(j=0;j<ns_maxnbc;j++){
+          if (strstr(ns_name[i],ns_bcname[j])!=NULL){
+            sprintf(outfname,"%s_%s",fonly,ns_bcname[j]);
+            if(ns_bcfilestat[j]==1){
+              /* already opened */
+              outf_nsbc[ns_nbc]=fopen(outfname,"a");
+            }else{
+              /* create new */
+              outf_nsbc[ns_nbc]=fopen(outfname,"w");
+              fprintf(outf_nsbc[ns_nbc],"%d\n",ns_bc_nnode[j]);
+            }
 
-      ns_bcfilestat[j]=1; /* this file is now opened */
-      ns_nbc+=1;
-      }
-    }
+            ns_bcfilestat[j]=1; /* this file is now opened */
+            ns_nbc+=1;
+          }
+        } /* for(j=0 ..) */
 
         if(ns_nbc==0){
           printf("WARNING: no BC name found in node side \"%s\"!\n",ns_name[i]);
@@ -406,15 +406,15 @@ while(!feof(inf)){
     printf("saving side BCs...");
     fscanf(inf,"%s",dumc); /* = */
     for (i=0; i<nss; i++){
-    fscanf(inf,"%s",dumc);
-    getfirstquote(dumc,ss_name[i]);
+      fscanf(inf,"%s",dumc);
+      getfirstquote(dumc,ss_name[i]);
 
-    /* count sides in each side BC */
-    for(j=0;j<ss_maxnbc;j++){
-      if (strstr(ss_name[i],ss_bcname[j])!=NULL){
-        ss_bc_nside[j]+=ss_nside[i];
-    }
-    }
+      /* count sides in each side BC */
+      for(j=0;j<ss_maxnbc;j++){
+        if (strstr(ss_name[i],ss_bcname[j])!=NULL){
+          ss_bc_nside[j]+=ss_nside[i];
+        }
+      }
     }
 
     /* open bc nodal files */
@@ -433,7 +433,7 @@ while(!feof(inf)){
       if(strcmp(token,stag)==0){
         ss_nbc=0;
         for(j=0;j<ss_maxnbc;j++){
-          if (strstr(ss_name[i],ss_bcname[j])!=NULL){
+          if(strstr(ss_name[i],ss_bcname[j])!=NULL){
             sprintf(outfname,"%s_%s",fonly,ss_bcname[j]);
             if(ss_bcfilestat[j]==1){
               /* already opened */
@@ -490,7 +490,9 @@ while(!feof(inf)){
           /* write to a dummy file with a name of ss_name */
           printf("WARNING: no BC name found in sideset name \"%s\"!\n",ss_name[i]);
           /* Open a filename with a name of sideset name */
-          outf_dum=fopen(ss_name[i],"w");
+          sprintf(outfname,"%s_%s",fonly,ss_name[i]);
+          outf_dum=fopen(outfname,"w");
+          /*outf_dum=fopen(ss_name[i],"w");*/
           fprintf(outf_dum,"%d\n",ss_nside[i]);
           for(j=0;j<ss_nside[i];j++){
             fprintf(outf_dum,"%d %d\n",ss_elmt[j],ss_side[j]);
