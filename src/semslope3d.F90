@@ -378,7 +378,7 @@ srf_loop: do i_srf=1,nsrf
     fmax=maxscal(fmax)
     uxmax=maxvec(abs(x))
     if(myrank==0)then
-      write(stdout,'(a,a,i4,a,f12.6,a,f12.6,a,f12.6)',advance='no')CR, &
+      write(stdout,'(a,i4,a,f12.6,a,f12.6,a,f12.6)') &
       ' nl_iter:',nl_iter,' f_max:',fmax,' uerr:',uerr,' umax:',uxmax
     endif
     if(nl_isconv.or.nl_iter==nl_maxiter)exit
