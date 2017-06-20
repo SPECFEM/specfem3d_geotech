@@ -1,12 +1,17 @@
 ! this module contains the routine for Mohr-Coulomb plasticity, Viscoplastic
 ! algorithm, and strength reduction techniques
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION
 !   HNG, Jul 07,2011; HNG, Apr 09,2010
 module plastic_library
 use set_precision
 use math_constants
+use conversion_constants,only:DEG2RAD,RAD2DEG
 
 contains
+
+!-------------------------------------------------------------------------------
 ! this function computes the stable pseudo-time step
 ! for viscoplastic algorithm (Cormeau 1975, Smith and Griffiths 2003)
 function dt_viscoplas(nmat,nuf,phif,ymf,ismat) result(dt_min)
@@ -32,7 +37,7 @@ do i_mat=1,nmat
   if(dt<dt_min)dt_min=dt
 end do
 end function dt_viscoplas
-!=======================================================
+!===============================================================================
 
 subroutine strength_reduction(srf,phinu,nmat,coh,nu,phi,psi,cohf,nuf,phif,psif,&
 istat)
@@ -81,7 +86,7 @@ do i_mat=1,nmat
 enddo
 return
 end subroutine strength_reduction
-!=======================================================
+!===============================================================================
 
 ! this subroutine calculates the value of the yield function
 ! for a mohr-coulomb material (phi in degrees, theta in radians).
@@ -101,7 +106,7 @@ snth=sin(theta)
 f=snph*sigm+dsbar*(csth/sqrt(r3)-snth*snph/r3)-c*csph
 return
 end subroutine mohcouf
-!=======================================================
+!===============================================================================
 
 ! this subroutine forms the derivatives of a mohr-coulomb potential
 ! function with respect to the three stress invariants
@@ -136,7 +141,7 @@ else
 end if
 return
 end subroutine mohcouq
-!=======================================================
+!===============================================================================
 
 ! this subroutine forms the derivatives of the invariants with respect to
 ! stress in 3d.
@@ -201,7 +206,7 @@ end do
 m1=m1/r3; m2=m2/r3; m3=m3/r3
 return
 end subroutine formm
-!=======================================================
+!===============================================================================
 
 end module plastic_library
-
+!===============================================================================

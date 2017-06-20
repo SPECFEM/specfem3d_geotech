@@ -1,6 +1,8 @@
-REVISION:
-  HNG, Jul 08,2011
+LAST REVISION:
+  HNG, June 18,2017
 TODO LIST
+ - interface to external solver PETSc
+ - nonzero displacement BC
  - add unrecognized variables feature in input
  - automatic factor of safey determination
  - need to consider ghost partitions for the averaging nodal quantities

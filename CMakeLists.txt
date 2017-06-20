@@ -1,5 +1,7 @@
 # cmake file for the cross-platform configure of the
 # software package SPECFEM3D_GEOTECH
+# AUTHOR
+#   Hom Nath Gharti
 # REVISION:
 #   HNG, Apr,2017; HNG, Sep 06,2011;
 
@@ -11,13 +13,15 @@ PROJECT(semgeotech Fortran C)
 
 # Disallow in-source build
 IF("${semgeotech_SOURCE_DIR}"  STREQUAL "${semgeotech_BINARY_DIR}")
-  MESSAGE(FATAL_ERROR "SPECFEM3D_GEOTECH requires an out-of-source build. Please create a separate binary directory and run CMake there.")
+  MESSAGE(FATAL_ERROR "SPECFEM3D_GEOTECH requires an out-of-source build. \
+  Please create a separate binary directory and run CMake there.")
 ENDIF("${semgeotech_SOURCE_DIR}"  STREQUAL "${semgeotech_BINARY_DIR}")
 
 # Test Fortran compiler
 TRY_COMPILE(TEST_F90 ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/src/testf90.f90)
 IF(NOT TEST_F90)
-  MESSAGE(FATAL_ERROR "Fortran compiler: ${CMAKE_Fortran_COMPILER} doesn't work! Please set working CMAKE_Fortran_COMPILER!")
+  MESSAGE(FATAL_ERROR "Fortran compiler: ${CMAKE_Fortran_COMPILER} doesn't \
+  work! Please set working CMAKE_Fortran_COMPILER!")
 ENDIF(NOT TEST_F90)
 
 # build directories
@@ -50,7 +54,8 @@ IF(BUILD_DOCUMENTATION)
   SET(ISDOCUMENTATION ON)
   FIND_PACKAGE(LATEX REQUIRED)
   IF(NOT PDFLATEX_COMPILER OR NOT BIBTEX_COMPILER)
-    MESSAGE(WARNING "LaTeX compiler/s not found! DOCUMENTATION cannot be built!"    )
+    MESSAGE(WARNING "LaTeX compiler/s not found! DOCUMENTATION cannot be \
+    built!")
   SET(ISDOCUMENTATION OFF)
   ENDIF(NOT PDFLATEX_COMPILER OR NOT BIBTEX_COMPILER)
 ENDIF(BUILD_DOCUMENTATION)
@@ -60,17 +65,28 @@ ENDIF(BUILD_DOCUMENTATION)
 
 # build partmesh option
 SET(BUILD_PARTMESH OFF CACHE BOOL "Build mesh partitioning program")
-IF(BUILD_PARTMESH)
-  SET(ISPARTMESH ON)
-  FIND_PATH(SCOTCH_LIBRARY_PATH NAMES libscotch.a libscotcherr.a
-  PATHS /usr/lib /usr/local/lib ENV LD_LIBRARY_PATH)
-  IF(NOT SCOTCH_LIBRARY_PATH)
-    MESSAGE(WARNING "SCOTCH library not found! Please set correct SCOTCH_LIBRARY_PATH manually!")
-    SET(ISPARTMESH OFF)
-  ENDIF(NOT SCOTCH_LIBRARY_PATH)
+IF(BUILD_PARTMESH)                                                               
+  SET(ISPARTMESH ON)                                                             
+  # find library                                                                 
+  FIND_PATH(SCOTCH_LIBRARY_PATH NAMES libscotch.a libscotcherr.a                 
+  PATHS /usr/lib /usr/local/lib ENV LD_LIBRARY_PATH)                             
+  IF(NOT SCOTCH_LIBRARY_PATH)                                                    
+    MESSAGE(WARNING "SCOTCH library not found! Please set correct \
+    SCOTCH_LIBRARY_PATH manually!")
+    SET(ISPARTMESH OFF)                                                          
+  ENDIF(NOT SCOTCH_LIBRARY_PATH)                                                 
+  # find include                                                                 
+  FIND_PATH(SCOTCH_INCLUDE_PATH NAMES scotch.h ptscotch.h                        
+  PATHS /usr/include /usr/local/include ENV LD_INCLUDE_PATH)                     
+  IF(NOT SCOTCH_INCLUDE_PATH)                                                    
+    MESSAGE(WARNING "SCOTCH include not found! Please set correct \
+    SCOTCH_INCLUDE_PATH manually!")
+    SET(ISPARTMESH OFF)                                                          
+  ENDIF(NOT SCOTCH_INCLUDE_PATH)                                                 
 ENDIF(BUILD_PARTMESH)
-SET(BUILD_UTILITIES_EXODUS2SEM OFF CACHE BOOL "Build exodus2sem program")
-SET(BUILD_UTILITIES_WRITE_SOS OFF CACHE BOOL "Build write_sos program")
+SET(BUILD_EXODUS2SEMGEOTECH OFF CACHE BOOL "Build exodus2semgeotech program")
+SET(BUILD_GID2SEMGEOTECH OFF CACHE BOOL "Build gid2semgeotech program")
+SET(BUILD_WRITE_SOS OFF CACHE BOOL "Build write_sos program")
 
 # MPI for parallel processing
 SET(ENABLE_MPI OFF CACHE BOOL "Build semgeotech with MPI support")
@@ -78,20 +94,23 @@ IF(ENABLE_MPI)
   SET(ISPARALLEL ON)
   FIND_PACKAGE(MPI COMPONENTS Fortran REQUIRED)
   IF(NOT MPI_FOUND)
-    MESSAGE(WARNING "MPI Fortran compiler not found! Parallel semgeotech cannot be built!")
+    MESSAGE(WARNING "MPI Fortran compiler not found! Parallel semgeotech \
+    cannot be built!")
     SET(ISPARALLEL OFF)
   ENDIF(NOT MPI_FOUND)
   
   # Test MPI Fortran compiler
   #include_directories(${MPI_Fortran_INCLUDE_PATH})
-  TRY_COMPILE(TEST_MPI ${CMAKE_BINARY_DIR}/CMakeTmp ${CMAKE_SOURCE_DIR}/src/testmpi.f90
+  TRY_COMPILE(TEST_MPI ${CMAKE_BINARY_DIR}/CMakeTmp 
+                       ${CMAKE_SOURCE_DIR}/src/testmpi.f90
   #COMPILE_DEFINITIONS ${MPI_Fortran_LINK_FLAGS}
   #CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${MPI_Fortran_INCLUDE_PATH}"
   #"-DLINK_LIBRARIES=${MPI_Fortran_LIBRARIES}"
   LINK_LIBRARIES ${MPI_Fortran_LIBRARIES}
   OUTPUT_VARIABLE test)
   IF(NOT TEST_MPI)
-    MESSAGE(WARNING "MPI Fortran compiler: ${MPI_Fortran_COMPILER} doesn't work! Parallel semgeotech cannot be built!")
+    MESSAGE(WARNING "MPI Fortran compiler: ${MPI_Fortran_COMPILER} doesn't \
+    work! Parallel semgeotech cannot be built!")
     SET(ISPARALLEL OFF)
   ENDIF(NOT TEST_MPI) 
 INCLUDE_DIRECTORIES(${MPI_Fortran_INCLUDE_DIRS}) 
@@ -100,7 +119,7 @@ ENDIF(ENABLE_MPI)
 # process CMakeLists.txt in other subdirectories
 ADD_SUBDIRECTORY(doc)
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(utilities)
+ADD_SUBDIRECTORY(util)
 
 # notes
 #SET_SOURCE_FILES_PROPERTIES(${SRC} PROPERTIES LANGUAGE "C")

@@ -1,0 +1,61 @@
+\chapter{Output and Visualization}
+
+\section{Output files}
+
+\subsection{Summary file}
+
+This file is self explanatory and it contains a summary of the results including control parameters, maximum displacement at each step, and elapsed time. The file is written in ASCII format and its name follows the convention \emph{input\_file\_name\_header}\texttt{\_summary} for serial run and \emph{input\_file\_name\_header}\texttt{\_summary\_proc}\emph{processor\_ID} for parallel run.
+
+\subsection{Mesh files}
+
+This file contains the mesh information of the model including coordinates, connectivity, element types, etc., in EnSight Gold binary format~\citep[see][]{ensight2008}. The file name follows the format \emph{input\_file\_name\_header}\texttt{\_summary} for serial run and \emph{input\_file\_name\_header}\texttt{\_summary\_proc}\emph{processor\_ID} for parallel run.
+
+\subsection{Displacement field file}
+
+This file contains the nodal displacement field in the model written in EnSight Gold binary format. The file name follows the format \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{.dis} for serial run and \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{\_proc}\emph{processor\_ID}\texttt{.dis} for parallel runs.
+
+\subsection{Pore pressure file}
+
+This file contains the hydrostatic pore pressure field in the model written in EnSight Gold binary format. The file name follows the format \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{.por} for serial run and \emph{input\_file\_name\_header}\texttt{\_step}\emph{step}\texttt{\_proc}\emph{processor\_ID}\texttt{.por} for parallel run.
+
+\subsection{CASE file}
+
+This is an EnSight Gold CASE file written in ASCII format. This file contain the information on the mesh files, other files, time steps etc. The file name follows the format \emph{input\_file\_name\_header}\texttt{.case} for serial run and \emph{input\_file\_name\_header}{\_proc}\emph{processor\_ID}\texttt{.case} for parallel run.
+
+\subsection{SOS file}
+
+This is an EnSight Gold server-of-server file for parallel visualization. The \texttt{write\_sos.f90} program provided in the \texttt{/util/} may be used to generate this file. See Chapter~\ref{chap:utilities}, Section~\ref{sec:sos} for more detail.
+
+All above EnSight Gold files correspond to the model with spectral-element mesh. Additionally, the CASE file/s and mesh file/s are written for the original model. These file names follow the similar conventions and they have the tag \texttt{\sq{original}} in the file name headers.
+
+\section{Visualization}
+\subsection{Serial visualization}
+
+Requirement: ParaView version later than 3.7. Precompiled binaries available from ParaView web (\texttt{www.paraview.org}) may be installed directly or it can be build from the source.
+
+\begin{itemize}
+\item open a session
+\item open paraview client \\
+\texttt{paraview}
+\item In ParaView client: $\Rightarrow$ File $\Rightarrow$ Open\\
+   select appropriate serial CASE file (.case file)\\
+   see ParaView wiki \texttt{paraview.org/Wiki/ParaView} for more detail.
+\end{itemize}
+
+\subsection{Parallel visualization}
+
+Requirement: ParaView version later than 3.7. It should be built enabling MPI. An appropriate MPI library is necessary.
+
+\begin{itemize}
+\item open a session
+\item open paraview client \\
+\texttt{paraview}
+\item start ParaView server \\
+mpirun -np 8 pvserver -display :0
+\item In ParaView client: $\Rightarrow$ File $\Rightarrow$ Connect and connect to the appropriate server
+\item In ParaView client: $\Rightarrow$ Open\\
+   select appropriate SOS file (.sos file)\\
+   see ParaView wiki (\texttt{paraview.org/Wiki/ParaView} for more detail.
+\end{itemize}
+
+\emph{Note: Each CASE file obtained from the parallel processing can also be visualized in a serial.}

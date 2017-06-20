@@ -1,5 +1,8 @@
-! this subroutine computes hydrostatic pressure at staurated nodes given the freesurface profile
+! this subroutine computes hydrostatic pressure at staurated nodes given the
+! freesurface profile
 ! z always + up
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 12,2011; HNG, Apr 09,2010; HNG, Dec 08,2010
 ! TODO:
@@ -58,7 +61,8 @@ ngllxy=ngllx*nglly
 ngllyz=nglly*ngllz
 ngllzx=ngllz*ngllx
 
-! segment just below can be computed only once!! it is computed in apply_bc,compute_pressure, and apply_traction!!!
+! segment just below can be computed only once!!
+! it is computed in apply_bc,compute_pressure, and apply_traction!!!
 allocate(face(1)%nod(ngllzx),face(3)%nod(ngllzx))
 allocate(face(2)%nod(ngllyz),face(4)%nod(ngllyz))
 allocate(face(5)%nod(ngllxy),face(6)%nod(ngllxy))
@@ -145,11 +149,16 @@ read(11,*)nwsurf
 allocate(wsurf(nwsurf))
 do i_wsurf=1,nwsurf
   read(11,*)wsurf(i_wsurf)%stype
-  if(wsurf(i_wsurf)%stype==0)then ! sweep horizontal line all across (z=constant)
-    read(11,*)wsurf(i_wsurf)%rdir,wsurf(i_wsurf)%rx1,wsurf(i_wsurf)%rx2,wsurf(i_wsurf)%z1
-  elseif(wsurf(i_wsurf)%stype==1)then ! sweep inclined line all across (z=linear)
-    read(11,*)wsurf(i_wsurf)%rdir,wsurf(i_wsurf)%rx1,wsurf(i_wsurf)%rx2,wsurf(i_wsurf)%z1,wsurf(i_wsurf)%z2
-  elseif(wsurf(i_wsurf)%stype==2)then ! meshed surface attached with the model
+  if(wsurf(i_wsurf)%stype==0)then
+    ! sweep horizontal line all across (z=constant)
+    read(11,*)wsurf(i_wsurf)%rdir,wsurf(i_wsurf)%rx1,wsurf(i_wsurf)%rx2,       &
+    wsurf(i_wsurf)%z1
+  elseif(wsurf(i_wsurf)%stype==1)then
+    ! sweep inclined line all across (z=linear)
+    read(11,*)wsurf(i_wsurf)%rdir,wsurf(i_wsurf)%rx1,wsurf(i_wsurf)%rx2,       &
+    wsurf(i_wsurf)%z1,wsurf(i_wsurf)%z2
+  elseif(wsurf(i_wsurf)%stype==2)then
+    ! meshed surface attached with the model
     read(11,*)wsurf(i_wsurf)%nface
     allocate(wsurf(i_wsurf)%ielmt(wsurf(i_wsurf)%nface))
     allocate(wsurf(i_wsurf)%iface(wsurf(i_wsurf)%nface))
@@ -168,7 +177,8 @@ nodal: do i_node=1,nnode
     xp=g_coord(:,i_node) ! coordinates of the node
 
     do i_wsurf=1,nwsurf
-      if(wsurf(i_wsurf)%stype==0)then ! sweep horizontal line all across (z=constant)
+      if(wsurf(i_wsurf)%stype==0)then
+      ! sweep horizontal line all across (z=constant)
         rdir=wsurf(i_wsurf)%rdir
         rx1=wsurf(i_wsurf)%rx1
         rx2=wsurf(i_wsurf)%rx2
@@ -181,14 +191,16 @@ nodal: do i_node=1,nnode
           endif
           cycle nodal
         endif
-      elseif(wsurf(i_wsurf)%stype==1)then ! sweep inclined line all across (z=linear)
+      elseif(wsurf(i_wsurf)%stype==1)then
+      ! sweep inclined line all across (z=linear)
         rdir=wsurf(i_wsurf)%rdir
         rx1=wsurf(i_wsurf)%rx1
         rx2=wsurf(i_wsurf)%rx2
         z1=wsurf(i_wsurf)%z1
         z2=wsurf(i_wsurf)%z2
 
-        if(xp(rdir)>=min(rx1,rx2) .and. xp(rdir)<=max(rx1,rx2) .and. xp(3)<=max(z1,z2))then
+        if(xp(rdir)>=min(rx1,rx2) .and. xp(rdir)<=max(rx1,rx2) .and.           &
+        xp(3)<=max(z1,z2))then
           ! point lies below this water surface
           !compute z
           z=z1+(z2-z1)*(xp(rdir)-rx1)/(rx2-rx1)
@@ -201,12 +213,14 @@ nodal: do i_node=1,nnode
       elseif(wsurf(i_wsurf)%stype==2)then ! meshed surface in the model
 
         do i_face=1,wsurf(i_wsurf)%nface
-          xf=g_coord(:,g_num(face(wsurf(i_wsurf)%iface(i_face))%gnod,wsurf(i_wsurf)%ielmt(i_face))) ! coordinates vector of the face
+          xf=g_coord(:,g_num(face(wsurf(i_wsurf)%iface(i_face))%gnod,          &
+          wsurf(i_wsurf)%ielmt(i_face))) ! coordinates vector of the face
           xmin=minval(xf(1,:)); xmax=maxval(xf(1,:))
           ymin=minval(xf(2,:)); ymax=maxval(xf(2,:))
           zmin=minval(xf(3,:)); zmax=maxval(xf(3,:))
 
-          if(xp(1)>=xmin .and. xp(1)<=xmax .and. xp(2)>=ymin .and. xp(2)<=ymax .and. xp(3)<=zmax)then
+          if(xp(1)>=xmin .and. xp(1)<=xmax .and. xp(2)>=ymin .and. xp(2)<=ymax &
+          .and. xp(3)<=zmax)then
             ! find equation of the plane
             ! Ax+By+Cz+D=0
             ! two vectors
@@ -255,5 +269,5 @@ deallocate(wsurf)
 errcode=0
 return
 end subroutine compute_pressure
-!=======================================================
+!===============================================================================
 

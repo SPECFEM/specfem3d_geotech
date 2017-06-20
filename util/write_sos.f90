@@ -1,4 +1,6 @@
 ! this program writes Ensight SOS file
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Aug 17,2010
 ! COMPILE:
@@ -68,17 +70,21 @@ format_str='(a,i'//trim(adjustl(format_str))//'.'//trim(adjustl(format_str))//')
 
 ! open SOS file for original data
 ! open file to read
-open(unit=11,file=trim(sos_path)//trim(file_head)//'_original.sos',status='replace', action='write',iostat=ios)
+open(unit=11,file=trim(sos_path)//trim(file_head)//'_original.sos',            &
+status='replace', action='write',iostat=ios)
 if (ios /= 0)then
-  write(*,'(/,a)')'ERROR: input file "'//trim(file_head)//'_original.sos" cannot be opened!'
+  write(*,'(/,a)')'ERROR: input file "'//trim(file_head)//&
+  '_original.sos" cannot be opened!'
   stop
 endif
 
 ! open SOS file for new data
 ! open file to read
-open(unit=12,file=trim(sos_path)//trim(file_head)//'.sos',status='replace', action='write',iostat=ios)
+open(unit=12,file=trim(sos_path)//trim(file_head)//'.sos',status='replace',    &
+action='write',iostat=ios)
 if (ios /= 0)then
-  write(*,'(/,a)')'ERROR: input file "'//trim(file_head)//'.sos" cannot be opened!'
+  write(*,'(/,a)')'ERROR: input file "'//trim(file_head)//&
+  '.sos" cannot be opened!'
   stop
 endif
 write(11,'(a)')'FORMAT'
@@ -122,3 +128,4 @@ close(12)
 write(*,*)'complete!'
 
 end program write_sos
+!===============================================================================

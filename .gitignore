@@ -4,7 +4,6 @@
 arc/
 tmp/
 bin/
-input/
 output/
 partition/
 viscoelastic/

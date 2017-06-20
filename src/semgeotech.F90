@@ -1,11 +1,13 @@
 ! this is a main program SPECFEM3D_GEOTECH
+! AUTHOR
+!   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
 program semgeotech
 ! import necessary libraries
 use global
 use string_library, only : parse_file
-!use math_constants
+use input
 use mesh_spec
 #if (USE_MPI)
 use mpi_library
@@ -15,12 +17,11 @@ use serial_library
 use math_library_serial
 #endif
 use visual
-
 implicit none
 integer :: funit,i,ios,j,k
 integer :: i_elmt
 
-integer :: gnod(8),map2exodus(8),ngllxy,node_hex8(8)
+integer :: gnod(8),gnum_hex(8),map2exodus(8),ngllxy,node_hex8(8)
 
 character(len=250) :: arg1,inp_fname,prog
 character(len=250) :: path
@@ -38,7 +39,7 @@ integer :: tot_nelmt,max_nelmt,min_nelmt,tot_nnode,max_nnode,min_nnode
 
 character(len=250) :: errtag ! error message
 integer :: errcode
-logical :: isopen ! flag to check whether the file is opened
+logical :: isfile,isopen ! flag to check whether the file is opened
 
 myrank=0; nproc=1;
 errtag=""; errcode=-1
@@ -46,7 +47,6 @@ errtag=""; errcode=-1
 call start_process(ismpi,stdout)
 
 call get_command_argument(0, prog)
-!----input and initialisation----
 if (command_argument_count() <= 0) then
   call error_stop('ERROR: no input file!',stdout,myrank)
 endif
@@ -54,16 +54,26 @@ endif
 call get_command_argument(1, arg1)
 if(trim(arg1)==('--help'))then
   if(myrank==0)then
-    write(stdout,'(a)')'Usage: '//trim(prog)//' [Options] [input_file]'
-    write(stdout,'(a)')'Options:'
+    write(stdout,'(a)')'Usage:'
+    write(stdout,'(a)')'For information:'
+    write(stdout,'(a)')'  '//trim(prog)//' [Options]'
+    write(stdout,'(a)')'  Options:'
     write(stdout,'(a)')'    --help        : Display this information.'
     write(stdout,'(a)')'    --version     : Display version information.'
+    if(trim(prog).eq.'./bin/semgeotech')then
+      write(stdout,'(a)')'For a serial run:'
+      write(stdout,'(a)')'  '//trim(prog)//' [input_file]'
+    elseif(trim(prog).eq.'./bin/psemgeotech')then
+      write(stdout,'(a)')'For a parallel run:'
+      write(stdout,'(a)')'  mpirun -n [NP] p'//trim(prog)//' [input_file]'
+    endif
+    write(stdout,'(a)')'See doc/manual_SPECFEM3D_GEOTECH.pdf for details.'
   endif
   !call sync_process
   call close_process()
 elseif(trim(arg1)==('--version'))then
   if(myrank==0)then
-    write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.2 Beta'
+    write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.2'
     write(stdout,'(a)')'This is free software; see the source for copying '
     write(stdout,'(a)')'conditions.  There is NO warranty; not even for '
     write(stdout,'(a)')'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.'
@@ -78,16 +88,26 @@ call cpu_time(cpu_tstart)
 ! get input file name
 call get_command_argument(1, inp_fname)
 
+if(myrank==0)write(stdout,*)'Input file name: "',trim(inp_fname),'"'
+inquire(file=trim(inp_fname),exist=isfile)
+if(.not.isfile)then
+ if(myrank==0)then
+   write(stdout,*)'Input file: "',trim(inp_fname),'" doesn''t exist!'
+ endif
+ call close_process()
+endif
 ! read input data
-call read_input(ismpi,myrank,inp_fname,errcode,errtag)
+call read_input(ismpi,inp_fname,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
 min_nelmt=minscal(nelmt); min_nnode=minscal(nnode)
 if(myrank==0)then
-write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',min_nelmt
-write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',min_nnode
+write(stdout,*)'elements => total:',tot_nelmt,' max:',&
+max_nelmt,' min:',min_nelmt
+write(stdout,*)'nodes    => total:',tot_nnode,' max:',&
+max_nnode,' min:',min_nnode
 endif
 
 if (trim(method)/='sem')then
@@ -140,7 +160,7 @@ real(g_coord),g_num)
 
 ! create spectral elements
 if(myrank==0)write(stdout,'(a)',advance='no')'creating spectral elements...'
-call hex2spec(ndim,ngnod,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
+call hex2spec(ndim,ngnode,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
 if(myrank==0)write(stdout,*)'complete!'
 
@@ -189,18 +209,18 @@ write(11,'(a)')'GEOMETRY'
 if(nexcav==0)then
   write(11,'(a,a/)')'model:    ',trim(file_head)//trim(ptail)//'.geo'
 else
-  write(11,'(a,i10,a,a/)')'model:    ',ts,' ',trim(file_head)//'_step'//       &
+  write(11,'(a,i10,a,a/)')'model:    ',ts,' ',trim(file_head)//'_step'//      &
   wild_char(1:twidth)//trim(ptail)//'.geo'
 endif
 
 write(11,'(a)')'VARIABLE'
 
 if(savedata%disp)then
-  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','displacement',' ',  &
+  write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','displacement',' ', &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.dis'
 endif
 if(savedata%stress)then
-  write(11,'(a,i10,a,a,a,a,/)')'tensor symm per node: ',ts,' ','stress',' ',   &
+  write(11,'(a,i10,a,a,a,a,/)')'tensor symm per node: ',ts,' ','stress',' ',  &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.sig'
 endif
 if(savedata%psigma)then
@@ -287,7 +307,8 @@ do i_elmt=1,nelmt
         node_hex8(7)=node_hex8(5)+ngllx
         node_hex8(8)=node_hex8(7)+1
         ! map to exodus/cubit numbering and write
-        write(funit)g_num(node_hex8(map2exodus),i_elmt)
+        gnum_hex=g_num(node_hex8(map2exodus),i_elmt)
+        write(funit)gnum_hex
       enddo
     enddo
   enddo

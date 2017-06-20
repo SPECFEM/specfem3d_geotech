@@ -1,4 +1,4 @@
-# material properties (id,domain,gamma,ym,nu,phi,coh,psi)
+# material properties (id,domain,type,gamma,ym,nu,phi,coh,psi)
 1
-1, 1, 26.86, 40e9, 0.13, 27.6, 200, 13.8
+1, 1, 0, 26.86, 40e9, 0.13, 27.6, 200, 13.8
 
