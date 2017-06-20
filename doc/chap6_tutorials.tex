@@ -130,20 +130,25 @@ Create a file "\texttt{cubit\_example.sem}" in \texttt{input/} folder with the f
 \parbox{16cm}{
 \noindent{\texttt{\#-----------------BEGIN "cubit\_example.sem"---------------------------------------------------\\
 \#pre information\\
-preinfo: method='sem', ngllx=3, nglly=3, ngllz=3, nenode=8, ngnode=8, \&\\
-inp\_path='./input', out\_path='./output/'\\
+preinfo: method=\sq{sem}, ngllx=3, nglly=3, ngllz=3, nenode=8, ngnode=8, \&\\
+inp\_path=\sq{./input}, out\_path=\sq{./output/}\\
+\\
 \#mesh information\\
-mesh: xfile='cubit\_example\_coord\_x', yfile='cubit\_example\_coord\_y', \&\\
-zfile='cubit\_example\_coord\_z',confile='cubit\_example\_connectivity', \&\\
-idfile='cubit\_example\_material\_id'\\
+mesh: xfile=\sq{cubit\_example\_coord\_x}, yfile=\sq{cubit\_example\_coord\_y}, \&\\
+zfile=\sq{cubit\_example\_coord\_z}, confile=\sq{cubit\_example\_connectivity}, \&\\
+idfile=\sq{cubit\_example\_material\_id}\\
+\\
 \#boundary conditions\\
-bc: uxfile='cubit\_example\_ssbcux', uyfile='cubit\_example\_ssbcuy', \&\\
-uzfile='cubit\_example\_ssbcuz'\\
+bc: uxfile=\sq{cubit\_example\_ssbcux}, uyfile=\sq{cubit\_example\_ssbcuy}, \&\\
+uzfile=\sq{cubit\_example\_ssbcuz}\\
+\\
 \#material list\\
-material: matfile='cubit\_example\_material\_list'\\
+material: matfile=\sq{cubit\_example\_material\_list}\\
+\\
 \#control parameters\\
 control: cg\_tol=1e-8, cg\_maxiter=5000, nl\_tol=0.0005, nl\_maxiter=3000, \&\\
 nsrf=3, srf=1.0 1.5 2.0\\
+\\
 \#save data options\\
 save: disp=1\\
 \#-----------------END "cubit\_example.sem"---------------------------------------------------
@@ -191,7 +196,7 @@ In this tutorial we build a slope model as shown in Figure~\ref{fig:slope} using
 
 \subsection*{Step 7: Create a main input file}
 
-Main input files for serial and parallel runs are very similar. For the parallel run, only two additional parameters "\texttt{nproc}" in the "\texttt{preinfo:}" line and "\texttt{ghostfile}" in the "\texttt{mesh:}" line are needed. See Chapter~\ref{chap:input} for more details.\\
+Main input files for serial and parallel runs are very similar. For the parallel run, only two additional parameters "\texttt{nproc}" in the "\texttt{preinfo:}" line and "\texttt{gfile}" in the "\texttt{mesh:}" line are needed. See Chapter~\ref{chap:input} for more details.\\
 \\
 
 Create a file "\texttt{cubit\_example.psem}" in \texttt{input/} folder with the following content:
@@ -201,20 +206,25 @@ Create a file "\texttt{cubit\_example.psem}" in \texttt{input/} folder with the 
 \parbox{16cm}{
 \noindent{\texttt{\# -----------------BEGIN "cubit\_example.psem"---------------------------------------------------\\
 \#pre information\\
-preinfo: nproc=8, method='sem', ngllx=3, nglly=3, ngllz=3, nenode=8, ngnode=8, \&\\
-inp\_path='./input', out\_path='./output/'\\
+preinfo: nproc=8, method=\sq{sem}, ngllx=3, nglly=3, ngllz=3, nenode=8, \&\\
+ngnode=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\
+\\
 \#mesh information\\
-mesh: xfile='cubit\_example\_coord\_x', yfile='cubit\_example\_coord\_y', \&\\
-zfile='cubit\_example\_coord\_z',confile='cubit\_example\_connectivity', \&\\
-idfile='cubit\_example\_material\_id',ghostfile='cubit\_example\_ghost'\\
+mesh: xfile=\sq{cubit\_example\_coord\_x}, yfile=\sq{cubit\_example\_coord\_y}, \&\\
+zfile=\sq{cubit\_example\_coord\_z}, confile=\sq{cubit\_example\_connectivity}, \&\\
+idfile=\sq{cubit\_example\_material\_id}, gfile=\sq{cubit\_example\_ghost}\\
+\\
 \#boundary conditions\\
-bc: uxfile='cubit\_example\_ssbcux', uyfile='cubit\_example\_ssbcuy', \&\\
-uzfile='cubit\_example\_ssbcuz'\\
+bc: uxfile=\sq{cubit\_example\_ssbcux}, uyfile=\sq{cubit\_example\_ssbcuy}, \&\\
+uzfile=\sq{cubit\_example\_ssbcuz}\\
+\\
 \#material list\\
-material: matfile='cubit\_example\_material\_list'\\
+material: matfile=\sq{cubit\_example\_material\_list}\\
+\\
 \#control parameters\\
 control: cg\_tol=1e-8, cg\_maxiter=5000, nl\_tol=0.0005, nl\_maxiter=3000, \&\\
 nsrf=3, srf=1.0 1.5 2.0\\
+\\
 \#save data options\\
 save: disp=1\\
 \#-----------------END "cubit\_example.psem"---------------------------------------------------
@@ -245,7 +255,7 @@ If your cluster has the job submition system, you must use the appropriate job s
 
 \textbf{\emph{Note}}: You must have compiled parallel SPECFEM3D\_GEOTECH. For more detail please see Chapter~\ref{chap:2}.
 
-\subsection*{Step 9: Visualize result}
+\subsection*{Step 10: Visualize result}
 
 Start ParaView. Open all (Eight for this tutorial) case files "\texttt{output/cubit\_example\_proc0.case}", "\texttt{output/cubit\_example\_proc1.case}", ad so on. Press "Apply" button. From "Filters" menu select \sq{Alphabetical} $\Rightarrow$ \sq{Group Datasets}. From "Coloring" dropdown list, select \sq{displacement} to color, and you will see the Figure~\ref{fig:pardisp}\\
 \\
