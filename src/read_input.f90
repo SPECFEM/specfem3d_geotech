@@ -138,16 +138,19 @@ do
   ! check for blank and comment line
   if (isblank(line) .or. iscomment(line,'#'))cycle
 
-  ! look for line continuation
-  tag=trim(line)
-  call last_char(line,tmp_char,ind)
-  if (tmp_char=='&')then
-    slen=len(line)
-    tag=trim(line(1:ind-1))
-    ! This will read a line and proceed to next line
-    read(11,'(a)',iostat=ios)line
-    tag=trim(tag)//trim(line)
-  endif
+  ! check for line continuation
+  tag=''
+  do
+    call last_char(line,tmp_char,ind) 
+    if(tmp_char.eq.'&')line(ind:ind)=''
+    tag=trim(tag)//trim(line)    
+    if(tmp_char.ne.'&')exit
+    read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
+    if(ios /= 0)then
+      write(errtag,'(a)')'ERROR: line continuation incomplete!'
+      return
+    endif    
+  enddo
   call first_token(tag,token)
 
   ! read pre information
@@ -595,8 +598,9 @@ if(.not.present(ispartmesh).or. .not.ispartmesh)then
       ! tomographic model defined on regular structured grid
       mfile_blk(i)=trim(lineword(4))
     else
-      print*,'ERROR: type_blk:',type_blk(i),' is unsupported!'
-      stop
+      write(errtag,'(a,1x,i2,1x,a)')'ERROR: type_blk:',type_blk(i),' is &
+      &unsupported!'
+      return
     endif
 
   enddo
