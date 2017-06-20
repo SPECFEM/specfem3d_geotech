@@ -1,0 +1,47 @@
+#--------------------------------BEGIN "cubit_example.jou"-----------------------------------
+# create model
+create vertex 0 0 0
+create vertex 50 0 0
+create vertex 50 0 6
+create vertex 43 0 6
+create vertex 18 0 18
+create vertex 0 0 18
+create curve vertex 1 2
+create curve vertex 2 3
+create curve vertex 3 4
+create curve vertex 4 5
+create curve vertex 5 6
+create curve vertex 6 1
+create surface curve 1 2 3 4 5 6
+sweep surface 1 vector 0 1 0 distance 20
+compress all
+# mesh surface
+surface 8 size 2
+surface 8 scheme pave
+mesh surface 8
+# mesh volume sweeping surface mesh
+volume 1 size 2
+volume 1 redistribute nodes off
+volume 1 scheme Sweep source surface 8 target surface 1 sweep_smooth Auto
+sweep_transform least_squares autosmooth_target off
+mesh volume 1
+# define block
+set duplicate block elements off
+block 1 volume 1
+# define boundary conditions
+Sideset 1 surface 2
+sideset 1 name 'bottom_ssbcux_ssbcuy_ssbcuz'
+Sideset 2 surface 8
+sideset 2 name 'front_ssbcuy'
+Sideset 3 surface 1
+sideset 3 name 'back_ssbcuy'
+Sideset 4 surface 7
+sideset 4 name 'left_ssbcux'
+Sideset 5 surface 3
+sideset 5 name 'right_ssbcux'
+compress all
+# save and export mesh
+save as "cubit_example.cub" overwrite
+set large exodus file off
+export mesh "cubit_example.e" overwrite
+#----------------------------END "cubit_example.jou"--------------------------------------
