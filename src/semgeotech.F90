@@ -48,11 +48,11 @@ logical :: isfile,isopen ! flag to check whether the file is opened
 myrank=0; nproc=1;
 errtag=""; errcode=-1
 
-call start_process(stdout)
+call start_process()
 
 call get_command_argument(0, prog)
 if (command_argument_count() <= 0) then
-  call error_stop('ERROR: no input file!',stdout,myrank)
+  call error_stop('ERROR: no input file!')
 endif
 
 call get_command_argument(1, arg1)
@@ -89,6 +89,9 @@ endif
 ! starting timer
 call cpu_time(cpu_tstart)
 
+! get processor tag
+ptail=proc_tag()
+
 ! get input file name
 call get_command_argument(1, inp_fname)
 
@@ -102,7 +105,7 @@ if(.not.isfile)then
 endif
 ! read input data
 call read_input(inp_fname,errcode,errtag)
-if(errcode/=0)call error_stop(errtag,stdout,myrank)
+if(errcode/=0)call error_stop(errtag)
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
@@ -116,13 +119,10 @@ endif
 
 if (trim(method)/='sem')then
   write(errtag,'(a)')'ERROR: wrong input for sem3d!'
-  call error_stop(errtag,stdout,myrank)
+  call error_stop(errtag)
 endif
 
 call parse_file(inp_fname,path,file_head,ext)
-
-! get processor tag
-ptail=proc_tag()
 
 ensight_etype='hexa8'
 ts=1 ! time set
@@ -143,7 +143,7 @@ geo_file=trim(file_head)//'_original'//trim(ptail)//'.geo'
 open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
-  call error_stop(errtag,stdout,myrank)
+  call error_stop(errtag)
 endif
 
 write(11,'(a)')'FORMAT'
@@ -165,7 +165,7 @@ real(g_coord),g_num)
 ! create spectral elements
 if(myrank==0)write(stdout,'(a)',advance='no')'creating spectral elements...'
 call hex2spec(ndim,ngnode,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
-if(errcode/=0)call error_stop(errtag,stdout,myrank)
+if(errcode/=0)call error_stop(errtag)
 if(myrank==0)write(stdout,*)'complete!'
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
@@ -197,7 +197,7 @@ case_file=trim(out_path)//trim(file_head)//trim(ptail)//'.case'
 open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
-  call error_stop(errtag,stdout,myrank)
+  call error_stop(errtag)
 endif
 
 write(11,'(a)')'FORMAT'
@@ -335,6 +335,7 @@ endif
 
 ! clean up
 call cleanup_hexface(errcode,errtag)
+call cleanup_integration2d(errcode,errtag)
 
 ! compute elapsed time
 call cpu_time(cpu_tend)

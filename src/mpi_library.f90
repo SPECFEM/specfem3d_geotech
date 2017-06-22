@@ -8,21 +8,19 @@ use mpi
 contains
 
 ! start MPI processes
-subroutine start_process(ounit)
+subroutine start_process()
 use global,only:ismpi,myrank,nproc
 implicit none
-integer,intent(in) :: ounit
 integer :: errcode
 ismpi=.true. ! parallel
 call MPI_INIT(errcode)
-if(errcode /= 0) call mpierror('ERROR: cannot initialize MPI!',errcode,ounit)
+if(errcode /= 0) call mpierror('ERROR: cannot initialize MPI!',errcode)
 call MPI_COMM_RANK(MPI_COMM_WORLD,myrank,errcode)
 if(errcode /= 0) call mpierror('ERROR: cannot find processor ID (rank)!',      &
-errcode,ounit)
+errcode)
 call MPI_COMM_SIZE(MPI_COMM_WORLD,nproc,errcode)
 if(errcode /= 0) call mpierror('ERROR: cannot find number of processors!',     &
-errcode,ounit)
-if(myrank==0)write(*,*)'Total processes started:',nproc,'!'
+errcode)
 return
 end subroutine start_process
 !===============================================================================
@@ -38,11 +36,12 @@ end subroutine close_process
 !===============================================================================
 
 ! MPI error
-subroutine mpierror(errtag,errcode,ounit)
+subroutine mpierror(errtag,errcode)
+use global,only:stdout
 implicit none
 character(len=*) :: errtag
-integer :: errcode,ounit
-write(ounit,'(a,a,i4,a)')errtag,' (MPI ERROR code:',errcode,')!'
+integer :: errcode
+write(stdout,'(a,a,i4,a)')errtag,' (MPI ERROR code:',errcode,')!'
 stop
 end subroutine mpierror
 !===============================================================================
@@ -58,15 +57,15 @@ end subroutine sync_process
 !===============================================================================
 
 ! write error and stop
-subroutine error_stop(errtag,ounit,myrank)
+subroutine error_stop(errtag)
+use global,only:myrank,stdout
 implicit none
 character(*),intent(in) :: errtag
-integer,intent(in) :: ounit,myrank
 integer :: errcode,ierr
-if(myrank==0)write(ounit,'(a)')errtag
+if(myrank==0)write(stdout,'(a)')errtag
 call close_process
 ! stop all the MPI processes, and exit
-write(ounit,'(a)')'aborting MPI...'
+write(stdout,'(a)')'aborting MPI...'
 call MPI_ABORT(MPI_COMM_WORLD,errcode,ierr)
 stop
 end subroutine error_stop

@@ -14,8 +14,8 @@ use ghost_library_mpi
 contains
 
 ! diagonally preconditioned conjuate-gradient solver
-subroutine pcg_solver(neq,nelmt,k,u_g,f,dprecon_g,       &
-gdof_elmt,cg_iter,errcode,errtag)
+subroutine pcg_solver(neq,nelmt,k,u_g,f,dprecon_g,gdof_elmt,cg_iter,errcode,   &
+errtag)
 !use math_library
 implicit none
 integer,intent(in) :: neq,nelmt
@@ -24,7 +24,8 @@ real(kind=kreal),dimension(nedof,nedof,nelmt),intent(in) :: k
 ! only for intact elements
 real(kind=kreal),dimension(0:neq),intent(inout) :: u_g
 real(kind=kreal),dimension(0:neq),intent(in) :: f,dprecon_g
-integer,dimension(nedof,nelmt),intent(in) :: gdof_elmt
+!integer,dimension(nedof,nelmt),intent(in) :: gdof_elmt
+integer,dimension(:,:),intent(in) :: gdof_elmt
 ! only for intact elements
 integer,intent(out) :: cg_iter
 integer,intent(out) :: errcode

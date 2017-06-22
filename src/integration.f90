@@ -1,3 +1,5 @@
+! AUTHOR
+!   Hom Nath Gharti
 module integration
 use set_precision
 implicit none
@@ -14,17 +16,23 @@ dlagrange_gll_yz,dlagrange_gll_zx
 contains
 
 !-------------------------------------------------------------------------------
-subroutine prepare_integration2d
+subroutine prepare_integration2d(errcode,errtag)
 use global,only:ngllx,nglly,ngllz,ngllxy,ngllyz,ngllzx
 use gll_library,only:gll_quadrature2d,zwgljd
 use shape_library,only:dshape_function_quad4
 implicit none
+integer,intent(out) :: errcode
+character(len=250),intent(out) :: errtag
+
 real(kind=kreal),parameter :: jacobi_alpha=0.0_kreal,jacobi_beta=0.0_kreal
 real(kind=kreal),dimension(ngllx) :: xigll,wxgll !double precision
 real(kind=kreal),dimension(nglly) :: etagll,wygll !double precision
 real(kind=kreal),dimension(ngllz) :: zetagll,wzgll !double precision
 real(kind=kreal),dimension(:,:),allocatable :: gll_points_xy,gll_points_yz,    &
 gll_points_zx
+
+errtag="ERROR: unknown!"
+errcode=-1
 
 ! compute GLL points and weights
 call zwgljd(xigll,wxgll,ngllx,jacobi_alpha,jacobi_beta)
@@ -53,7 +61,29 @@ lagrange_gll_zx,dlagrange_gll_zx)
 
 deallocate(gll_points_xy,gll_points_yz,gll_points_zx)
 
+errcode=0
+return
+
 end subroutine prepare_integration2d
+!===============================================================================
+
+subroutine cleanup_integration2d(errcode,errtag)
+implicit none
+integer,intent(out) :: errcode
+character(len=250),intent(out) :: errtag
+
+errtag="ERROR: unknown!"
+errcode=-1
+
+deallocate(dshape_quad4_xy,dshape_quad4_yz,dshape_quad4_zx)
+deallocate(gll_weights_xy,lagrange_gll_xy,dlagrange_gll_xy)
+deallocate(gll_weights_yz,lagrange_gll_yz,dlagrange_gll_yz)
+deallocate(gll_weights_zx,lagrange_gll_zx,dlagrange_gll_zx)
+
+errcode=0
+return
+
+end subroutine cleanup_integration2d
 !===============================================================================
 
 end module integration

@@ -44,7 +44,7 @@ if (istat /= 0)then
   stop
 endif
 call read_input(inp_fname,errcode,errtag,.true.)
-if(errcode/=0)call error_stop(errtag,stdout,myrank)
+if(errcode/=0)call error_stop(errtag)
 
 npart=nproc
 !bc_stat=-1

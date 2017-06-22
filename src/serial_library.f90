@@ -10,13 +10,11 @@ use set_precision
 contains
 
 !-------------------------------------------------------------------------------
-subroutine start_process(ounit)
+subroutine start_process()
 use global,only:ismpi,myrank,nproc
 implicit none
-integer,intent(in) :: ounit
 ismpi=.false. ! serial
 myrank=0; nproc=1
-write(ounit,*)'Single process started!'
 return
 end subroutine start_process
 !===============================================================================
@@ -35,11 +33,11 @@ end subroutine sync_process
 !===============================================================================
 
 ! write error and stop
-subroutine error_stop(errtag,ounit,myrank)
+subroutine error_stop(errtag)
+use global,only:myrank,stdout
 implicit none
 character(*),intent(in) :: errtag
-integer,intent(in) :: ounit,myrank
-if(myrank==0)write(ounit,'(a)')errtag
+if(myrank==0)write(stdout,'(a)')errtag
 stop
 end subroutine error_stop
 !===============================================================================
