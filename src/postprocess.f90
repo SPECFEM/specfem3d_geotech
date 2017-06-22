@@ -125,14 +125,14 @@ end subroutine elastic_stress_intact
 
 ! this routine save data to files Ensight Gold format
 ! TODO: make it optional
-subroutine save_data(ptail,format_str,istep,nnode,nodalu,scf,vmeps,            &
+subroutine save_data(format_str,istep,nnode,nodalu,scf,vmeps,            &
 stress_global)
-use global,only:nst,out_path,file_head,savedata
+use global,only:nst,out_path,file_head,ptail,savedata
 use math_constants
 use math_library,only:rquick_sort,stress_invariant
 use visual
 implicit none
-character(len=20),intent(in) :: format_str,ptail
+character(len=20),intent(in) :: format_str
 integer,intent(in) :: istep,nnode
 real(kind=kreal),intent(in) :: nodalu(3,nnode),scf(nnode),vmeps(nnode),        &
 stress_global(nst,nnode)

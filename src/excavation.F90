@@ -1,3 +1,9 @@
+module excavation
+! this module contains main excavation routines
+
+contains
+
+!-------------------------------------------------------------------------------
 !include 'license.tt'
 ! this is a main routine for multistage excavation
 ! this program was originally based on the book "Programming the finite element
@@ -6,7 +12,7 @@
 !   Hom Nath Gharti
 ! REVISION:
 !   HNG, Aug 25,2011; HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
-subroutine semexcav3d(ismpi,gnod,sum_file,ptail,format_str)
+subroutine excavation3d(sum_file,format_str)
 ! import necessary libraries
 use global
 use string_library, only : parse_file
@@ -14,9 +20,10 @@ use math_constants
 use gll_library
 use shape_library
 use math_library
+use element,only:hex8_gnode,map2exodus
 use elastic
 use preprocess
-use excavation
+use excavation_library
 use plastic_library
 #if (USE_MPI)
 use mpi_library
@@ -32,10 +39,8 @@ use visual
 use postprocess
 
 implicit none
-logical,intent(in) :: ismpi
-integer,intent(in) :: gnod(8)
 character(len=250),intent(in) :: sum_file
-character(len=20),intent(in) :: ptail,format_str
+character(len=20),intent(in) :: format_str
 
 integer :: funit,i,ios,istat,j,k,neq
 integer :: i_elmt,i_node,i_inc,i_srf,i_excav,ielmt,imat,inode
@@ -66,7 +71,7 @@ real(kind=kreal),allocatable :: stress_intact(:,:,:),stress_void(:,:,:)
 !,psigma(:,:),psigma0(:,:),taumax(:),nsigma(:)
 integer,allocatable :: egdof(:) ! elemental global degree of freedom
 
-integer :: map2exodus(8),ngllxy,node_hex8(8)
+integer :: node_hex8(8)
 real(kind=kreal),allocatable :: dshape_hex8(:,:,:)
 real(kind=kreal),parameter :: jacobi_alpha=0.0_kreal,jacobi_beta=0.0_kreal
 !double precision
@@ -93,12 +98,10 @@ integer :: nelmt_intact,nelmt_void
 integer,allocatable :: elmt_intact(:),elmt_void(:)
 integer :: nnode_intact,nnode_void
 integer,allocatable :: nmir(:),node_intact(:),node_void(:)
-logical,allocatable :: ismat(:),isnode(:)
+logical,allocatable :: ismat(:)
 
 integer :: tot_nelmt,max_nelmt,min_nelmt,tot_nnode,max_nnode,min_nnode
 integer :: tot_neq,max_neq,min_neq
-! number of active ghost partitions for a node
-integer,allocatable :: ngpart_node(:)
 character(len=250) :: errtag ! error message
 integer :: errcode
 
@@ -110,9 +113,6 @@ ismat=.true.
 ngllxy=ngllx*nglly
 ensight_etype='hexa8'
 
-! map sequential node numbering to exodus/cubit order for 8-noded hexahedra
-map2exodus=(/ 1,2,4,3,5,6,8,7 /)
-
 ! apply displacement boundary conditions
 if(myrank==0)write(stdout,'(a)',advance='no')'applying BC...'
 allocate(gdof(nndof,nnode),stat=istat)
@@ -121,12 +121,12 @@ if (istat/=0)then
   stop
 endif
 gdof=1
-call apply_bc(ismpi,neq,errcode,errtag)
-if(errcode/=0)call error_stop(errtag,stdout,myrank)
+call apply_bc(neq,errcode,errtag)
+if(errcode/=0)call error_stop(errtag)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
 
-allocate(isnode(nnode),num(nenod),evpt(nst,ngll,nelmt),coord(ngnode,ndim),      &
+allocate(num(nenod),evpt(nst,ngll,nelmt),coord(ngnode,ndim),      &
 jac(ndim,ndim),der(ndim,ngnode),deriv(ndim,nenod),bmat(nst,nedof),eld(nedof),   &
 bload(nedof),eload(nedof),nodalu(nndof,nnode),egdof(nedof),stat=istat)
 if (istat/=0)then
@@ -149,7 +149,7 @@ call zwgljd(zetagll,wzgll,ngllz,jacobi_alpha,jacobi_beta)
 
 ! get derivatives of shape functions for 8-noded hex
 allocate(dshape_hex8(ndim,ngnode,ngll))
-call dshape_function_hex8(ngnode,ngllx,nglly,ngllz,xigll,etagll,zetagll,   &
+call dshape_function_hex8(ngnode,ngllx,nglly,ngllz,xigll,etagll,zetagll,       &
 dshape_hex8)
 deallocate(xigll,wxgll,etagll,wygll,zetagll,wzgll)
 ! compute gauss-lobatto-legendre quadrature information
@@ -189,8 +189,8 @@ if(s0_type==0)then
     stop
   endif
   extload=zero; gravity=.true.; pseudoeq=.false.
-  call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam_blk,       &
-  nu_blk,ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon,extload,  &
+  call stiffness_bodyload(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,gam_blk, &
+  nu_blk,ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon,extload, &
   gravity,pseudoeq)
 
   if(myrank==0)write(stdout,*)'complete!'
@@ -198,8 +198,8 @@ if(s0_type==0)then
   ! apply traction boundary conditions
   if(istraction)then
     if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
-    call apply_traction(ismpi,gnod,neq,extload,errcode,errtag)
-    if(errcode/=0)call error_stop(errtag,stdout,myrank)
+    call apply_traction(hex8_gnode,neq,extload,errcode,errtag)
+    if(errcode/=0)call error_stop(errtag)
     if(myrank==0)write(*,*)'complete!'
   endif
 
@@ -209,7 +209,7 @@ if(s0_type==0)then
     allocate(wpressure(nnode),submerged_node(nnode))
     call compute_pressure(wpressure,submerged_node,errcode,   &
     errtag)
-    if(errcode/=0)call error_stop(errtag,stdout,myrank)
+    if(errcode/=0)call error_stop(errtag)
     ! write pore pressure file
 
     ! open Ensight Gold data file to store data
@@ -230,10 +230,10 @@ if(s0_type==0)then
   x=zero
   call pcg_solver(neq,nelmt,storekm,x,extload,     &
   dprecon,gdof_elmt,cg_iter,errcode,errtag)
-  if(errcode/=0)call error_stop(errtag,stdout,myrank)
+  if(errcode/=0)call error_stop(errtag)
   x(0)=zero
 
-  call elastic_stress(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,       &
+  call elastic_stress(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,dshape_hex8, &
   dlagrange_gll,x,stress_elmt)
   deallocate(extload,dprecon,x,storekm)
 elseif(s0_type==1)then
@@ -266,7 +266,8 @@ write(10,*)cg_maxiter,cg_tol,nl_maxiter,nl_tol
 write(10,*)'Number of SRFs'
 write(10,*)nsrf
 
-allocate(cohf_blk(nmatblk),nuf_blk(nmatblk),phif_blk(nmatblk),psif_blk(nmatblk),ymf_blk(nmatblk))
+allocate(cohf_blk(nmatblk),nuf_blk(nmatblk),phif_blk(nmatblk),                 &
+psif_blk(nmatblk),ymf_blk(nmatblk))
 
 if(myrank==0)then
   write(stdout,'(a,e12.4,a,i5)')'CG_TOL:',cg_tol,' CG_MAXITER:',cg_maxiter
@@ -290,7 +291,7 @@ write(10,*)'STEP, CGITER, NLITER, UXMAX, UMAX, fmax'
 close(10)
 
 allocate(excavload(nndof,nnode))
-allocate(ngpart_node(nnode))
+allocate(isnode_intact(nnode),ngpart_node(nnode))
 
 ! excavation-stage loop
 ! initilize
@@ -319,7 +320,7 @@ if(maxval(abs(stress_elmt)).gt.zero)then
 endif
 ! allocate and set intact plotting variables
 i_excav=0
-call save_data(ptail,format_str,i_excav,nnode,nodalu,scf,vmeps,stress_global)
+call save_data(format_str,i_excav,nnode,nodalu,scf,vmeps,stress_global)
 !----------------------------------------
 
 ! initalize intact elements and nodes
@@ -353,15 +354,15 @@ excavation_stage: do i_excav=1,nexcav
   allocate(elmt_intact(nelmt_intact),elmt_void(nelmt_void))
   ! find intact and void elements after excavation
   call intact_void_elmt(nexcavid(i_excav),excavid(id0:id1),ismat,nelmt_intact, &
-  nelmt_void,elmt_intact,elmt_void,isnode)
+  nelmt_void,elmt_intact,elmt_void)
 
   ! count intact and void nodes after excavation
-  nnode_intact=count(isnode)
+  nnode_intact=count(isnode_intact)
   nnode_void=nnode-nnode_intact
   allocate(node_intact(nnode_intact),node_void(nnode_void))
   ! find intact and void nodes after excavation
-  call intact_void_node(isnode,nnode_intact,nnode_void,node_intact,node_void,  &
-  nmir)
+  call intact_void_node(isnode_intact,nnode_intact,nnode_void,node_intact,     &
+  node_void,nmir)
 
   tot_nelmt=sumscal(nelmt_intact); tot_nnode=sumscal(nnode_intact)
   max_nelmt=maxscal(nelmt_intact); max_nnode=maxscal(nnode_intact)
@@ -435,7 +436,7 @@ excavation_stage: do i_excav=1,nexcav
   close(funit)
 
   ! reallocate those arrays whose size depend on the neq
-  allocate(load(0:neq),bodyload(0:neq),extload(0:neq),oldx(0:neq),x(0:neq), &
+  allocate(load(0:neq),bodyload(0:neq),extload(0:neq),oldx(0:neq),x(0:neq),    &
   dprecon(0:neq),storekm(nedof,nedof,nelmt_intact),stat=istat)
   if (istat/=0)then
     write(stdout,*)'ERROR: cannot allocate memory!'
@@ -443,31 +444,32 @@ excavation_stage: do i_excav=1,nexcav
   endif
 
   ! modify ghost partitions after excavation
-  call modify_ghost(isnode)
-  call count_active_nghosts(ngpart_node)
+  call modify_ghost()
+  call count_active_nghosts()
 
   excavload=zero; extload=zero; ! extload1=zero
 
-  allocate(stress_intact(nst,ngll,nelmt_intact),stress_void(nst,ngll,nelmt_void))
+  allocate(stress_intact(nst,ngll,nelmt_intact),                               &
+  stress_void(nst,ngll,nelmt_void))
   stress_intact=zero
   stress_void=zero
 
   stress_void=stress_elmt(:,:,elmt_void)
   ! compute excavation load at gdofs
-  !call excavation_load(nelmt_void,neq,gnod,g_num(:,elmt_void),                &
+  !call excavation_load(nelmt_void,neq,hex8_gnode,g_num(:,elmt_void),          &
   !gdof_elmt(:,elmt_void), &
   !mat_id(elmt_void),dshape_hex8,dlagrange_gll,gll_weights, &
   !stress_elmt(:,:,elmt_void),extload)
 
   ! compute excavation load at nodes
-  call excavation_load_nodal(nelmt_void,gnod,g_num(:,elmt_void),               &
+  call excavation_load_nodal(nelmt_void,hex8_gnode,g_num(:,elmt_void),         &
   mat_id(elmt_void),dshape_hex8,dlagrange_gll,gll_weights,                     &
   stress_void,excavload)
 
   ! if the excavation load is discarded by the partition (it can happens due to
   ! the special combination of partition geometry and excavation geoemtry) it
   ! should be distributed equally to the active sharing partitions.
-  call distribute2ghosts(gdof,nndof,neq,ngpart_node,excavload,extload)
+  call distribute2ghosts(gdof,nndof,neq,excavload,extload)
 !#else
 !  ! store nodal values to gdof locations
 !  do j=1,nnode
@@ -489,7 +491,7 @@ excavation_stage: do i_excav=1,nexcav
 
   ! compute stiffness matrix
   gravity=.false.; pseudoeq=.false.
-  call stiffness_bodyload(nelmt_intact,neq,gnod,g_num(:,elmt_intact),          &
+  call stiffness_bodyload(nelmt_intact,neq,hex8_gnode,g_num(:,elmt_intact),    &
   gdof_elmt(:,elmt_intact),mat_id(elmt_intact),gam_blk,nuf_blk,ym_blk,         &
   dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon)
   !,extload,gravity,pseudoeq)
@@ -522,12 +524,12 @@ excavation_stage: do i_excav=1,nexcav
     !x=zero
     call pcg_solver(neq,nelmt_intact,storekm,x,load,      &
     dprecon,gdof_elmt(:,elmt_intact),cg_iter,errcode,errtag)
-    if(errcode/=0)call error_stop(errtag,stdout,myrank)
+    if(errcode/=0)call error_stop(errtag)
     cg_tot=cg_tot+cg_iter
     x(0)=zero
 
     if(allelastic)then
-      call elastic_stress_intact(nelmt_intact,neq,gnod,elmt_intact,            &
+      call elastic_stress_intact(nelmt_intact,neq,hex8_gnode,elmt_intact,      &
       g_num(:,elmt_intact),gdof_elmt(:,elmt_intact),mat_id(elmt_intact),       &
       dshape_hex8,dlagrange_gll,x,stress_intact)
 
@@ -547,7 +549,7 @@ excavation_stage: do i_excav=1,nexcav
       imat=mat_id(ielmt)
       call compute_cmat(cmat,ym_blk(imat),nuf_blk(imat))
       num=g_num(:,ielmt)
-      coord=transpose(g_coord(:,num(gnod)))
+      coord=transpose(g_coord(:,num(hex8_gnode)))
       egdof=gdof_elmt(:,ielmt)
       eld=x(egdof)
       bload=zero
@@ -616,7 +618,7 @@ excavation_stage: do i_excav=1,nexcav
     fmax=maxscal(fmax)
     uxmax=maxvec(abs(x))
     if(myrank==0)then
-      write(stdout,'(a,a,i4,a,i4,a,f12.6,a,f12.6,a,f12.6)',advance='no')CR,    &
+      write(stdout,'(a,i4,a,i4,a,f12.6,a,f12.6,a,f12.6)')    &
       ' ninc:',i_inc,' nl_iter:',nl_iter,' f_max:',fmax,' uerr:',uerr,' umax:',&
       uxmax
     endif
@@ -681,8 +683,8 @@ excavation_stage: do i_excav=1,nexcav
   vmeps_intact=vmeps(node_intact)
   stress_global_intact=stress_global(:,node_intact)
 
-  call save_data(ptail,format_str,i_excav,nnode_intact,nodalu_intact,          &
-  scf_intact,vmeps_intact,stress_global_intact)
+  call save_data(format_str,i_excav,nnode_intact,nodalu_intact,scf_intact,     &
+  vmeps_intact,stress_global_intact)
 
   deallocate(nodalu_intact,scf_intact,vmeps_intact,stress_global_intact)
 
@@ -699,9 +701,12 @@ enddo excavation_stage ! i_excav time stepping loop
 !-------------------------------------------------------------------------------
 ENDDO SRF_LOOP ! i_srf safety factor loop
 deallocate(mat_id,gam_blk,ym_blk,coh_blk,nu_blk,phi_blk,psi_blk,srf)
-deallocate(excavload,g_coord,g_num,isnode,nmir)
+deallocate(excavload,g_coord,g_num,nmir)
+deallocate(isnode_intact,ngpart_node)
 call free_ghost()
 
 return
-end subroutine semexcav3d
+end subroutine excavation3d
+!===============================================================================
+end module excavation
 !===============================================================================

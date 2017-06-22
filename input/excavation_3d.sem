@@ -16,3 +16,6 @@ material: matfile='excavation_3d_material_list'
 
 #control parameters
 control: cg_tol=1e-8, cg_maxiter=5000, nl_tol=1e-5, nl_maxiter=5000, nsrf=1, srf=1.0, nexcav=3, excavid=2 3 4, ninc=10
+
+# save information
+save: disp=1

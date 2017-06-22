@@ -1,5 +1,5 @@
 \chapter{Getting started}
-\label{chap:2}
+\label{chap:start}
 \section{Package structure}
 The original \pack\ package comes in a single compressed file \linebreak\texttt{\pack.tar.gz}, which can be extracted using \texttt{tar} command:\\
 
@@ -27,7 +27,7 @@ or using, for example, \texttt{7-zip (www.7-zip.org)} under WINDOWS. The package
 \begin{itemize}[-]
   \item \underline{CMake build system}. The CMake version $\ge$ 2.8.4 is necessary to configure the software. It is free and open-source, and can be downloaded from \texttt{www.cmake.org}. In order to check if the CMake is already installed, type\\
   \texttt{cmake -{}-version}
-  
+
   \item \underline{Make utility}. The make utility is necessary to build the software using Makefile. This utility is usually installed by default in most LINUX systems. Under WINDOWS, one can use Cygwin (\texttt{www.cygwin.com}) or MinGW (\texttt{www.mingw.org}) to install the make utility.  In order to check if the CMake is already installed, type\\
   \texttt{make -{}-version}
   \item \underline{A recent FORTRAN compiler}. The software is written mainly in FORTRAN 90, but it also uses a few FORTRAN 2003 features (e.g., streaming IO). These features are already available in most of the FORTRAN compilers, e.g., gfortran version $\ge$ 4.2 (\texttt{gcc.gnu.org/wiki/GFortran}) and g95 (\texttt{www.g95.org}).
@@ -94,9 +94,9 @@ Following are the main CMake variables for the \pack\ (See Figure~\ref{fig:cmake
 \begin{adescription}{BUILD\_UTILITIES\_EXODUS2SEM}
 \item[BUILD\_DOCUMENTATION]           : If \texttt{ON}, the user manual (this file) is created. The default is \texttt{OFF}.
 \item[BUILD\_PARTMESH]                : If \texttt{ON}, the \texttt{partmesh} program is built. The default is \texttt{OFF}. The \texttt{partmesh} program is necessary to partition the mesh for parallel processing.
-\item[BUILD\_EXODUS2SEMGEOTECH]   : If \texttt{ON}, the \texttt{exodus2semgeotech} program is built. The default is \texttt{OFF}. The \texttt{exodus2semgeotech} program convert exodus mesh file to input files required by the \pack\ package (see also Chapter~\ref{chap:utilities}).
-\item[BUILD\_GID2SEMGEOTECH]   : If \texttt{ON}, the \texttt{gid2semgeotech} program is built. The default is \texttt{OFF}. The \texttt{gid2semgeotech} program convert GiD mesh file to input files required by the \pack\ package (see also Chapter~\ref{chap:utilities}).
-\item[BUILD\_WRITE\_SOS]   : If \texttt{ON}, the \texttt{write\_sos} program is built. The default is \texttt{OFF}. The \texttt{write\_sos} program writes a EnSight SOS file necessary for the parallel visualization (see also Chapter~\ref{chap:utilities}).
+\item[BUILD\_EXODUS2SEMGEOTECH]   : If \texttt{ON}, the \texttt{exodus2semgeotech} program is built. The default is \texttt{OFF}. The \texttt{exodus2semgeotech} program convert exodus mesh file to input files required by the \pack\ package (see also Chapter~\ref{chap:util}).
+\item[BUILD\_GID2SEMGEOTECH]   : If \texttt{ON}, the \texttt{gid2semgeotech} program is built. The default is \texttt{OFF}. The \texttt{gid2semgeotech} program convert GiD mesh file to input files required by the \pack\ package (see also Chapter~\ref{chap:util}).
+\item[BUILD\_WRITE\_SOS]   : If \texttt{ON}, the \texttt{write\_sos} program is built. The default is \texttt{OFF}. The \texttt{write\_sos} program writes a EnSight SOS file necessary for the parallel visualization (see also Chapter~\ref{chap:util}).
 \item[ENABLE\_MPI]                    : If \texttt{ON}, the main parallel program \texttt{psemgeotech} is built otherwise main serial program \texttt{semgeotech} is built. The default is \texttt{OFF}.
 \item[SCOTCH\_LIBRARY\_PATH]          : This is required if \texttt{BUILD\_PARTMESH} is \texttt{ON}. If not found automatically, it can be set manually.
 \item[CMAKE\_Fortran\_COMPILER]       : This defines the Fortran compiler. If not found automatically or the automatically found compiler is not correct, it can be set manually.

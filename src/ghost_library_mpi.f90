@@ -101,7 +101,7 @@ write(fname, fmt=format_str)trim(part_path)//trim(gfile)//'_proc',myrank
 open(unit=11,file=trim(fname),status='old',action='read',iostat = istat)
 if( istat /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
-  call error_stop(errtag,stdout,myrank)
+  call error_stop(errtag)
 endif
 
 read(11,*) ! skip 1 line
@@ -109,7 +109,7 @@ read(11,*)mrank ! master partition ID
 
 if(mrank/=myrank)then
   write(errtag,*)'ERROR: wrong gpart file partition ',mrank,' !'
-  call error_stop(errtag,stdout,myrank)
+  call error_stop(errtag)
 endif
 
 read(11,*) ! skip 1 line
@@ -138,7 +138,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
   itmp_array=-1
   switch_node=.false.
   ncount=0
-  !call error_stop(errtag,stdout)
+  !call error_stop(errtag)
   do i_elmt=1,ngelmt ! ghost elements loop
     read(11,*)melmt,etype,eid;
 
@@ -162,7 +162,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
     else
       write(errtag,*)'ERROR: wrong etype:',etype,' for ghost partition ',      &
       mrank,'!'
-      call error_stop(errtag,stdout,myrank)
+      call error_stop(errtag)
     endif
 
     do k_g=kg0,kg1
@@ -207,7 +207,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
   deallocate(xp,yp,zp)
   if(ncount/=new_ncount)then
     write(errtag,*)'ERROR: number of ghost nodes mismatched after sorting!'
-    call error_stop(errtag,stdout,myrank)
+    call error_stop(errtag)
   endif
 
   ! find ghost gdof
@@ -241,12 +241,10 @@ end subroutine prepare_ghost_gdof
 !===============================================================================
 
 ! modify ghost gdof based on the modified gdof
-subroutine modify_ghost(isnode)
-use global,only:nnode,nndof,gdof
-
+subroutine modify_ghost()
+use global,only:nndof,gdof
+use excavation_library,only:isnode_intact
 implicit none
-logical,intent(in) :: isnode(nnode)
-
 integer :: i,i_gpart,ncount
 
 ! modify ghost gdof based on the modified gdof
@@ -254,7 +252,7 @@ do i_gpart=1,ngpart
   ncount=gpart(i_gpart)%nnode
   gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
   do i=1,ncount
-    gpart(i_gpart)%isnode(i)=isnode(gpart(i_gpart)%node(i))
+    gpart(i_gpart)%isnode(i)=isnode_intact(gpart(i_gpart)%node(i))
   enddo
 enddo ! do i_gpart
 return
@@ -440,13 +438,11 @@ end subroutine undo_unmatching_displacementBC
 ! interfaces.
 ! logical flag representing whether the nodes in the interfaces are intact or
 ! void has to be communicated across the processors
-subroutine count_active_nghosts(ngpart_node)
+subroutine count_active_nghosts()
 use mpi
-use global,only:nnode
-implicit none
-! number of active ghost partitions for a node
-integer,dimension(nnode),intent(out) :: ngpart_node
+use excavation_library,only:ngpart_node
 ! only the interfacial nodes can be saved for the storage (TODO)
+implicit none
 
 logical,dimension(maxngnode,ngpart) :: lsend_array,lrecv_array
 integer,parameter :: tag=0
@@ -491,20 +487,18 @@ call sync_process()
 
 return
 end subroutine count_active_nghosts
-!=======================================================
+!===============================================================================
 
 ! this subroutine distributes the excavation loads discarded by a processors due
 ! to the special geoemtry partition. it will not distribute if the load is used
 ! within the partition
-subroutine distribute2ghosts(gdof,nndof,neq,ngpart_node, &
-array,array_g)
+subroutine distribute2ghosts(gdof,nndof,neq,array,array_g)
 use mpi
 use global,only:nnode
+use excavation_library,only:ngpart_node
 implicit none
 integer,intent(in) :: nndof,neq
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
-! number of active ghost partitions for a node
-integer,dimension(nnode),intent(in) :: ngpart_node
 real(kind=kreal),dimension(nndof,nnode),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
 

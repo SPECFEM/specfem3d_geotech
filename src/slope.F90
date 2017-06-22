@@ -1,3 +1,8 @@
+module slope
+!this module contains main slope stability routines
+contains
+
+!-------------------------------------------------------------------------------
 ! this is a main routine for slope stabiliy analysis
 ! this program was originally based on the book "Programming the finite element
 ! method" Smith and Griffiths (2004)
@@ -5,7 +10,7 @@
 !   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
-subroutine semslope3d(ismpi,gnod,sum_file,ptail,format_str)
+subroutine slope3d(sum_file,format_str)
 ! import necessary libraries
 use global
 use string_library, only : parse_file
@@ -13,6 +18,7 @@ use math_constants
 use gll_library
 use shape_library
 use math_library
+use element,only:hex8_gnode
 use elastic
 use preprocess
 use plastic_library
@@ -29,10 +35,8 @@ use solver
 use visual
 use postprocess
 implicit none
-logical,intent(in) :: ismpi
-integer,intent(in) :: gnod(8)
 character(len=250),intent(in) :: sum_file
-character(len=20),intent(in) :: ptail,format_str
+character(len=20),intent(in) :: format_str
 
 integer :: i,ios,istat,j,neq
 integer :: i_elmt,i_node,i_srf,ielmt,imat,inode
@@ -49,7 +53,8 @@ flow(nst,nst),m1(nst,nst),m2(nst,nst),m3(nst,nst),effsigma(nst),sigma(nst)
 ! dynamic arrays
 integer,allocatable::gdof_elmt(:,:),num(:),node_valency(:)
 ! factored parameters
-real(kind=kreal),allocatable :: cohf_blk(:),nuf_blk(:),phif_blk(:),psif_blk(:),ymf_blk(:)
+real(kind=kreal),allocatable :: cohf_blk(:),nuf_blk(:),phif_blk(:),psif_blk(:),&
+ymf_blk(:)
 real(kind=kreal),allocatable::bodyload(:),bmat(:,:),bload(:),coord(:,:),       &
 der(:,:),deriv(:,:),dprecon(:),eld(:),eload(:),evpt(:,:,:),                    &
 extload(:),jac(:,:),load(:),nodalu(:,:),storekm(:,:,:),oldx(:),x(:),            &
@@ -75,7 +80,6 @@ logical :: gravity,pseudoeq ! gravity load and pseudostatic load
 real(kind=kreal),allocatable :: wpressure(:) ! water pressure
 logical,allocatable :: submerged_node(:)
 
-!logical :: ismpi !.true. : MPI, .false. : serial
 integer :: tot_neq,max_neq,min_neq
 ! number of active ghost partitions for a node
 character(len=250) :: errtag ! error message
@@ -91,8 +95,8 @@ if (istat/=0)then
   stop
 endif
 gdof=1
-call apply_bc(ismpi,neq,errcode,errtag)
-if(errcode/=0)call error_stop(errtag,stdout,myrank)
+call apply_bc(neq,errcode,errtag)
+if(errcode/=0)call error_stop(errtag)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
 
@@ -119,7 +123,7 @@ call zwgljd(zetagll,wzgll,ngllz,jacobi_alpha,jacobi_beta)
 
 ! get derivatives of shape functions for 8-noded hex
 allocate(dshape_hex8(ndim,ngnode,ngll))
-call dshape_function_hex8(ngnode,ngllx,nglly,ngllz,xigll,etagll,zetagll,   &
+call dshape_function_hex8(ngnode,ngllx,nglly,ngllz,xigll,etagll,zetagll,       &
 dshape_hex8)
 deallocate(xigll,wxgll,etagll,wygll,zetagll,wzgll)
 ! compute gauss-lobatto-legendre quadrature information
@@ -152,17 +156,17 @@ if (istat/=0)then
   stop
 endif
 extload=zero; gravity=.true.; pseudoeq=iseqload
-call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam_blk,nu_blk,  &
-ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon,extload,gravity,   &
-pseudoeq)
+call stiffness_bodyload(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,gam_blk,   &
+nu_blk,ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon,extload,   &
+gravity,pseudoeq)
 
 if(myrank==0)write(stdout,*)'complete!'
 
 ! apply traction boundary conditions
 if(istraction)then
   if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
-  call apply_traction(ismpi,gnod,neq,extload,errcode,errtag)
-  if(errcode/=0)call error_stop(errtag,stdout,myrank)
+  call apply_traction(hex8_gnode,neq,extload,errcode,errtag)
+  if(errcode/=0)call error_stop(errtag)
   if(myrank==0)write(*,*)'complete!'
 endif
 
@@ -171,7 +175,7 @@ if(iswater)then
   if(myrank==0)write(stdout,'(a)',advance='no')'computing water pressure...'
   allocate(wpressure(nnode),submerged_node(nnode))
   call compute_pressure(wpressure,submerged_node,errcode,errtag)
-  if(errcode/=0)call error_stop(errtag,stdout,myrank)
+  if(errcode/=0)call error_stop(errtag)
   ! write pore pressure file
 
   ! open Ensight Gold data file to store data
@@ -223,7 +227,8 @@ if (istat/=0)then
   stop
 endif
 
-allocate(cohf_blk(nmatblk),nuf_blk(nmatblk),phif_blk(nmatblk),psif_blk(nmatblk),ymf_blk(nmatblk))
+allocate(cohf_blk(nmatblk),nuf_blk(nmatblk),phif_blk(nmatblk),                 &
+psif_blk(nmatblk),ymf_blk(nmatblk))
 
 if(myrank==0)then
   write(stdout,'(a,e12.4,a,i5)')'CG_TOL:',cg_tol,' CG_MAXITER:',cg_maxiter
@@ -255,8 +260,9 @@ srf_loop: do i_srf=1,nsrf
     ! in future this should be changed so that only the elements with changed
     ! material properties are involved
     dprecon=zero
-    call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam_blk,nuf_blk, &
-    ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon)
+    call stiffness_bodyload(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,       &
+    gam_blk,nuf_blk,ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,      &
+    dprecon)
 
     ! assemble from ghost partitions
     call assemble_ghosts(neq,dprecon,dprecon)
@@ -284,15 +290,15 @@ srf_loop: do i_srf=1,nsrf
 
     ! pcg solver
     !x=zero
-    call pcg_solver(neq,nelmt,storekm,x,load,dprecon, &
-    gdof_elmt,cg_iter,errcode,errtag)
-    if(errcode/=0)call error_stop(errtag,stdout,myrank)
+    call pcg_solver(neq,nelmt,storekm,x,load,dprecon,gdof_elmt,cg_iter,        &
+    errcode,errtag)
+    if(errcode/=0)call error_stop(errtag)
     cg_tot=cg_tot+cg_iter
     x(0)=zero
 
     if(allelastic)then
-      call elastic_stress(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,   &
-      dlagrange_gll,x,stress_elmt)
+      call elastic_stress(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,         &
+      dshape_hex8,dlagrange_gll,x,stress_elmt)
 
       exit plastic
     endif
@@ -309,7 +315,7 @@ srf_loop: do i_srf=1,nsrf
 
       call compute_cmat(cmat,ym_blk(imat),nuf_blk(imat))
       num=g_num(:,ielmt)
-      coord=transpose(g_coord(:,num(gnod)))
+      coord=transpose(g_coord(:,num(hex8_gnode)))
       egdof=gdof_elmt(:,ielmt)
       eld=x(egdof)
 
@@ -364,7 +370,8 @@ srf_loop: do i_srf=1,nsrf
           ! update stresses
           stress_elmt(:,i,ielmt)=effsigma
           !phif_blkr=atan(tnph/srf(i_srf))
-          !sf=(sigm*sin(phif_blkr)-cohf_blk*cos(phif_blkr))/(-dsbar*(cos(lode_theta)/      &
+          !sf=(sigm*sin(phif_blkr)-cohf_blk*cos(phif_blkr))/&
+          !(-dsbar*(cos(lode_theta)/      &
           !sqrt(r3)-sin(lode_theta)*sin(phif_blkr)/r3))
           !if(sf<scf(num(i)))scf(num(i))=sf
         endif
@@ -378,7 +385,7 @@ srf_loop: do i_srf=1,nsrf
     fmax=maxscal(fmax)
     uxmax=maxvec(abs(x))
     if(myrank==0)then
-      write(stdout,'(a,a,i4,a,f12.6,a,f12.6,a,f12.6)',advance='no')CR, &
+      write(stdout,'(a,i4,a,f12.6,a,f12.6,a,f12.6)') &
       ' nl_iter:',nl_iter,' f_max:',fmax,' uerr:',uerr,' umax:',uxmax
     endif
     if(nl_isconv.or.nl_iter==nl_maxiter)exit
@@ -425,11 +432,11 @@ srf_loop: do i_srf=1,nsrf
   ! compute average stress at sharing nodes
   do i_node=1,nnode
     inode=i_node
-    stress_global(:,inode)=stress_global(:,inode)/real(node_valency(inode),kreal)
+    stress_global(:,inode)=stress_global(:,inode)/real(node_valency(inode),    &
+                                                      kreal)
   enddo
 
-  call save_data(ptail,format_str,i_srf,nnode,nodalu,scf,vmeps,          &
-  stress_global)
+  call save_data(format_str,i_srf,nnode,nodalu,scf,vmeps,stress_global)
 
   if(nl_iter==nl_maxiter)exit
 
@@ -440,5 +447,7 @@ deallocate(load,bodyload,extload,oldx,x,dprecon,storekm,stat=istat)
 call free_ghost()
 
 return
-end subroutine semslope3d
+end subroutine slope3d
+!===============================================================================
+end module slope
 !===============================================================================

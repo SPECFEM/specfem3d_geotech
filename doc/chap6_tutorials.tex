@@ -1,9 +1,9 @@
 \chapter{Tutorials}
-\label{chap:tutorials}
+\label{chap:tut}
 
 %\section[Building a slope model from scratch]{Building and simulation of a slope model using CUBIT/Trelis and SPECFEM3D\_GEOTECH}
 \section{Building a slope model from scratch: Serial run}
-\label{sec:cubit}
+\label{sec:scubit}
 
 \begin{figure}[ht]
 \centering
@@ -161,7 +161,7 @@ go to SPECFEM3D\_GEOTECH folder in terminal and type\\
 \\
 \texttt{./bin/semgeotech ./input/cubit\_example.sem}\\
 \\
-\textbf{\emph{Note}}: You must have compiled SPECFEM3D\_GEOTECH. For more detail please see Chapter~\ref{chap:2}.
+\textbf{\emph{Note}}: You must have compiled SPECFEM3D\_GEOTECH. For more detail please see Chapter~\ref{chap:start}.
 
 \subsection*{Step 9: Visualize result}
 
@@ -177,10 +177,12 @@ Start ParaView. Open "\texttt{output/cubit\_example.case}" file and press "Apply
 \textbf{\emph{Note}}: You must have installed ParaView. ParaView is a free opensource visualization software which
 can be downloaded from \texttt{http://www.paraview.org/}.
 
-\section{Building a slope model from scratch: Parallel run}
-\label{sec:cubit}
+\newpage
 
-We can run the same model in parallel. You must have compiled the parallel version of the SPECFEM3D\_GEOTECH (See Chapter~\ref{chap:2}).\\
+\section{Building a slope model from scratch: Parallel run}
+\label{sec:pcubit}
+
+We can run the same model in parallel. You must have compiled the parallel version of the SPECFEM3D\_GEOTECH (See Chapter~\ref{chap:start}).\\
 \\
 \begin{figure}[ht]
 \centering
@@ -242,7 +244,7 @@ go to SPECFEM3D\_GEOTECH folder in terminal and type\\
 \\
 It will produce several files in \texttt{partition/} folder.\\
 \\
-\textbf{\emph{Note}}: You must have compiled \texttt{partmesh} tool. For more detail please see Chapter~\ref{chap:2}.
+\textbf{\emph{Note}}: You must have compiled \texttt{partmesh} tool. For more detail please see Chapter~\ref{chap:start}.
 
 \subsection*{Step 9: Run prgroam}
 
@@ -253,11 +255,11 @@ go to SPECFEM3D\_GEOTECH folder in terminal and type\\
 If your cluster has the job submition system, you must use the appropriate job submission script.\\
 \\
 
-\textbf{\emph{Note}}: You must have compiled parallel SPECFEM3D\_GEOTECH. For more detail please see Chapter~\ref{chap:2}.
+\textbf{\emph{Note}}: You must have compiled parallel SPECFEM3D\_GEOTECH. For more detail please see Chapter~\ref{chap:start}.
 
 \subsection*{Step 10: Visualize result}
 
-Start ParaView. Open all (Eight for this tutorial) case files "\texttt{output/cubit\_example\_proc0.case}", "\texttt{output/cubit\_example\_proc1.case}", ad so on. Press "Apply" button. From "Filters" menu select \sq{Alphabetical} $\Rightarrow$ \sq{Group Datasets}. From "Coloring" dropdown list, select \sq{displacement} to color, and you will see the Figure~\ref{fig:pardisp}\\
+Start ParaView. Open all (Eight for this tutorial) case files "\texttt{output/cubit\_example\_proc0.case}", "\texttt{output/cubit\_example\_proc1.case}", ad so on. Press "Apply" button. Select all files in the \sq{Pipeline Browser}. From "Filters" menu select \sq{Alphabetical} $\Rightarrow$ \sq{Group Datasets}. Press "Apply" button. From "Coloring" dropdown list, select \sq{displacement} to color, and you will see the Figure~\ref{fig:pardisp}\\
 \\
 \begin{figure}[ht]
 \centering

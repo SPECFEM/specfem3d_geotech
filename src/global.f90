@@ -47,12 +47,15 @@ end module conversion_constants
 module global
 use set_precision
 implicit none
+logical :: ismpi !.true. : MPI, .false. : serial
+character(len=20) :: ptail
 logical,parameter :: off=.false., on=.true.
 character(len=3) :: method
 integer,parameter :: ndim=3
 integer,parameter :: nndof=3 ! number of nodal degree of freedoms - ux, uy, uz
 ! number of gauss-lobatto-legendre points
 integer :: ngllx,nglly,ngllz,ngll
+integer :: ngllxy,ngllyz,ngllzx,maxngll2d
 integer,parameter :: ng=8 ! number of gauss points for FEM
 
 ! rank or ID of this processor (starts from 0), number of processors
@@ -115,7 +118,8 @@ end type savedata_options
 type(savedata_options) :: savedata
 
 ! others
-character(len=1),parameter :: CR=achar(13) ! carriage return to overwrite
+! this is no longer necessary with new compilers!! OBSOLETE
+!character(len=1),parameter :: CR=achar(13) ! carriage return to overwrite
 !previous line
 
 !character(len=80) :: phead
