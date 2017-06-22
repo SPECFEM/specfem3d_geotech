@@ -77,7 +77,7 @@ if(trim(arg1)==('--help'))then
   call close_process()
 elseif(trim(arg1)==('--version'))then
   if(myrank==0)then
-    write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.2'
+    write(stdout,'(a)')'SPECFEM3D_GEOTECH 1.2.0'
     write(stdout,'(a)')'This is free software; see the source for copying '
     write(stdout,'(a)')'conditions.  There is NO warranty; not even for '
     write(stdout,'(a)')'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.'

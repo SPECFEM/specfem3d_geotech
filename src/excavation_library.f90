@@ -16,7 +16,7 @@ contains
 ! intact and void regions
 subroutine intact_void_elmt(nexcavid,excavid,ismat,nelmt_intact,nelmt_void,    &
 elmt_intact,elmt_void)
-use global,only:mat_id,nelmt,nnode,g_num,nmatblk
+use global,only:mat_id,nelmt,g_num,nmatblk
 implicit none
 integer,intent(in) :: nexcavid,nelmt_intact,nelmt_void
 integer,intent(in) :: excavid(nexcavid)

@@ -109,14 +109,12 @@ end subroutine count_active_nghosts
 ! this subroutine distributes the excavation loads discarded by a processors due
 ! to the special geoemtry partition. it will not distribute if the load is used
 ! within the partition
-subroutine distribute2ghosts(gdof,nndof,neq,ngpart_node, &
-array,array_g)
+subroutine distribute2ghosts(gdof,nndof,neq,array,array_g)
 use global,only:nnode
 implicit none
 integer,intent(in) :: nndof,neq
 integer,dimension(nndof,nnode),intent(in) :: gdof ! global degree of freedom
 ! number of active ghost partitions for a node
-integer,dimension(nnode),intent(in) :: ngpart_node
 real(kind=kreal),dimension(nndof,nnode),intent(in) :: array
 real(kind=kreal),dimension(0:neq),intent(out) :: array_g
 

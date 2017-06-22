@@ -1,5 +1,6 @@
 module excavation
 ! this module contains main excavation routines
+
 contains
 
 !-------------------------------------------------------------------------------
@@ -120,7 +121,7 @@ if (istat/=0)then
   stop
 endif
 gdof=1
-call apply_bc(ismpi,neq,errcode,errtag)
+call apply_bc(neq,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
@@ -148,7 +149,7 @@ call zwgljd(zetagll,wzgll,ngllz,jacobi_alpha,jacobi_beta)
 
 ! get derivatives of shape functions for 8-noded hex
 allocate(dshape_hex8(ndim,ngnode,ngll))
-call dshape_function_hex8(ngnode,ngllx,nglly,ngllz,xigll,etagll,zetagll,   &
+call dshape_function_hex8(ngnode,ngllx,nglly,ngllz,xigll,etagll,zetagll,       &
 dshape_hex8)
 deallocate(xigll,wxgll,etagll,wygll,zetagll,wzgll)
 ! compute gauss-lobatto-legendre quadrature information
@@ -197,7 +198,7 @@ if(s0_type==0)then
   ! apply traction boundary conditions
   if(istraction)then
     if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
-    call apply_traction(ismpi,hex8_gnode,neq,extload,errcode,errtag)
+    call apply_traction(hex8_gnode,neq,extload,errcode,errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myrank)
     if(myrank==0)write(*,*)'complete!'
   endif
@@ -265,7 +266,8 @@ write(10,*)cg_maxiter,cg_tol,nl_maxiter,nl_tol
 write(10,*)'Number of SRFs'
 write(10,*)nsrf
 
-allocate(cohf_blk(nmatblk),nuf_blk(nmatblk),phif_blk(nmatblk),psif_blk(nmatblk),ymf_blk(nmatblk))
+allocate(cohf_blk(nmatblk),nuf_blk(nmatblk),phif_blk(nmatblk),                 &
+psif_blk(nmatblk),ymf_blk(nmatblk))
 
 if(myrank==0)then
   write(stdout,'(a,e12.4,a,i5)')'CG_TOL:',cg_tol,' CG_MAXITER:',cg_maxiter
@@ -359,8 +361,8 @@ excavation_stage: do i_excav=1,nexcav
   nnode_void=nnode-nnode_intact
   allocate(node_intact(nnode_intact),node_void(nnode_void))
   ! find intact and void nodes after excavation
-  call intact_void_node(isnode_intact,nnode_intact,nnode_void,node_intact,node_void,  &
-  nmir)
+  call intact_void_node(isnode_intact,nnode_intact,nnode_void,node_intact,     &
+  node_void,nmir)
 
   tot_nelmt=sumscal(nelmt_intact); tot_nnode=sumscal(nnode_intact)
   max_nelmt=maxscal(nelmt_intact); max_nnode=maxscal(nnode_intact)
@@ -434,7 +436,7 @@ excavation_stage: do i_excav=1,nexcav
   close(funit)
 
   ! reallocate those arrays whose size depend on the neq
-  allocate(load(0:neq),bodyload(0:neq),extload(0:neq),oldx(0:neq),x(0:neq), &
+  allocate(load(0:neq),bodyload(0:neq),extload(0:neq),oldx(0:neq),x(0:neq),    &
   dprecon(0:neq),storekm(nedof,nedof,nelmt_intact),stat=istat)
   if (istat/=0)then
     write(stdout,*)'ERROR: cannot allocate memory!'
@@ -447,26 +449,27 @@ excavation_stage: do i_excav=1,nexcav
 
   excavload=zero; extload=zero; ! extload1=zero
 
-  allocate(stress_intact(nst,ngll,nelmt_intact),stress_void(nst,ngll,nelmt_void))
+  allocate(stress_intact(nst,ngll,nelmt_intact),                               &
+  stress_void(nst,ngll,nelmt_void))
   stress_intact=zero
   stress_void=zero
 
   stress_void=stress_elmt(:,:,elmt_void)
   ! compute excavation load at gdofs
-  !call excavation_load(nelmt_void,neq,hex8_gnode,g_num(:,elmt_void),                &
+  !call excavation_load(nelmt_void,neq,hex8_gnode,g_num(:,elmt_void),          &
   !gdof_elmt(:,elmt_void), &
   !mat_id(elmt_void),dshape_hex8,dlagrange_gll,gll_weights, &
   !stress_elmt(:,:,elmt_void),extload)
 
   ! compute excavation load at nodes
-  call excavation_load_nodal(nelmt_void,hex8_gnode,g_num(:,elmt_void),               &
+  call excavation_load_nodal(nelmt_void,hex8_gnode,g_num(:,elmt_void),         &
   mat_id(elmt_void),dshape_hex8,dlagrange_gll,gll_weights,                     &
   stress_void,excavload)
 
   ! if the excavation load is discarded by the partition (it can happens due to
   ! the special combination of partition geometry and excavation geoemtry) it
   ! should be distributed equally to the active sharing partitions.
-  call distribute2ghosts(gdof,nndof,neq,ngpart_node,excavload,extload)
+  call distribute2ghosts(gdof,nndof,neq,excavload,extload)
 !#else
 !  ! store nodal values to gdof locations
 !  do j=1,nnode
@@ -488,7 +491,7 @@ excavation_stage: do i_excav=1,nexcav
 
   ! compute stiffness matrix
   gravity=.false.; pseudoeq=.false.
-  call stiffness_bodyload(nelmt_intact,neq,hex8_gnode,g_num(:,elmt_intact),          &
+  call stiffness_bodyload(nelmt_intact,neq,hex8_gnode,g_num(:,elmt_intact),    &
   gdof_elmt(:,elmt_intact),mat_id(elmt_intact),gam_blk,nuf_blk,ym_blk,         &
   dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon)
   !,extload,gravity,pseudoeq)
@@ -526,7 +529,7 @@ excavation_stage: do i_excav=1,nexcav
     x(0)=zero
 
     if(allelastic)then
-      call elastic_stress_intact(nelmt_intact,neq,hex8_gnode,elmt_intact,            &
+      call elastic_stress_intact(nelmt_intact,neq,hex8_gnode,elmt_intact,      &
       g_num(:,elmt_intact),gdof_elmt(:,elmt_intact),mat_id(elmt_intact),       &
       dshape_hex8,dlagrange_gll,x,stress_intact)
 
@@ -680,8 +683,8 @@ excavation_stage: do i_excav=1,nexcav
   vmeps_intact=vmeps(node_intact)
   stress_global_intact=stress_global(:,node_intact)
 
-  call save_data(format_str,i_excav,nnode_intact,nodalu_intact,          &
-  scf_intact,vmeps_intact,stress_global_intact)
+  call save_data(format_str,i_excav,nnode_intact,nodalu_intact,scf_intact,     &
+  vmeps_intact,stress_global_intact)
 
   deallocate(nodalu_intact,scf_intact,vmeps_intact,stress_global_intact)
 

@@ -33,7 +33,6 @@ if( ios /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
   return
 endif
-
 bcux: do
   read(11,*,iostat=ios)bctype,val
   if(ios/=0)exit

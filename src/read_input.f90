@@ -130,15 +130,15 @@ do
   ! check for line continuation
   tag=''
   do
-    call last_char(line,tmp_char,ind) 
+    call last_char(line,tmp_char,ind)
     if(tmp_char.eq.'&')line(ind:ind)=''
-    tag=trim(tag)//trim(line)    
+    tag=trim(tag)//trim(line)
     if(tmp_char.ne.'&')exit
     read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
     if(ios /= 0)then
       write(errtag,'(a)')'ERROR: line continuation incomplete!'
       return
-    endif    
+    endif
   enddo
   call first_token(tag,token)
 

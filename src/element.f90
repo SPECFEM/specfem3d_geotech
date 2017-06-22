@@ -6,11 +6,11 @@ integer,parameter :: map2exodus(8)=(/ 1,2,4,3,5,6,8,7 /)
 integer :: hex8_gnode(8)
 real(kind=kreal) :: hexface_sign(6)
 ! face sign or normal orientation (outward +, inward -)
-                                                                                 
-type hex_faces                                                                     
+
+type hex_faces
   integer,allocatable :: node(:)
-  integer :: gnode(4) ! geometric (corner) nodes only                                       
-end type hex_faces                                                                 
+  integer :: gnode(4) ! geometric (corner) nodes only
+end type hex_faces
 type (hex_faces) :: hexface(6)
 
 contains

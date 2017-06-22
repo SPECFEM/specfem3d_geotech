@@ -12,6 +12,8 @@ The software currently does not include an inbuilt mesher. Existing tools, such 
 
 \section{Status summary}
 \begin{desclist}{Pseudo-static earthquake loading}
+\item[Serial run]        : Yes
+\item[Parallel run with MPI]        : Yes
 \item[Slope stability analysis]        : Yes
 \item[Multistage excavation]           : Yes
 \item[Gravity loading]                 : Yes
@@ -21,5 +23,15 @@ The software currently does not include an inbuilt mesher. Existing tools, such 
 \item[Automatic factor of safety]      : No
 \end{desclist}
 
-\section*{Last revision}
-June 19, 2017
+\section{Changes made since the last version}
+\begin{itemize}
+\item File format of the displacement boundary conditions has changed (See Section~\ref{subsec:dispbc}).
+\item Now the program can be run from any locations.
+\item Main routines are modularized in preparation to add other features in coming versions.
+\item Removed all instances of run time warning for temporary arrays.
+\item Added step-by-step tutorials for both serial and parallel runs.
+\item Added GiD mesh converter.
+\item Improved EXODUS mesh converter.
+\item Fixed several minor bugs.
+\item Structural change and overall code cleanup.
+\end{itemize}
