@@ -10,6 +10,7 @@
 subroutine compute_pressure(wpressure,submerged_node,errcode,errtag)
 use global
 use math_library,only:determinant
+use element,only:hexface
 implicit none
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
@@ -19,14 +20,12 @@ real(kind=kreal) :: A,B,C,D ! coefficients of a plane
 real(kind=kreal) :: v1(3),v2(3),xf(3,4),xp(3),xmin,xmax,ymin,ymax,zmin,zmax
 real(kind=kreal) :: rx1,rx2,z1,z2,z
 integer :: rdir !(1: X-axis, 2: Y-axis, 3: Z-axis)
-integer :: i,j,k,i1,i2,i3,i4,i5,i6,inod,i_elmt,i_face,i_node,ios
-integer :: ngllxy,ngllyz,ngllzx
+integer :: i,i_elmt,i_face,i_node,ios
 ! water surface segments
 integer :: i_wsurf,nwsurf ! number of water table surfaces
 ! unit weight of water
 real(kind=kreal),parameter :: zero=0.0_kreal,gamw=9.81_kreal !KN/m3
 
-character(len=20) :: ptail
 character(len=250) :: fname
 character(len=150) :: data_path
 
@@ -39,12 +38,6 @@ type water_surface
   integer,allocatable :: ielmt(:),iface(:)
 end type water_surface
 type(water_surface),allocatable :: wsurf(:)
-! faces of a hexahedron
-type faces
-  integer,allocatable :: nod(:)
-  integer :: gnod(4) ! 4 corner nodes only
-end type faces
-type (faces) :: face(6) ! hexahedral element has 6 faces
 
 errtag="ERROR: unknown!"
 errcode=-1
@@ -53,83 +46,6 @@ errcode=-1
 data_path=trim(inp_path)
 
 wsurf_mesh=.false.
-
-! all processors read only one water file from the input folder
-ptail=""
-
-ngllxy=ngllx*nglly
-ngllyz=nglly*ngllz
-ngllzx=ngllz*ngllx
-
-! segment just below can be computed only once!!
-! it is computed in apply_bc,compute_pressure, and apply_traction!!!
-allocate(face(1)%nod(ngllzx),face(3)%nod(ngllzx))
-allocate(face(2)%nod(ngllyz),face(4)%nod(ngllyz))
-allocate(face(5)%nod(ngllxy),face(6)%nod(ngllxy))
-! local node numbers for the faces. faces are numbered in exodus/CUBIT
-! convention,but the node numbers follow the incremental indicial convention
-inod=0
-i1=0; i2=0; i3=0; i4=0; i5=0; i6=0
-do k=1,ngllz
-  do j=1,nglly
-    do i=1,ngllx
-      inod=inod+1
-      if (i==1)then
-        ! face 4
-        i4=i4+1
-        face(4)%nod(i4)=inod
-      endif
-      if (i==ngllx)then
-        ! face 2
-        i2=i2+1
-        face(2)%nod(i2)=inod
-      endif
-      if (j==1)then
-        ! face 1
-        i1=i1+1
-        face(1)%nod(i1)=inod
-      endif
-      if (j==nglly)then
-        ! face 3
-        i3=i3+1
-        face(3)%nod(i3)=inod
-      endif
-      if (k==1)then
-        ! face 5
-        i5=i5+1
-        face(5)%nod(i5)=inod
-      endif
-      if (k==ngllz)then
-        ! face 6
-        i6=i6+1
-        face(6)%nod(i6)=inod
-      endif
-    enddo
-  enddo
-enddo
-
-! find corners nodes
-do i_face=1,6 ! there are 6 faces in a hexahedron
-  if(i_face==1 .or. i_face==3)then ! ZX plane
-    face(i_face)%gnod(1)=face(i_face)%nod(1)
-    face(i_face)%gnod(2)=face(i_face)%nod(ngllx)
-    face(i_face)%gnod(3)=face(i_face)%nod(ngllzx)
-    face(i_face)%gnod(4)=face(i_face)%nod(ngllzx-ngllx+1)
-  elseif(i_face==2 .or. i_face==4)then ! YZ plane
-    face(i_face)%gnod(1)=face(i_face)%nod(1)
-    face(i_face)%gnod(2)=face(i_face)%nod(nglly)
-    face(i_face)%gnod(3)=face(i_face)%nod(ngllyz)
-    face(i_face)%gnod(4)=face(i_face)%nod(ngllyz-nglly+1)
-  elseif(i_face==5 .or. i_face==6)then ! XY plane
-    face(i_face)%gnod(1)=face(i_face)%nod(1)
-    face(i_face)%gnod(2)=face(i_face)%nod(ngllx)
-    face(i_face)%gnod(3)=face(i_face)%nod(ngllxy)
-    face(i_face)%gnod(4)=face(i_face)%nod(ngllxy-ngllx+1)
-  else
-    write(errtag,'(a)')'ERROR: wrong face ID for traction!'
-    return
-  endif
-enddo
 
 ! find submerged nodes
 submerged_node=.false.
@@ -213,7 +129,7 @@ nodal: do i_node=1,nnode
       elseif(wsurf(i_wsurf)%stype==2)then ! meshed surface in the model
 
         do i_face=1,wsurf(i_wsurf)%nface
-          xf=g_coord(:,g_num(face(wsurf(i_wsurf)%iface(i_face))%gnod,          &
+          xf=g_coord(:,g_num(hexface(wsurf(i_wsurf)%iface(i_face))%gnode,          &
           wsurf(i_wsurf)%ielmt(i_face))) ! coordinates vector of the face
           xmin=minval(xf(1,:)); xmax=maxval(xf(1,:))
           ymin=minval(xf(2,:)); ymax=maxval(xf(2,:))
@@ -256,9 +172,6 @@ nodal: do i_node=1,nnode
   endif
 enddo nodal
 ! deallocate variables
-do i=1,6
-  deallocate(face(i)%nod)
-enddo
 if(wsurf_mesh)then
   do i=1,nwsurf
     deallocate(wsurf(i)%ielmt,wsurf(i)%iface)

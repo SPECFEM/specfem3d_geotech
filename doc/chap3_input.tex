@@ -18,13 +18,13 @@ OR
 \\
 \texttt{preinfo:   \quad\&\\
           \hspace*{18pt} nproc=8,\&\\
-          \hspace*{18pt} ngllx=3,\&\\ 
-          \hspace*{18pt} nglly=3,\&\\ 
-          \hspace*{18pt} ngllz=3,\&\\ 
-          \hspace*{18pt} nenod=8,\&\\ 
+          \hspace*{18pt} ngllx=3,\&\\
+          \hspace*{18pt} nglly=3,\&\\
+          \hspace*{18pt} ngllz=3,\&\\
+          \hspace*{18pt} nenod=8,\&\\
           \hspace*{18pt} ngnod=8,\&\\
           \hspace*{18pt} inp\_path=\sq{./input},\&\\
-          \hspace*{18pt} part\_path=\sq{./partition},\&\\ 
+          \hspace*{18pt} part\_path=\sq{./partition},\&\\
           \hspace*{18pt} out\_path=\sq{./output/}}\\
 \\
 All legitimate input lines should be written in lower case. Line type and argument-value pairs must be separated by a space. Each argument-value pair must be separated by a comma(,) and a space/s. No space/s are recommended before line type and in between argument name and "=" or "=" and argument value. If argument value is a string, the FORTRAN 90 string (i.e., enclosed within single quotes) should be used, for example, \texttt{inp\_path=\sq{./input}}. If the argument value is a vector (i.e., multi-valued), a list of values separated by space (no comma!) shoud be used, e.g, \texttt{srf=1.0 1.2 1.3 1.4}.
@@ -362,6 +362,7 @@ Example:\\
 This file will be generated automatically by a program \texttt{partmesh}.\\
 
 \subsection{Displacement boundary conditions files: \texttt{uxfile, uyfile, uzfile}}
+\label{subsec:dispbc}
 
 This file contains information on the displacement boundary conditions (currently only the zero-displacement is implemented), and has the following format:\\
 

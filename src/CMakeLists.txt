@@ -10,6 +10,8 @@ SET(srcsem
    string_library.f90
    math_library.f90
    shape_library.f90
+   element.f90
+   integration.f90
    elastic.f90
    read_input.f90
    gll_library.f90
@@ -21,9 +23,9 @@ SET(srcsem
    plastic_library.f90
    visual.f90
    postprocess.f90
-   excavation.f90)
+   excavation_library.f90)
 #IF(BUILD_EXCAVATION)
-#  LIST(APPEND srcsem excavation.f90)
+#  LIST(APPEND srcsem excavation_library.f90)
 #ENDIF(BUILD_EXCAVATION)
 ADD_LIBRARY(sem ${srcsem})
 
@@ -52,19 +54,19 @@ ENDIF(ISPARALLEL)
 #SET(srcgeotech "")
 #message("${srcgeotech}")
 #IF(BUILD_EXCAVATION)
-#  LIST(APPEND srcgeotech semexcav3d.f90)
+#  LIST(APPEND srcgeotech excavation.F90)
 #ENDIF(BUILD_EXCAVATION)
 #IF(BUILD_SLOPE)
-#  LIST(APPEND srcgeotech semslope3d.f90)
+#  LIST(APPEND srcgeotech slope.F90)
 #ENDIF(BUILD_SLOPE)
 SET(srcgeotech
-   semexcav3d.F90
-   semslope3d.F90)
+   excavation.F90
+   slope.F90)
 #compiler preprocessor directives
 #ADD_DEFINITIONS(CMAKE_Fortran_FLAGS "-DUSE_MPI")
 IF(ISPARALLEL)
   SET_PROPERTY(SOURCE ${srcgeotech} PROPERTY COMPILE_DEFINITIONS USE_MPI)
-  #SET_PROPERTY(SOURCE ${srcgeotech} PROPERTY INCLUDE_DIRECTORIES 
+  #SET_PROPERTY(SOURCE ${srcgeotech} PROPERTY INCLUDE_DIRECTORIES
   #                    ${MPI_Fortran_INCLUDE_PATH})
 ENDIF(ISPARALLEL)
 ADD_LIBRARY(geotech ${srcgeotech})
@@ -76,7 +78,7 @@ ENDIF(ISPARALLEL)
 
 # build semgeotech
 #TARGET_LINK_LIBRARIES(geotech ${semall})
-#SET_TARGET_PROPERTIES(geotech PROPERTIES LINK_FLAGS 
+#SET_TARGET_PROPERTIES(geotech PROPERTIES LINK_FLAGS
 #                     "${MPI_Fortran_LINK_FLAGS}")
 IF(ISPARALLEL)
   SET_PROPERTY(SOURCE semgeotech.F90 PROPERTY COMPILE_DEFINITIONS USE_MPI)
