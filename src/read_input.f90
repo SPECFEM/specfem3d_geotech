@@ -10,7 +10,7 @@ contains
 !   HNG, Jul 07,2011; HNG, Apr 09,2010
 ! TODO:
 !   - prompt warning or error for unknown argument/s
-subroutine read_input(ismpi,inp_fname,errcode,errtag,ispartmesh)
+subroutine read_input(inp_fname,errcode,errtag,ispartmesh)
 use global
 use math_constants,only:inftol,zero,zerotol,ONE,HALF,TWO,THREE
 use string_library
@@ -18,7 +18,6 @@ implicit none
 
 integer :: i
 character(len=*),intent(in) :: inp_fname
-logical,intent(in) :: ismpi
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
 logical,optional,intent(in) :: ispartmesh
@@ -37,7 +36,6 @@ eqload_stat,stress0_stat,traction_stat,water_stat,save_stat
 integer :: mat_count,nwmat
 integer :: ielmt,i_node,inode,imat,tmp_nelmt,tmp_nnode
 
-character(len=20) :: format_str,ptail
 character(len=250) :: fname
 character(len=250) :: data_path,mat_path
 
@@ -49,15 +47,6 @@ real(kind=kreal),allocatable :: rvect(:)
 
 errtag="ERROR: unknown!"
 errcode=-1
-
-if(ismpi)then
-  write(format_str,*)ceiling(log10(real(nproc)+1))
-  format_str='(a,i'//trim(adjustl(format_str))//'.'//                         &
-  trim(adjustl(format_str))//')'
-  write(ptail, fmt=format_str)'_proc',myrank
-else
-  ptail=""
-endif
 
 ! reading main input information
 if(myrank==0)write(*,'(a)',advance='no')'reading main input file...'

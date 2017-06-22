@@ -8,10 +8,9 @@ use mpi
 contains
 
 ! start MPI processes
-subroutine start_process(ismpi,ounit)
-use global,only:myrank,nproc
+subroutine start_process(ounit)
+use global,only:ismpi,myrank,nproc
 implicit none
-logical,intent(out) :: ismpi
 integer,intent(in) :: ounit
 integer :: errcode
 ismpi=.true. ! parallel

@@ -33,10 +33,12 @@ OBJ = $(BIN)/global.o           \
       $(BIN)/string_library.o   \
       $(BIN)/math_library.o     \
       $(BIN)/shape_library.o    \
-      $(BIN)/elastic.o     \
+      $(BIN)/element.o          \
+      $(BIN)/elastic.o          \
       $(BIN)/read_input.o       \
       $(BIN)/gll_library.o      \
       $(BIN)/mesh_spec.o        \
+      $(BIN)/integration.o      \
       $(BIN)/apply_bc.o         \
       $(BIN)/preprocess.o       \
       $(BIN)/apply_traction.o   \
@@ -44,6 +46,9 @@ OBJ = $(BIN)/global.o           \
       $(BIN)/plastic_library.o  \
       $(BIN)/visual.o           \
       $(BIN)/postprocess.o
+
+# object tree for EXCAVATION
+OBJ_EXCAV = $(BIN)/excavation_library.o
 
 # object tree for SEM
 OBJ_SEM = $(BIN)/serial_library.o      \
@@ -56,9 +61,6 @@ OBJ_SEMMPI = $(BIN)/set_precision_mpi.o \
              $(BIN)/math_library_mpi.o  \
              $(BIN)/ghost_library_mpi.o \
              $(BIN)/solver_mpi.o
-
-# object tree for EXCAVATION
-OBJ_EXCAV = $(BIN)/excavation.o
 
 # object tree for SEM
 OBJ_SEM = $(BIN)/serial_library.o      \
@@ -75,8 +77,8 @@ OBJ_PARTMESH = $(BIN)/global.o           \
 	             $(BIN)/partmesh_scotch.o  \
                $(BIN)/partmesh.o
 
-OBJ_semgeotech = $(OBJ) $(OBJ_SEM) $(BIN)/semslope3d.o $(OBJ_EXCAV) $(BIN)/semexcav3d.o $(BIN)/semgeotech.o
-OBJ_psemgeotech = $(OBJ) $(OBJ_SEMMPI) $(BIN)/psemslope3d.o $(OBJ_EXCAV) $(BIN)/psemexcav3d.o $(BIN)/psemgeotech.o
+OBJ_semgeotech = $(OBJ) $(OBJ_EXCAV) $(OBJ_SEM) $(BIN)/slope.o $(BIN)/excavation.o $(BIN)/semgeotech.o
+OBJ_psemgeotech = $(OBJ) $(OBJ_SEMMPI) $(BIN)/pslope.o $(OBJ_EXCAV) $(BIN)/pexcavation.o $(BIN)/psemgeotech.o
 
 # main executable for spectral-element method
 semgeotech = $(BIN)/semgeotech
@@ -136,6 +138,12 @@ $(BIN)/mesh_spec.o: mesh_spec.f90
 $(BIN)/shape_library.o: shape_library.f90
 	$(FC_COMPILE) -c -o $(BIN)/shape_library.o shape_library.f90
 
+$(BIN)/element.o: element.f90
+	$(FC_COMPILE) -c -o $(BIN)/element.o element.f90
+
+$(BIN)/integration.o: integration.f90
+	$(FC_COMPILE) -c -o $(BIN)/integration.o integration.f90
+
 $(BIN)/elastic.o: elastic.f90
 	$(FC_COMPILE) -c -o $(BIN)/elastic.o elastic.f90
 
@@ -176,24 +184,24 @@ $(BIN)/solver_mpi.o: solver_mpi.f90
 # different compiler preprocessing directives options.
 # -DUSE_MPI provides the flag to use the MPI library for the compilation.
 # the flag -DUSE_MPI is equivalent to #define USE_MPI 1.
-$(BIN)/semslope3d.o: semslope3d.F90
-	$(FC_COMPILE) -c -o $(BIN)/semslope3d.o semslope3d.F90
+$(BIN)/slope.o: slope.F90
+	$(FC_COMPILE) -c -o $(BIN)/slope.o slope.F90
 
-$(BIN)/psemslope3d.o: semslope3d.F90
-	$(FC_COMPILE) -DUSE_MPI -c -o $(BIN)/psemslope3d.o semslope3d.F90
+$(BIN)/pslope.o: slope.F90
+	$(FC_COMPILE) -DUSE_MPI -c -o $(BIN)/pslope.o slope.F90
 
-$(BIN)/excavation.o: excavation.f90
-	$(FC_COMPILE) -c -o $(BIN)/excavation.o excavation.f90
+$(BIN)/excavation_library.o: excavation_library.f90
+	$(FC_COMPILE) -c -o $(BIN)/excavation_library.o excavation_library.f90
 
 # following objective files are compiled from the same file but with
 # different compiler preprocessing directives options.
 # -DUSE_MPI provides the flag to use the MPI library for the compilation.
 # the flag -DUSE_MPI is equivalent to #define USE_MPI 1.
-$(BIN)/semexcav3d.o: semexcav3d.F90
-	$(FC_COMPILE) -c -o $(BIN)/semexcav3d.o semexcav3d.F90
+$(BIN)/excavation.o: excavation.F90
+	$(FC_COMPILE) -c -o $(BIN)/excavation.o excavation.F90
 
-$(BIN)/psemexcav3d.o: semexcav3d.F90
-	$(FC_COMPILE) -DUSE_MPI -c -o $(BIN)/psemexcav3d.o semexcav3d.F90
+$(BIN)/pexcavation.o: excavation.F90
+	$(FC_COMPILE) -DUSE_MPI -c -o $(BIN)/pexcavation.o excavation.F90
 
 # following objective files are compiled from the same file but with
 # different compiler preprocessing directives options.

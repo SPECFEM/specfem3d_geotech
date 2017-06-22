@@ -10,14 +10,13 @@ use set_precision
 contains
 
 !-------------------------------------------------------------------------------
-subroutine start_process(ismpi,ounit)
-use global,only:myrank,nproc
+subroutine start_process(ounit)
+use global,only:ismpi,myrank,nproc
 implicit none
-logical,intent(out) :: ismpi
 integer,intent(in) :: ounit
 ismpi=.false. ! serial
 myrank=0; nproc=1
-write(*,*)'Single process started!'
+write(ounit,*)'Single process started!'
 return
 end subroutine start_process
 !===============================================================================
@@ -67,10 +66,8 @@ return
 end subroutine prepare_ghost_gdof
 !===============================================================================
 
-subroutine modify_ghost(isnode)
-use global,only:nnode,nndof
+subroutine modify_ghost()
 implicit none
-logical,intent(in) :: isnode(nnode)
 return
 end subroutine modify_ghost
 !===============================================================================
@@ -103,13 +100,8 @@ end subroutine assemble_ghosts_nodal
 ! interfaces.
 ! logical flag representing whether the nodes in the interfaces are intact or
 ! void has to be communicated across the processors
-subroutine count_active_nghosts(ngpart_node)
-use global,only:nnode
+subroutine count_active_nghosts()
 implicit none
-! number of active ghost partitions for a node
-integer,dimension(nnode),intent(out) :: ngpart_node
-! only the interfacial nodes can be saved for the storage (TODO)
-ngpart_node=0
 return
 end subroutine count_active_nghosts
 !===============================================================================

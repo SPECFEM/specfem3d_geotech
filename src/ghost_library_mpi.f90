@@ -241,12 +241,10 @@ end subroutine prepare_ghost_gdof
 !===============================================================================
 
 ! modify ghost gdof based on the modified gdof
-subroutine modify_ghost(isnode)
-use global,only:nnode,nndof,gdof
-
+subroutine modify_ghost()
+use global,only:nndof,gdof
+use excavation_library,only:isnode_intact
 implicit none
-logical,intent(in) :: isnode(nnode)
-
 integer :: i,i_gpart,ncount
 
 ! modify ghost gdof based on the modified gdof
@@ -254,7 +252,7 @@ do i_gpart=1,ngpart
   ncount=gpart(i_gpart)%nnode
   gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
   do i=1,ncount
-    gpart(i_gpart)%isnode(i)=isnode(gpart(i_gpart)%node(i))
+    gpart(i_gpart)%isnode(i)=isnode_intact(gpart(i_gpart)%node(i))
   enddo
 enddo ! do i_gpart
 return
@@ -440,13 +438,11 @@ end subroutine undo_unmatching_displacementBC
 ! interfaces.
 ! logical flag representing whether the nodes in the interfaces are intact or
 ! void has to be communicated across the processors
-subroutine count_active_nghosts(ngpart_node)
+subroutine count_active_nghosts()
 use mpi
-use global,only:nnode
-implicit none
-! number of active ghost partitions for a node
-integer,dimension(nnode),intent(out) :: ngpart_node
+use excavation_library,only:ngpart_node
 ! only the interfacial nodes can be saved for the storage (TODO)
+implicit none
 
 logical,dimension(maxngnode,ngpart) :: lsend_array,lrecv_array
 integer,parameter :: tag=0
@@ -491,7 +487,7 @@ call sync_process()
 
 return
 end subroutine count_active_nghosts
-!=======================================================
+!===============================================================================
 
 ! this subroutine distributes the excavation loads discarded by a processors due
 ! to the special geoemtry partition. it will not distribute if the load is used

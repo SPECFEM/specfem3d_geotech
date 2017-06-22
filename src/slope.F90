@@ -1,3 +1,8 @@
+module slope
+!this module contains main slope stability routines
+contains 
+
+!-------------------------------------------------------------------------------
 ! this is a main routine for slope stabiliy analysis
 ! this program was originally based on the book "Programming the finite element
 ! method" Smith and Griffiths (2004)
@@ -5,7 +10,7 @@
 !   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 14,2011; HNG, Jul 11,2011; Apr 09,2010
-subroutine semslope3d(ismpi,gnod,sum_file,ptail,format_str)
+subroutine slope3d(sum_file,format_str)
 ! import necessary libraries
 use global
 use string_library, only : parse_file
@@ -13,6 +18,7 @@ use math_constants
 use gll_library
 use shape_library
 use math_library
+use element,only:hex8_gnode
 use elastic
 use preprocess
 use plastic_library
@@ -29,10 +35,8 @@ use solver
 use visual
 use postprocess
 implicit none
-logical,intent(in) :: ismpi
-integer,intent(in) :: gnod(8)
 character(len=250),intent(in) :: sum_file
-character(len=20),intent(in) :: ptail,format_str
+character(len=20),intent(in) :: format_str
 
 integer :: i,ios,istat,j,neq
 integer :: i_elmt,i_node,i_srf,ielmt,imat,inode
@@ -152,7 +156,7 @@ if (istat/=0)then
   stop
 endif
 extload=zero; gravity=.true.; pseudoeq=iseqload
-call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam_blk,nu_blk,  &
+call stiffness_bodyload(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,gam_blk,nu_blk,  &
 ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon,extload,gravity,   &
 pseudoeq)
 
@@ -161,7 +165,7 @@ if(myrank==0)write(stdout,*)'complete!'
 ! apply traction boundary conditions
 if(istraction)then
   if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
-  call apply_traction(ismpi,gnod,neq,extload,errcode,errtag)
+  call apply_traction(ismpi,hex8_gnode,neq,extload,errcode,errtag)
   if(errcode/=0)call error_stop(errtag,stdout,myrank)
   if(myrank==0)write(*,*)'complete!'
 endif
@@ -255,7 +259,7 @@ srf_loop: do i_srf=1,nsrf
     ! in future this should be changed so that only the elements with changed
     ! material properties are involved
     dprecon=zero
-    call stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam_blk,nuf_blk, &
+    call stiffness_bodyload(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,gam_blk,nuf_blk, &
     ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon)
 
     ! assemble from ghost partitions
@@ -284,14 +288,14 @@ srf_loop: do i_srf=1,nsrf
 
     ! pcg solver
     !x=zero
-    call pcg_solver(neq,nelmt,storekm,x,load,dprecon, &
-    gdof_elmt,cg_iter,errcode,errtag)
+    call pcg_solver(neq,nelmt,storekm,x,load,dprecon,gdof_elmt,cg_iter,        &
+    errcode,errtag)
     if(errcode/=0)call error_stop(errtag,stdout,myrank)
     cg_tot=cg_tot+cg_iter
     x(0)=zero
 
     if(allelastic)then
-      call elastic_stress(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,   &
+      call elastic_stress(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,dshape_hex8,   &
       dlagrange_gll,x,stress_elmt)
 
       exit plastic
@@ -309,7 +313,7 @@ srf_loop: do i_srf=1,nsrf
 
       call compute_cmat(cmat,ym_blk(imat),nuf_blk(imat))
       num=g_num(:,ielmt)
-      coord=transpose(g_coord(:,num(gnod)))
+      coord=transpose(g_coord(:,num(hex8_gnode)))
       egdof=gdof_elmt(:,ielmt)
       eld=x(egdof)
 
@@ -428,7 +432,7 @@ srf_loop: do i_srf=1,nsrf
     stress_global(:,inode)=stress_global(:,inode)/real(node_valency(inode),kreal)
   enddo
 
-  call save_data(ptail,format_str,i_srf,nnode,nodalu,scf,vmeps,          &
+  call save_data(format_str,i_srf,nnode,nodalu,scf,vmeps,          &
   stress_global)
 
   if(nl_iter==nl_maxiter)exit
@@ -440,5 +444,7 @@ deallocate(load,bodyload,extload,oldx,x,dprecon,storekm,stat=istat)
 call free_ghost()
 
 return
-end subroutine semslope3d
+end subroutine slope3d
+!===============================================================================
+end module slope
 !===============================================================================

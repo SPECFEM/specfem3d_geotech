@@ -9,6 +9,8 @@ use global
 use string_library, only : parse_file
 use input
 use mesh_spec
+use element
+use integration
 #if (USE_MPI)
 use mpi_library
 use math_library_mpi
@@ -17,24 +19,26 @@ use serial_library
 use math_library_serial
 #endif
 use visual
+! main drive routines
+use slope
+use excavation
 implicit none
 integer :: funit,i,ios,j,k
 integer :: i_elmt
 
-integer :: gnod(8),gnum_hex(8),map2exodus(8),ngllxy,node_hex8(8)
+integer :: gnum_hex(8),node_hex8(8)
 
 character(len=250) :: arg1,inp_fname,prog
 character(len=250) :: path
 character(len=20), parameter :: wild_char='********************'
 character(len=20) :: ensight_etype
 character(len=80) :: buffer,destag ! this must be 80 characters long
-character(len=20) :: ext,format_str,ptail
+character(len=20) :: ext,format_str
 character(len=250) :: case_file,geo_file,sum_file
 integer :: npart,nt,tinc,tstart,twidth,ts ! ts: time set for ensight gold
 
 real(kind=kreal) :: cpu_tstart,cpu_tend,telap,max_telap,mean_telap
 
-logical :: ismpi !.true. : MPI, .false. : serial
 integer :: tot_nelmt,max_nelmt,min_nelmt,tot_nnode,max_nnode,min_nnode
 
 character(len=250) :: errtag ! error message
@@ -44,7 +48,7 @@ logical :: isfile,isopen ! flag to check whether the file is opened
 myrank=0; nproc=1;
 errtag=""; errcode=-1
 
-call start_process(ismpi,stdout)
+call start_process(stdout)
 
 call get_command_argument(0, prog)
 if (command_argument_count() <= 0) then
@@ -97,7 +101,7 @@ if(.not.isfile)then
  call close_process()
 endif
 ! read input data
-call read_input(ismpi,inp_fname,errcode,errtag)
+call read_input(inp_fname,errcode,errtag)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
@@ -179,21 +183,15 @@ nenod=ngll !(ngllx*nglly*ngllz) ! number of elemental nodes (nodes per element)
 nedof=nndof*nenod
 
 ngllxy=ngllx*nglly
+ngllyz=nglly*ngllz
+ngllzx=ngllz*ngllx
 
-! geometrical nodes (corner nodes) in EXODUS/CUBIT order
-! bottom nodes
-gnod(1)=1;
-gnod(2)=ngllx
-gnod(3)=ngllxy;
-gnod(4)=gnod(3)-ngllx+1
-! top nodes
-gnod(5)=(ngllz-1)*ngllxy+1;
-gnod(6)=gnod(5)+ngllx-1
-gnod(7)=ngll;
-gnod(8)=gnod(7)-ngllx+1
+maxngll2d=max(ngllxy,ngllyz,ngllzx)
 
-! map sequential node numbering to exodus/cubit order for 8-noded hexahedra
-map2exodus=(/ 1,2,4,3,5,6,8,7 /)
+! prepare
+call prepare_hex(errcode,errtag)
+call prepare_hexface(errcode,errtag)
+
 
 case_file=trim(out_path)//trim(file_head)//trim(ptail)//'.case'
 open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
@@ -328,12 +326,15 @@ if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 ! call main routines
 if(nexcav==0)then
   ! slope stability
-  call semslope3d(ismpi,gnod,sum_file,ptail,format_str)
+  call slope3d(sum_file,format_str)
 else
   ! excavation
-  call semexcav3d(ismpi,gnod,sum_file,ptail,format_str)
+  call excavation3d(sum_file,format_str)
 endif
 !-------------------------------------------------------------------------------
+
+! clean up
+call cleanup_hexface(errcode,errtag)
 
 ! compute elapsed time
 call cpu_time(cpu_tend)

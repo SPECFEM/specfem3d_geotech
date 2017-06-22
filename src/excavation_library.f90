@@ -3,20 +3,25 @@
 !   Hom Nath Gharti
 ! REVISION:
 !   HNG, Jul 12,2011; HNG, Apr 09,2010
-module excavation
+module excavation_library
 use set_precision
+implicit none
+logical,allocatable :: isnode_intact(:)
+! number of active ghost partitions for a node
+integer,allocatable :: ngpart_node(:)
+
 contains
+!-------------------------------------------------------------------------------
 ! this subroutine analyzes the excavation and determine the elements in the
 ! intact and void regions
 subroutine intact_void_elmt(nexcavid,excavid,ismat,nelmt_intact,nelmt_void,    &
-elmt_intact,elmt_void,isnode)
+elmt_intact,elmt_void)
 use global,only:mat_id,nelmt,nnode,g_num,nmatblk
 implicit none
 integer,intent(in) :: nexcavid,nelmt_intact,nelmt_void
 integer,intent(in) :: excavid(nexcavid)
 logical,intent(in) :: ismat(nmatblk)
 integer,intent(out) :: elmt_intact(nelmt_intact),elmt_void(nelmt_void)
-logical,intent(out) :: isnode(nnode)
 integer :: i_elmt,ielmt_intact,ielmt_void
 logical :: ismat_off(nmatblk)
 
@@ -40,9 +45,9 @@ if(ielmt_void/=nelmt_void .or. ielmt_intact/=nelmt_intact)then
 endif
 
 ! find intact and void nodes
-isnode=.false.
+isnode_intact=.false.
 do i_elmt=1,nelmt_intact
-  isnode(g_num(:,elmt_intact(i_elmt)))=.true.
+  isnode_intact(g_num(:,elmt_intact(i_elmt)))=.true.
 enddo
 return
 end subroutine intact_void_elmt
@@ -230,5 +235,5 @@ enddo
 return
 end subroutine excavation_load_nodal
 !===============================================================================
-end module excavation
+end module excavation_library
 !===============================================================================

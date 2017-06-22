@@ -19,7 +19,6 @@ character(len=256) :: inp_fname
 character(len=80) :: path,ext
 real :: cpu_tstart,cpu_tend
 
-logical :: ismpi
 character(len=250) :: errtag ! error message
 integer :: errcode
 
@@ -44,7 +43,7 @@ if (istat /= 0)then
   write(*,*)'ERROR: input file "'//trim(inp_fname)//'" cannot be opened!'
   stop
 endif
-call read_input(ismpi,inp_fname,errcode,errtag,.true.)
+call read_input(inp_fname,errcode,errtag,.true.)
 if(errcode/=0)call error_stop(errtag,stdout,myrank)
 
 npart=nproc
