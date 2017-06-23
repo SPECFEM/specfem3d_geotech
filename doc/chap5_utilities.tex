@@ -2,31 +2,31 @@
 \label{chap:util}
 \section{Convert EXODUS mesh into SEM files}
 
-The program \texttt{exodus2semgeotech.c} contained in the utilities directory can be used to convert the mesh file in EXODUS II format to input files required by the \pack\ .
+The program \texttt{exodus2semgeotech.c} contained in the \texttt{util/} directory can be used to convert the mesh file in EXODUS II format to input files required by the \pack\ .
 
 \subsubsection*{Compile}
 \texttt{gcc -o exodus2semgeotech exodus2semgeotech.c}
 \subsubsection*{Run}
  \texttt{exodus2semgeotech} {\emph{EXODUS\_mesh\_file}} {\emph{OPTIONS}}\\
- For more details, see \texttt{/util/README\_exodus2semgeotech}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
+ For more details, see \texttt{util/README\_exodus2semgeotech}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
 
 \section{Convert GiD mesh into SEM files}
 
-The program \texttt{gid2semgeotech.c} contained in the utilities directory can be used to convert the mesh file in GiD format to input files required by the \pack\ .
+The program \texttt{gid2semgeotech.c} contained in the \texttt{util/} directory can be used to convert the mesh file in GiD format to input files required by the \pack\ .
 
 \subsubsection*{Compile}
 \texttt{gcc -o gid2semgeotech gid2semgeotech.c}
 \subsubsection*{Run}
  \texttt{gid2semgeotech} {\emph{GiD\_mesh\_file}} {\emph{OPTIONS}}\\
- For more details, see \texttt{/util/README\_gid2semgeotech}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
+ For more details, see \texttt{util/README\_gid2semgeotech}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
 
 \section{Generate SOS file}
 \label{sec:sos}
 
-The program \texttt{write\_sos.f90} contained in the utilities directory can be used to write EnSight Gold server-of-server file (.sos file, see~\citep{ensight2008}) to visualize the multi-processors data in parallel. This file does not contain the actual data, but only information on the data location and parallel processing.
+The program \texttt{write\_sos.f90} contained in the \texttt{util/} directory can be used to write EnSight Gold server-of-server file (.sos file, see~\citep{ensight2008}) to visualize the multi-processors data in parallel. This file does not contain the actual data, but only information on the data location and parallel processing.
 \subsubsection*{Compile}
 \texttt{gfortran -o write\_sos write\_sos.f90}
 \subsubsection*{Run}
 \texttt{exodus2sem} {\it{input\_file}}\\
 
-For more details, see \texttt{/util/README\_write\_sos}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
+For more details, see \texttt{util/README\_write\_sos}. It can also be compiled automatically during the build process of main package \pack\ (see Section~\ref{sec:configure}).
