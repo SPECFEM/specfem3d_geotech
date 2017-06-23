@@ -5,7 +5,19 @@ The original \pack\ package comes in a single compressed file \linebreak\texttt{
 
 \texttt{tar -zxvf \pack.tar.gz}\\
 
-or using, for example, \texttt{7-zip (www.7-zip.org)} under WINDOWS. The package has the following structure:\\
+or using, for example, \texttt{7-zip (www.7-zip.org)} under WINDOWS.\\
+
+Alternatively, the package can be obtained using Git.\\
+
+For the latest stable release, use the following Git command:\\
+\\
+\texttt{git clone -{}-recursive https://github.com/geodynamics/specfem3d\_geotech.git}\\
+\\
+For the development version, use the following Git command:\\
+\\
+\texttt{git clone -{}-recursive -{}-branch devel https://github.com/geodynamics/specfem3d\_geotech.git}\\
+\\
+The package has the following structure:\\
 
 
 
@@ -56,18 +68,24 @@ Software package \pack\ is configured using CMake, and the package uses an out-o
 \texttt{cd \$HOME/build/\pack}
 
 \item CMake configuration \\
-You can set the necessary compilers explicitly, and configure the package with the default options by typing, for example,\\
-\texttt{CC=gcc CXX=g++ FC=gfortran MPIFC=mpif90 ccmake \$HOME/source/\pack} \\
-for GNU compilers.\\
-OR\\
-\texttt{CC=icc CXX=icpc FC=ifort MPIFC=mpif90 ccmake \$HOME/source/\pack} \\
-for Intel compilers.
-
-For more options and flexibility, we recommend using CMake GUI. Type:\\
+CMake has a command-line interface \texttt{cmake}, and interactive interfaces \texttt{ccmake} a curses interface and \texttt{cmake-gui} a GUI. For more options and flexibility, we recommend using either of the interactive interfaces. For example, type:\\
+\\
 \texttt{ccmake \$HOME/source/\pack} \\
 \\
 This will open the CMake GUI (Figure~\ref{fig:cmake}), in which you can select several options as described below.
 \end{itemize}
+You can also set the necessary compilers explicitly, and configure the package with the default options by typing, for example,\\
+\\
+\texttt{CC=gcc CXX=g++ FC=gfortran MPIFC=mpif90 ccmake \$HOME/source/\pack} \\
+\\
+for GNU compilers.\\
+\\
+OR\\
+\\
+\texttt{CC=icc CXX=icpc FC=ifort MPIFC=mpif90 ccmake \$HOME/source/\pack} \\
+\\
+for Intel compilers.
+
 
 \begin{figure}[ht]
 \centering
