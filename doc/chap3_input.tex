@@ -10,7 +10,7 @@ Legitimate input lines have the format\\
 {\it{line\_type}} $arg_1=val_1$, $arg_2=val_2$, ......., $arg_n=val_n$\\
 
 Example:\\
-\texttt{preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+\texttt{preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenode=8, ngnode=8, \& \\
 inp\_path=\sq{./input}, part\_path=\sq{./partition}, out\_path=\sq{./output/}}\\
 \\
 OR
@@ -21,8 +21,8 @@ OR
           \hspace*{18pt} ngllx=3,\&\\
           \hspace*{18pt} nglly=3,\&\\
           \hspace*{18pt} ngllz=3,\&\\
-          \hspace*{18pt} nenod=8,\&\\
-          \hspace*{18pt} ngnod=8,\&\\
+          \hspace*{18pt} nenode=8,\&\\
+          \hspace*{18pt} ngnode=8,\&\\
           \hspace*{18pt} inp\_path=\sq{./input},\&\\
           \hspace*{18pt} part\_path=\sq{./partition},\&\\
           \hspace*{18pt} out\_path=\sq{./output/}}\\
@@ -150,7 +150,7 @@ Only the following arguments under the specified line types are permitted.\\
 \noindent{\texttt{\#-----------------------------------------------------------------\\
 \#input file elastic.sem\\
 \#pre information\\
-preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+preinfo: ngllx=3, nglly=3, ngllz=3, nenode=8, ngnode=8, \& \\
 inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
@@ -173,7 +173,7 @@ control: cg\_tol=1e-8, cg\_maxiter=5000\\
 \noindent{\texttt{\#-----------------------------------------------------------------\\
 \#input file validation1.sem\\
 \#pre information\\
-preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+preinfo: ngllx=3, nglly=3, ngllz=3, nenode=8, ngnode=8, \& \\
 inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
@@ -197,8 +197,8 @@ nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20\\
 \noindent{\texttt{\#-----------------------------------------------------------------\\
 \#input file validation1.psem\\
 \#pre information\\
-preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, \& \\
-ngnod=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
+preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenode=8, \& \\
+ngnode=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{validation1\_coord\_x}, yfile=\sq{validation1\_coord\_y}, \& \\
 zfile=\sq{validation1\_coord\_z}, confile=\sq{validation1\_connectivity}, \& \\
@@ -221,7 +221,7 @@ nsrf=9, srf=1.0 1.5 2.0 2.15 2.16 2.17 2.18 2.19 2.20\\
 \noindent{\texttt{\#-----------------------------------------------------------------\\
 \#input file excavation\_3d.sem\\
 \#pre information\\
-preinfo: ngllx=3, nglly=3, ngllz=3, nenod=8, ngnod=8, \& \\
+preinfo: ngllx=3, nglly=3, ngllz=3, nenode=8, ngnode=8, \& \\
 inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{excavation\_3d\_coord\_x}, yfile=\sq{excavation\_3d\_coord\_y}, \& \\
@@ -230,7 +230,7 @@ idfile=\sq{excavation\_3d\_material\_id}\\\\
 \#boundary conditions\\
 bc: uxfile=\sq{excavation\_3d\_ssbcux}, uyfile=\sq{excavation\_3d\_ssbcuy}, \& \\
 uzfile=\sq{excavation\_3d\_ssbcuz}\\\\
-\#initial stress
+\#initial stress\\
 stress0: type=0, z0=0, s0=0, k0=0.5, usek0=1\\\\
 \#material list\\
 material: matfile=\sq{excavation\_3d\_material\_list}\\\\
@@ -247,8 +247,8 @@ nexcav=3, excavid=2 3 4, ninc=10\\
 \noindent{\texttt{\#-----------------------------------------------------------------\\
 \#input file excavation\_3d.psem\\
 \#pre information\\
-preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenod=8, \& \\
-ngnod=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
+preinfo: nproc=8, ngllx=3, nglly=3, ngllz=3, nenode=8, \& \\
+ngnode=8, inp\_path=\sq{./input}, out\_path=\sq{./output/}\\\\
 \#mesh information \\
 mesh: xfile=\sq{excavation\_3d\_coord\_x}, yfile=\sq{excavation\_3d\_coord\_y}, \& \\
 zfile=\sq{excavation\_3d\_coord\_z}, confile=\sq{excavation\_3d\_connectivity}, \& \\
@@ -256,7 +256,7 @@ idfile=\sq{excavation\_3d\_material\_id}, gfile=\sq{excavation\_3d\_ghost}\\\\
 \#boundary conditions\\
 bc: uxfile=\sq{excavation\_3d\_ssbcux}, uyfile=\sq{excavation\_3d\_ssbcuy}, \& \\
 uzfile=\sq{excavation\_3d\_ssbcuz}\\\\
-\#initial stress
+\#initial stress\\
 stress0: type=0, z0=0, s0=0, k0=0.5, usek0=1\\\\
 \#material list\\
 material: matfile=\sq{excavation\_3d\_material\_list}\\\\
