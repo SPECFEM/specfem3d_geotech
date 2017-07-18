@@ -35,7 +35,7 @@ do i_mat=1,nmat
   dt=r4*(one+nuf(i_mat))*(one-two*nuf(i_mat))/(ymf(i_mat)*(one-two*nuf(i_mat)+ &
   snphi**2))
   if(dt<dt_min)dt_min=dt
-end do
+enddo
 end function dt_viscoplas
 !===============================================================================
 
@@ -171,7 +171,7 @@ m1(1:3,1:3)=one/(r3*sigm)
 do i=1,3
   m2(i,i)=two
   m2(i+3,i+3)=r6
-end do
+enddo
 m2(1,2)=-one
 m2(1,3)=-one
 m2(2,3)=-one
@@ -201,8 +201,8 @@ do i=1,6
     m1(j,i)=m1(i,j)
     m2(j,i)=m2(i,j)
     m3(j,i)=m3(i,j)
-  end do
-end do
+  enddo
+enddo
 m1=m1/r3; m2=m2/r3; m3=m3/r3
 return
 end subroutine formm

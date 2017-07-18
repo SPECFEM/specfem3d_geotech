@@ -131,8 +131,8 @@ else
         xmat(i,k)=0.0_kreal
         xmat(i,:)=xmat(i,:)-xmat(k,:)*con
       end if
-    end do
-  end do
+    enddo
+  enddo
 end if
 return
 end subroutine invert
@@ -200,9 +200,9 @@ do i = 2, n
   do while (j>=1 .and. x(j)>temp)
     x(j+1) = x(j)
     j = j - 1
-  end do
+  enddo
   x(j+1) = temp
-end do
+enddo
 xnew=x
 end function iquick_sort
 !===============================================================================
@@ -221,9 +221,9 @@ do i = 2, n
   do while (j>=1 .and. x(j)>temp)
     x(j+1) = x(j)
     j = j - 1
-  end do
+  enddo
   x(j+1) = temp
-end do
+enddo
 xnew=x
 end function rquick_sort
 !===============================================================================
@@ -241,9 +241,9 @@ do i = 2, n
   do while (j>=1 .and. x(j)>temp)
     x(j+1) = x(j)
     j = j - 1
-  end do
+  enddo
   x(j+1) = temp
-end do
+enddo
 end subroutine insertion_sort
 !===============================================================================
 

@@ -173,7 +173,7 @@ do i_elmt=1,nelmt
     idof=idof+3
     eld(idof)=eld(idof)+detjac*gll_weights(i)
     !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
-  end do ! i=1,ngll
+  enddo ! i=1,ngll
   extload(egdof)=extload(egdof)+eld*gam_blk(mat_id(i_elmt))+bload
 enddo
 extload(0)=zero
@@ -223,7 +223,7 @@ do i_elmt=1,nelmt
     idof=idof+3
     eld(idof)=eld(idof)+detjac*gll_weights(i)
     !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
-  end do ! i=1,ngll
+  enddo ! i=1,ngll
   tload=eld*gam_blk(mat_id(i_elmt))+bload
   !excavload(:,num)=excavload(:,num)+reshape(tload,(/nndof,ngll/))
   do i=1,nndof

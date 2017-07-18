@@ -107,7 +107,7 @@ nb_edges = 0
 do i = 0, esize*nelmt-1
     nodeselmt(g_num(i)*nsize+nnodeelmt(g_num(i))) = i/esize
     nnodeelmt(g_num(i)) = nnodeelmt(g_num(i)) + 1
-end do
+enddo
 
 ! checking which elements are neighbours ('ncommonnode' criteria)
 do j = 0, nnode-1
@@ -123,8 +123,8 @@ do j = 0, nnode-1
                 if ( nodeselmt(m+num_node*nsize) == elem_target ) then
                   connectivity = connectivity + 1
                 end if
-            end do
-          end do
+            enddo
+          enddo
 
           if ( connectivity >=  ncommonnode) then
 
@@ -137,7 +137,7 @@ do j = 0, nnode-1
 
                   end if
                 end if
-            end do
+            enddo
             if ( .not.is_neighbour ) then
                 adjncy(nodeselmt(k+j*nsize)*sup_neighbour+xadj(nodeselmt(k+j*nsize))) = nodeselmt(l+j*nsize)
 
@@ -150,9 +150,9 @@ do j = 0, nnode-1
                 if (xadj(nodeselmt(l+j*nsize))>sup_neighbour) stop 'ERROR : too much neighbours per element, modify the mesh.'
             end if
           end if
-      end do
-    end do
-end do
+      enddo
+    enddo
+enddo
 
 max_neighbour = maxval(xadj)
 
@@ -163,8 +163,8 @@ do i = 0, nelmt-1
     do j = 0, k-1
       adjncy(nb_edges) = adjncy(i*sup_neighbour+j)
       nb_edges = nb_edges + 1
-    end do
-end do
+    enddo
+enddo
 
 xadj(nelmt) = nb_edges
 end subroutine mesh2dual_ncommonnode
@@ -191,7 +191,7 @@ allocate(glob2loc_elmt(0:nelmt-1))
 ! initializes number of local points per partition
 do num_part = 0, npart-1
     num_loc(num_part) = 0
-end do
+enddo
 !print*,minval(part),maxval(part)
 ! local numbering
 do num_glob = 0, nelmt-1
@@ -201,7 +201,7 @@ do num_glob = 0, nelmt-1
     ! increments local numbering of elements (starting with 0,1,2,...)
     glob2loc_elmt(num_glob) = num_loc(num_part)
     num_loc(num_part) = num_loc(num_part) + 1
-end do
+enddo
 
 end subroutine Construct_glob2loc_elmt
 !=======================================================
@@ -242,7 +242,7 @@ do num_node = 0, nnode-1
     do el = 0, nnodeelmt(num_node)-1
       parts_node(part(nodeselmt(el+nsize*num_node))) = 1
 
-    end do
+    enddo
 
     do num_part = 0, npart-1
       if ( parts_node(num_part) == 1 ) then
@@ -250,9 +250,9 @@ do num_node = 0, nnode-1
           parts_node(num_part) = 0
 
       end if
-    end do
+    enddo
 
-end do
+enddo
 
 glob2loc_nodes_npart(nnode) = size_glob2loc_nodes
 
@@ -270,7 +270,7 @@ do num_node = 0, nnode-1
     do el = 0, nnodeelmt(num_node)-1
       parts_node(part(nodeselmt(el+nsize*num_node))) = 1
 
-    end do
+    enddo
     do num_part = 0, npart-1
 
       if ( parts_node(num_part) == 1 ) then
@@ -281,8 +281,8 @@ do num_node = 0, nnode-1
           parts_node(num_part) = 0
       end if
 
-    end do
-end do
+    enddo
+enddo
 end subroutine Construct_glob2loc_nodes
 !=======================================================
 
@@ -1560,8 +1560,8 @@ ninterfaces = 0
 do  i = 0, npart-1
     do j = i+1, npart-1
       ninterfaces = ninterfaces + 1
-    end do
-end do
+    enddo
+enddo
 
 !print*,npart,ninterfaces,sup_neighbour,nelmt,ubound(adjncy)
 
@@ -1584,16 +1584,16 @@ do num_part = 0, npart-1
                   num_edge = num_edge + 1
                 end if
 
-            end do
+            enddo
           end if
-      end do
+      enddo
       ! stores number of elements at interface
       tab_size_interfaces(num_interface+1) = tab_size_interfaces(num_interface) + num_edge
       num_edge = 0
       num_interface = num_interface + 1
 
-    end do
-end do
+    enddo
+enddo
 
 
 ! stores element indices for elements from above search at each interface
@@ -1620,8 +1620,8 @@ do num_part = 0, npart-1
                                 = g_num(el*esize+num_node)
                             ncommon_nodes = ncommon_nodes + 1
                         end if
-                      end do
-                  end do
+                      enddo
+                  enddo
                   if ( ncommon_nodes > 0 ) then
                       tab_interfaces(tab_size_interfaces(num_interface)*7+num_edge*7+2) = ncommon_nodes
                   else
@@ -1629,14 +1629,14 @@ do num_part = 0, npart-1
                   end if
                   num_edge = num_edge + 1
                 end if
-            end do
+            enddo
           end if
 
-      end do
+      enddo
       num_edge = 0
       num_interface = num_interface + 1
-    end do
-end do
+    enddo
+enddo
 
 end subroutine Construct_interfaces
 !=======================================================
@@ -1680,8 +1680,8 @@ ninterfaces = 0
 do  i = 0, npart-1
     do j = i+1, npart-1
       ninterfaces = ninterfaces + 1
-    end do
-end do
+    enddo
+enddo
 
 allocate(tab_size_interfaces(0:ninterfaces))
 tab_size_interfaces(:) = 0
@@ -1721,16 +1721,16 @@ do num_part = 0, npart-1
                 if ( (part(adjncy(el_adj)) == num_part_bis) .and. (is_acoustic_el .eqv. is_acoustic_el_adj) ) then
                   num_edge = num_edge + 1
                 end if
-            end do
+            enddo
           end if
-      end do
+      enddo
       ! stores number of elements at interface
       tab_size_interfaces(num_interface+1) = tab_size_interfaces(num_interface) + num_edge
       num_edge = 0
       num_interface = num_interface + 1
 
-    end do
-end do
+    enddo
+enddo
 
 
 ! stores element indices for elements from above search at each interface
@@ -1774,8 +1774,8 @@ do num_part = 0, npart-1
                                 = g_num(el*esize+num_node)
                             ncommon_nodes = ncommon_nodes + 1
                         end if
-                      end do
-                  end do
+                      enddo
+                  enddo
                   if ( ncommon_nodes > 0 ) then
                       tab_interfaces(tab_size_interfaces(num_interface)*7+num_edge*7+2) = ncommon_nodes
                   else
@@ -1783,14 +1783,14 @@ do num_part = 0, npart-1
                   end if
                   num_edge = num_edge + 1
                 end if
-            end do
+            enddo
           end if
 
-      end do
+      enddo
       num_edge = 0
       num_interface = num_interface + 1
-    end do
-end do
+    enddo
+enddo
 end subroutine Construct_interfaces_no_ac_el_sep
 !=======================================================
 
@@ -1859,8 +1859,8 @@ endif
 
           end if
 
-      end do
-    end do
+      enddo
+    enddo
 write(16,*)npgeo
 write(17,*)npgeo
 write(18,*)npgeo
@@ -1883,8 +1883,8 @@ write(18,*)npgeo
             write(18,'(i10,f25.15)') glob2loc_nodes(j)+1, g_coord(3,i+1)
 !            write(19,'(i10)')i+1
           end if
-      end do
-    end do
+      enddo
+    enddo
 !end if
 close(16)
 close(17)
@@ -1947,12 +1947,12 @@ do i = 1, count_def_mat
     write(*,*)'ERROR: unsupported type_blk:',type_blk(i)
     stop
   endif
-end do
+enddo
 !do i = 1, count_undef_mat
 !   write(IIN_database,*) undef_mat_domain(i),trim(undef_mat_prop(1,i)),trim(undef_mat_prop(2,i)), &
 !                        trim(undef_mat_prop(3,i)),trim(undef_mat_prop(4,i)), &
 !                        trim(undef_mat_prop(5,i)),trim(undef_mat_prop(6,i)),trim(undef_mat_prop(7,i))
-!end do
+!enddo
 
 ! write viscoelastic properties if any
 do i=1,nvisco
@@ -2022,7 +2022,7 @@ do i=1,nelmt2D_xmin
     if(part(ibelm_xmin(i)) == iproc) then
       loc_nelmt2D_xmin = loc_nelmt2D_xmin + 1
     end if
-end do
+enddo
 write(16,*)loc_nelmt2D_xmin
 
 ! outputs element index and element node indices
@@ -2034,7 +2034,7 @@ do i=1,nelmt2D_xmin
     if(part(ibelm_xmin(i)) == iproc) then
       write(16,*) glob2loc_elmt(ibelm_xmin(i)-1)+1, nodes_ibelm_xmin(i)
     end if
-end do
+enddo
 close(16)
 
 ! open output file
@@ -2051,14 +2051,14 @@ do i=1,nelmt2D_xmax
     if(part(ibelm_xmax(i)) == iproc) then
       loc_nelmt2D_xmax = loc_nelmt2D_xmax + 1
     end if
-end do
+enddo
 write(16,*)loc_nelmt2D_xmax
 
 do i=1,nelmt2D_xmax
     if(part(ibelm_xmax(i)) == iproc) then
       write(16,*) glob2loc_elmt(ibelm_xmax(i)-1)+1, nodes_ibelm_xmax(i)
     end if
-end do
+enddo
 close(16)
 
 ! open output file
@@ -2074,14 +2074,14 @@ do i=1,nelmt2D_ymin
     if(part(ibelm_ymin(i)) == iproc) then
       loc_nelmt2D_ymin = loc_nelmt2D_ymin + 1
     end if
-end do
+enddo
 write(16,*)loc_nelmt2D_ymin
 
 do i=1,nelmt2D_ymin
     if(part(ibelm_ymin(i)) == iproc) then
       write(16,*) glob2loc_elmt(ibelm_ymin(i)-1)+1, nodes_ibelm_ymin(i)
     end if
-end do
+enddo
 close(16)
 
 end subroutine write_boundaries_database
@@ -2147,7 +2147,7 @@ endif
       if ( part(i) == iproc ) then
           nelmt_local = nelmt_local + 1
       end if
-    end do
+    enddo
     write(16,*)nelmt_local
     write(17,*)nelmt_local
 
@@ -2171,9 +2171,9 @@ endif
                 if ( glob2loc_nodes_parts(k) == iproc ) then
                   loc_nodes(j) = glob2loc_nodes(k)
                 end if
-            end do
+            enddo
 
-          end do
+          enddo
 
           ! format:
           ! # ispec_local # material_index_1 # material_index_2 # corner_id1 # corner_id2 # ... # corner_id8
@@ -2182,7 +2182,7 @@ endif
           write(17,*) glob2loc_elmt(i)+1, mat_id(i+1)
           !write(19,'(i10)')i+1
       end if
-    end do
+    enddo
 !end if
 close(16)
 close(17)
@@ -2259,8 +2259,8 @@ num_interface = 0
             my_nb_interfaces(num_interface) = tab_size_interfaces(num_interface+1) - tab_size_interfaces(num_interface)
           end if
           num_interface = num_interface + 1
-      end do
-    end do
+      enddo
+    enddo
     my_ninterface = sum(my_interfaces(:))
 
     ! writes out MPI interfaces elements
@@ -2300,7 +2300,7 @@ num_interface = 0
 !!$                        if ( glob2loc_nodes_parts(l) == iproc ) then
 !!$                           local_nodes(1) = glob2loc_nodes(l)+1
 !!$                        end if
-!!$                     end do
+!!$                     enddo
 !!$
 !!$                     write(16,*) local_elmnt, tab_interfaces(k*7+2), local_nodes(1), -1
 !!$                  else
@@ -2310,13 +2310,13 @@ num_interface = 0
 !!$                           if ( glob2loc_nodes_parts(l) == iproc ) then
 !!$                              local_nodes(1) = glob2loc_nodes(l)+1
 !!$                           end if
-!!$                        end do
+!!$                        enddo
 !!$                        do l = glob2loc_nodes_npart(tab_interfaces(k*7+4)), &
 !!$                           glob2loc_nodes_npart(tab_interfaces(k*7+4)+1)-1
 !!$                           if ( glob2loc_nodes_parts(l) == iproc ) then
 !!$                              local_nodes(2) = glob2loc_nodes(l)+1
 !!$                           end if
-!!$                        end do
+!!$                        enddo
 !!$                        write(16,*) local_elmnt, tab_interfaces(k*7+2), local_nodes(1), local_nodes(2)
 !!$                     else
 !!$                        write(16,*) "erreur_write_interface_", tab_interfaces(k*7+2)
@@ -2331,7 +2331,7 @@ num_interface = 0
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(1) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   write(16,*) local_elmnt, tab_interfaces(k*7+2), local_nodes(1), -1, -1, -1
               case (2)
                   ! edge element
@@ -2340,13 +2340,13 @@ num_interface = 0
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(1) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   do l = glob2loc_nodes_npart(tab_interfaces(k*7+4)), &
                       glob2loc_nodes_npart(tab_interfaces(k*7+4)+1)-1
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(2) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   write(16,*) local_elmnt, tab_interfaces(k*7+2), local_nodes(1), local_nodes(2), -1, -1
               case (4)
                   ! face element
@@ -2357,31 +2357,31 @@ num_interface = 0
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(1) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   do l = glob2loc_nodes_npart(tab_interfaces(k*7+4)), &
                       glob2loc_nodes_npart(tab_interfaces(k*7+4)+1)-1
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(2) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   do l = glob2loc_nodes_npart(tab_interfaces(k*7+5)), &
                       glob2loc_nodes_npart(tab_interfaces(k*7+5)+1)-1
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(3) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   do l = glob2loc_nodes_npart(tab_interfaces(k*7+6)), &
                       glob2loc_nodes_npart(tab_interfaces(k*7+6)+1)-1
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(4) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   write(16,*) local_elmnt, tab_interfaces(k*7+2), &
                       local_nodes(1), local_nodes(2),local_nodes(3), local_nodes(4)
               case default
                   print *, "error in write_interfaces_database!", tab_interfaces(k*7+2), iproc
               end select
-            end do
+            enddo
 
             ! outputs infos
             !print*,'  partition MPI interface:',iproc,num_interface
@@ -2390,8 +2390,8 @@ num_interface = 0
         end if
 
         num_interface = num_interface + 1
-      end do
-  end do
+      enddo
+  enddo
 
 !end if
 close(16)
@@ -2433,7 +2433,7 @@ do i=1,nelmt2D_moho
     if(part(ibelm_moho(i)) == iproc) then
       loc_nelmt2D_moho = loc_nelmt2D_moho + 1
     end if
-end do
+enddo
 ! checks if anything to do
 if( loc_nelmt2D_moho == 0 ) return
 
@@ -2453,26 +2453,26 @@ do i=1,nelmt2D_moho
           if (glob2loc_nodes_parts(j) == iproc ) then
             loc_node1 = glob2loc_nodes(j)+1
           end if
-      end do
+      enddo
       do j = glob2loc_nodes_npart(nodes_ibelm_moho(2,i)-1), glob2loc_nodes_npart(nodes_ibelm_moho(2,i))-1
           if (glob2loc_nodes_parts(j) == iproc ) then
             loc_node2 = glob2loc_nodes(j)+1
           end if
-      end do
+      enddo
       do j = glob2loc_nodes_npart(nodes_ibelm_moho(3,i)-1), glob2loc_nodes_npart(nodes_ibelm_moho(3,i))-1
           if (glob2loc_nodes_parts(j) == iproc ) then
             loc_node3 = glob2loc_nodes(j)+1
           end if
-      end do
+      enddo
       do j = glob2loc_nodes_npart(nodes_ibelm_moho(4,i)-1), glob2loc_nodes_npart(nodes_ibelm_moho(4,i))-1
           if (glob2loc_nodes_parts(j) == iproc ) then
             loc_node4 = glob2loc_nodes(j)+1
           end if
-      end do
+      enddo
       write(IIN_database,*) glob2loc_elmt(ibelm_moho(i)-1)+1, loc_node1, loc_node2, loc_node3, loc_node4
     end if
 
-end do
+enddo
 end subroutine write_moho_surface_database
 !=======================================================
 
@@ -2821,9 +2821,9 @@ temp = x(i)
 do while (j>=1 .and. x(j)>temp)
   x(j+1) = x(j)
   j = j - 1
-end do
+enddo
 x(j+1) = temp
-end do
+enddo
 xnew=x
 inum=1
 irank(1)=1
@@ -2849,9 +2849,9 @@ temp = x(i)
 do while (j>=1 .and. x(j)>temp)
   x(j+1) = x(j)
   j = j - 1
-end do
+enddo
 x(j+1) = temp
-end do
+enddo
 xnew=x
 end function sort
 !=======================================================
@@ -2869,9 +2869,9 @@ temp = x(i)
 do while (j>=1 .and. x(j)>temp)
   x(j+1) = x(j)
   j = j - 1
-end do
+enddo
 x(j+1) = temp
-end do
+enddo
 end subroutine insertion_sort
 !=======================================================
 

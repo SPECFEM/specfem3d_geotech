@@ -375,12 +375,12 @@ srf_loop: do i_srf=1,nsrf
           !sqrt(r3)-sin(lode_theta)*sin(phif_blkr)/r3))
           !if(sf<scf(num(i)))scf(num(i))=sf
         endif
-      end do ! i_gll
+      enddo ! i_gll
 
       if(nl_isconv .or. nl_iter==nl_maxiter)cycle
       ! compute total body load vector
       bodyload(egdof)=bodyload(egdof)+bload
-    end do ! i_elmt
+    enddo ! i_elmt
     bodyload(0)=zero
     fmax=maxscal(fmax)
     uxmax=maxvec(abs(x))
@@ -389,7 +389,7 @@ srf_loop: do i_srf=1,nsrf
       ' nl_iter:',nl_iter,' f_max:',fmax,' uerr:',uerr,' umax:',uxmax
     endif
     if(nl_isconv.or.nl_iter==nl_maxiter)exit
-  end do plastic ! plastic iteration
+  enddo plastic ! plastic iteration
   ! check if the plastic iteration did not converge
   if(nl_iter>=nl_maxiter .and. .not.nl_isconv)then
     write(stdout,*)'WARNING: nonconvergence in nonlinear iterations!'
