@@ -187,7 +187,7 @@ ngnode = esize
 !  !enddo
 !  !print*
 !
-!end do
+!enddo
 !close(98)
 !print*, 'total elements:', nelmt
 !
@@ -209,7 +209,7 @@ ngnode = esize
 !  ! format: # id_element #flag
 !  ! note: we assume elements are sorted in materials_file
 !  read(98,*)ispec,mat_id(ispec);
-!end do
+!enddo
 !close(98)
 
 ! reads material definitions
@@ -250,7 +250,7 @@ endif
 !      count_undef_mat = count_undef_mat + 1
 !   end if
 !   read(98,*,iostat=istat) idummy,num_mat
-!end do
+!enddo
 !close(98)
 read(98,*) ! skip 1 line
 read(98,*)count_def_mat
@@ -315,7 +315,7 @@ do imat=1,count_def_mat
       stop
     endif
 
-end do
+enddo
 ! reads in undefined material properties
 do imat=1,count_undef_mat
   read(98,'(i6,i6,6a30)')num_mat,undef_mat_domain(num_mat),                    &
@@ -323,7 +323,7 @@ do imat=1,count_undef_mat
   !undef_mat_prop(7,imat),undef_mat_prop(6,imat),undef_mat_prop(1,imat),       &
   !undef_mat_prop(2,imat),undef_mat_prop(3,imat),undef_mat_prop(4,imat),       &
   !undef_mat_prop(5,imat)
-end do
+enddo
 ! viscoelastic properties
 nvisco=count(mat_domain.eq.VISCOELASTIC_DOMAIN)
 allocate(imat_visco(nvisco),muratio(nvisco),viscosity(nvisco))
@@ -376,7 +376,7 @@ close(98)
 !  !      g_coord(2,nodes_ibelm_xmin(i,ispec2D)),g_coord(3,nodes_ibelm_xmin(i,ispec2D))
 !  !enddo
 !  !print*
-!end do
+!enddo
 !close(98)
 !print*, 'absorbing boundaries:'
 !print*, '  nelmt2D_xmin = ', nelmt2D_xmin
@@ -400,7 +400,7 @@ close(98)
 !do ispec2D = 1,nelmt2D_xmax
 !  ! format: #id_(element containing the face) #id_node1_face .. #id_node4_face
 !  read(98,*) ibelm_xmax(ispec2D), nodes_ibelm_xmax(ispec2D)
-!end do
+!enddo
 !close(98)
 !print*, '  nelmt2D_xmax = ', nelmt2D_xmax
 !
@@ -423,7 +423,7 @@ close(98)
 !do ispec2D = 1,nelmt2D_ymin
 !  ! format: #id_(element containing the face) #id_node1_face .. #id_node4_face
 !  read(98,*) ibelm_ymin(ispec2D), nodes_ibelm_ymin(ispec2D)
-!end do
+!enddo
 !close(98)
 !print*, '  nelmt2D_ymin = ', nelmt2D_ymin
 end subroutine read_mesh_files
@@ -659,7 +659,7 @@ do ipart = 0, npart-1
   !  my_ninterface, my_interfaces, my_nb_interfaces, &
   !  glob2loc_elmt, glob2loc_nodes_npart, glob2loc_nodes_parts, &
   !  glob2loc_nodes, npart)
-end do
+enddo
 
 deallocate(mat_id,g_coord,xadj,adjncy,nnodeelmt,nodeselmt,elmt_weight)
 deallocate(tab_size_interfaces,tab_interfaces,my_interfaces,my_nb_interfaces)

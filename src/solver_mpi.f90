@@ -46,7 +46,7 @@ if(maxval(abs(u_g)).gt.zero)then
     egdof=gdof_elmt(:,i_elmt)
     km=k(:,:,i_elmt)
     kp(egdof)=kp(egdof)+matmul(km,u_g(egdof))
-  end do
+  enddo
   kp(0)=zero
 endif
 r=f-kp
@@ -63,7 +63,7 @@ pcg: do cg_iter=1,cg_maxiter
     egdof=gdof_elmt(:,i_elmt)
     km=k(:,:,i_elmt)
     kp(egdof)=kp(egdof)+matmul(km,p_g(egdof))
-  end do
+  enddo
   kp(0)=zero
 
   rz=dot_product_par(r,z_g)
@@ -81,7 +81,7 @@ pcg: do cg_iter=1,cg_maxiter
   beta=dot_product_par(r,z_g)/rz
   p=z+beta*p
   !if(myrank==0)write(*,'(i3,f25.18,f25.18,f25.18)')cg_iter,alpha,beta,rz
-end do pcg
+enddo pcg
 write(errtag,'(a)')'ERROR: PCG solver doesn''t converge!'
 return
 end subroutine pcg_solver

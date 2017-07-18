@@ -27,8 +27,8 @@ do i_elmt=1,nelmt
     stress_elmt(3,i,i_elmt)=szz
     stress_elmt(1,i,i_elmt)=k0*szz
     stress_elmt(2,i,i_elmt)=k0*szz
-  end do ! i GLL
-end do ! i_elmt
+  enddo ! i GLL
+enddo ! i_elmt
 return
 end subroutine overburden_stress
 !===============================================================================
@@ -73,8 +73,8 @@ do i_elmt=1,nelmt
     eps=matmul(bmat,eld)
     sigma=matmul(cmat,eps)
     stress_elmt(:,i,i_elmt)=sigma
-  end do ! i GLL
-end do ! i_elmt
+  enddo ! i GLL
+enddo ! i_elmt
 return
 end subroutine elastic_stress
 !===============================================================================
@@ -117,8 +117,8 @@ do i_elmt=1,nelmt_intact
     eps=matmul(bmat,eld)
     sigma=matmul(cmat,eps)
     stress_intact(:,i,ielmt)=stress_intact(:,i,ielmt)+sigma
-  end do ! i GLL
-end do ! i_elmt
+  enddo ! i GLL
+enddo ! i_elmt
 return
 end subroutine elastic_stress_intact
 !===============================================================================

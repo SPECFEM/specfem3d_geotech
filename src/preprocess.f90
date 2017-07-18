@@ -124,11 +124,11 @@ do i_elmt=1,nelmt
     ! interpolation functions are orthogonal, hence it is simple
     eld(idof)=eld(idof)+detjac*gll_weights(i)
     !eld(3:nedof:3)=eld(3:nedof:3)+lagrange_gll(i,:)*detjac*gll_weights(i)
-  end do ! i=1,ngll
+  enddo ! i=1,ngll
   storekm(:,:,i_elmt)=km
   do k=1,nedof
     dprecon(egdof(k))=dprecon(egdof(k))+km(k,k)
-  end do
+  enddo
 
   if(.not.present(extload))cycle
   ! compute body loads
@@ -141,7 +141,7 @@ do i_elmt=1,nelmt
     eqload(3:nedof:3)=eqkz*eld(3:nedof:3)
     extload(egdof)=extload(egdof)+eqload*gam(mat_id(i_elmt)) ! KN
   endif
-end do ! i_elmt=1,nelmt
+enddo ! i_elmt=1,nelmt
 !write(*,*)'complete!'
 dprecon(0)=zero
 if(present(extload))extload(0)=zero
