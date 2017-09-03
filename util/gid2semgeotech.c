@@ -5,7 +5,7 @@
 *  by the SPECFEM3D_GEOTECH package. GiD (www.gidhome.com) is a commercial pre
 *  and post processor for numerical simulations.
 *
-*  @author Hom Nath Gharti (hgharti_AT_princeton_DOT_edu), Zhenzhen Yan
+*  <!-- @author Hom Nath Gharti (hgharti_AT_princeton_DOT_edu), Zhenzhen Yan -->
 
 * ## Dependencies:
 *  stringmanip.c: string manipulation routines
@@ -14,31 +14,35 @@
 *  gcc gid2semgeotech.c -o gid2semgeotech
 *
 * ## Usage:
-*  gid2semgeotech <inputfile> <OPTIONS>
-*  Example: gid2semgeotech gid2semgeotech_example.dat
-*  or
+*  gid2semgeotech \em input_file [\em Options] \n\n
+*  Example: \n
+*  gid2semgeotech gid2semgeotech_example.dat \n
+*  or \n
 *  gid2semgeotech gid2semgeotech_example.dat -fac=0.001
 *
 * ## Options:
-* - -fac: use this option to multiply coordinates. this is importantn for unit
-*        conversion, e.g., to convert m to km use -fac=0.001
+* - -fac: Use this option to multiply coordinates with a certain factor. This
+*         is useful for unit conversion, e.g., to convert m to km use:
+*         -fac=0.001
 * # Basic steps starting from GID:
 *
-* ### step1: export mesh file in ASCII format "mesh.dat"
+* ### step1: Export mesh file in ASCII format "mesh.dat"
 *
-* ### step2: produce mesh and BC files
-*  >>gid2semgeotech mesh.dat
-*  OR
-*  >>gid2semgeotech mesh.dat 1000.0
+* ### step2: Produce mesh and BC files
+*
+*  gid2semgeotech mesh.dat\n
+*  OR\n
+*  gid2semgeotech mesh.dat 1000.0\n
 *
 *There will be several output files:
-* - coord_? : total number of nodes followed by nodal coordinate ? (? -> x, y, z)
+* - coord_? : Total number of nodes followed by nodal coordinate ? (? -> x,y,z)
 *
-* - _connectivity : total number of elements followed by connectivity list
+* - _connectivity : Total number of elements followed by connectivity list
 *
-* - _material_id : total number of elements followed by material IDs
+* - _material_id : Total number of elements followed by material IDs
 *
-* - ??bcu? : node IDs which have u? = 0 as the boundary conditions (?? -> ns or ss, ? -> x, y, z)
+* - ??bcu? : node IDs which have u? = 0 as the boundary conditions
+*            (?? -> ns or ss, ? -> x,y,z)
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,26 +63,21 @@ int getfirstquote(char *, char *);
 
 /* main routine */
 int main(int argc,char **argv){
-int i,itmp,j,k;
+int i,j;
 int ielmt,iface,imat,inode,ix,iy,iz,n1,n2,n3,n4,n5,n6,n7,n8;
-int nelmt_bc,nface,nbcx,nbcy,nbcz;
+int nelmt_bc,nbcx,nbcy,nbcz;
 int ndim; /* geometry dimension */
 int nnode,nelmt; /* number of nodes, number of elements */
 int nblk,nns,nss; /* number of blocks, number of node sets */
 int elmt_count,node_count; /* element, node count */
 int blk_count,ns_count,ss_count; /* block, node set count */
-int ns_nbc; /* number of bc types in each node set */
-int ss_nbc; /* number of bc types in each side set */
 int dim_stat,ns_stat,ss_stat,con_stat,coord_stat,mat_stat; /* status */
-int *blk_nelmt,*blk_nenod; /* number of elements, number of nodes per element in each node */
-int *ns_nnode,*ss_nside; /* number of nodes in each node set */
 
-double fac,ftmp,x,y,z; /* multiplication factor for coordinates, temporary float */
-char *bulk,line[100],token[62],dumc[62],stag[62];
-char **coord_name; /* coordinates name */
-char fonly[62],infname[62],outfname[62],outfnamex[62],outfnamey[62],outfnamez[62];
-char **ns_name; /* node set names */
-char **ss_name; /* node set names */
+double fac; /* multiplication factor for coordinates, temporary float */
+double ftmp,x,y,z;
+char *bulk,line[100],token[62];
+char fonly[62],infname[62],outfname[62],outfnamex[62],outfnamey[62],          \
+     outfnamez[62];
 int ns_maxnbc; /* maximum number of BC types */
 int ss_maxnbc; /* maximum number of BC types */
 
@@ -92,7 +91,6 @@ int *ns_bc_nnode; /* number of nodes in each nodal bc */
 /* e.g., char *ss_bcname[4]={"ssbcux","ssbcuy","ssbcuz","ssbcfx"};*/
 char *ss_bcname[]={"ssbcux","ssbcuy","ssbcuz"};
 int *ss_bcfilestat;
-int *ss_elmt,*ss_side;
 int *ss_bc_nside; /* number of sides in each side bc */
 
 int gid2exodus[]={5,4,1,2,3,6};
@@ -100,7 +98,8 @@ int imatnum,idomain;
 double gamma,ym,nu,phi,coh,psi;
 int isbin; /* test if binary */
 
-FILE *inf,*tempf,*outf_dum,*outf_mat,*outf_con,*outf_coord[3],*outf_bc[3],**outf_nsbc,**outf_ssbc;
+FILE *inf,*tempf,*outf_mat,*outf_con,*outf_coord[3],*outf_bc[3],**outf_nsbc,  \
+     **outf_ssbc;
 
 /* default factor and binary switch*/
 fac=1.0; isbin=OFF;
@@ -196,7 +195,8 @@ while(!feof(inf)){
     fprintf(outf_coord[1],"%d\n",nnode);
     fprintf(outf_coord[2],"%d\n",nnode);
     for(i=0;i<nnode;i++){
-      fscanf(inf,"%d %lf %lf %lf",&inode,&x,&y,&z); /* read comma separated data */
+      fscanf(inf,"%d %lf %lf %lf",&inode,&x,&y,&z);
+      /* read comma separated data */
       fprintf(outf_coord[0],"%.15lf\n",fac*x);
       fprintf(outf_coord[1],"%.15lf\n",fac*y);
       fprintf(outf_coord[2],"%.15lf\n",fac*z);
@@ -244,8 +244,10 @@ while(!feof(inf)){
     outf_mat=fopen(outfname,"w");
     fprintf(outf_mat,"# material properties (id,domain,gamma,ym,nu,phi,coh,psi)\n");
     fprintf(outf_mat,"%d\n",nblk);
-    fscanf(inf,"%d %d %lf %lf %lf %lf %lf %lf",&imatnum,&idomain,&gamma,&ym,&nu,&phi,&coh,&psi);
-    fprintf(outf_mat,"%d %d %.6f %.6e %.6f %.6f %.6f %.6f\n",imatnum,idomain,gamma,ym,nu,phi,coh,psi);
+    fscanf(inf,"%d %d %lf %lf %lf %lf %lf %lf",&imatnum,&idomain,&gamma,&ym,  \
+      &nu,&phi,&coh,&psi);
+    fprintf(outf_mat,"%d %d %.6f %.6e %.6f %.6f %.6f %.6f\n",imatnum,idomain, \
+      gamma,ym,nu,phi,coh,psi);
     printf("complete!\n");
     fclose(outf_mat);
     continue;
@@ -332,4 +334,4 @@ if(coord_stat!=ON){
 printf("--------------------------------\n");
 return(0);
 }
-/*======================================*/
+/*===========================================================================*/
