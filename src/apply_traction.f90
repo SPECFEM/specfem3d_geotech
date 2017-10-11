@@ -10,8 +10,7 @@ use math_constants
 use element,only:hexface,hexface_sign
 use integration,only:dshape_quad4_xy,dshape_quad4_yz,dshape_quad4_zx,          &
                      gll_weights_xy,gll_weights_yz,gll_weights_zx,             &
-                     lagrange_gll_xy,lagrange_gll_yz,lagrange_gll_zx!,         &
-                     !dlagrange_gll_xy,dlagrange_gll_yz,dlagrange_gll_zx
+                     lagrange_gll_xy,lagrange_gll_yz,lagrange_gll_zx
 implicit none
 integer,intent(in) :: gnod(ngnode)
 integer,intent(in) :: neq

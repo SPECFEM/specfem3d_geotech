@@ -191,6 +191,7 @@ maxngll2d=max(ngllxy,ngllyz,ngllzx)
 ! prepare
 call prepare_hex(errcode,errtag)
 call prepare_hexface(errcode,errtag)
+call prepare_integration2d(errcode,errtag)
 
 
 case_file=trim(out_path)//trim(file_head)//trim(ptail)//'.case'
