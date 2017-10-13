@@ -33,13 +33,13 @@ end subroutine sync_process
 !===============================================================================
 
 ! write error and stop
-subroutine error_stop(errtag)
+subroutine control_error(errtag)
 use global,only:myrank,stdout
 implicit none
 character(*),intent(in) :: errtag
 if(myrank==0)write(stdout,'(a)')errtag
 stop
-end subroutine error_stop
+end subroutine control_error
 !===============================================================================
 
 ! get processor tag

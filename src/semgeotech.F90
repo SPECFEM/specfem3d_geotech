@@ -52,7 +52,7 @@ call start_process()
 
 call get_command_argument(0, prog)
 if (command_argument_count() <= 0) then
-  call error_stop('ERROR: no input file!')
+  call control_error('ERROR: no input file!')
 endif
 
 call get_command_argument(1, arg1)
@@ -105,7 +105,7 @@ if(.not.isfile)then
 endif
 ! read input data
 call read_input(inp_fname,errcode,errtag)
-if(errcode/=0)call error_stop(errtag)
+if(errcode/=0)call control_error(errtag)
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
 max_nelmt=maxscal(nelmt); max_nnode=maxscal(nnode)
@@ -119,7 +119,7 @@ endif
 
 if (trim(method)/='sem')then
   write(errtag,'(a)')'ERROR: wrong input for sem3d!'
-  call error_stop(errtag)
+  call control_error(errtag)
 endif
 
 call parse_file(inp_fname,path,file_head,ext)
@@ -143,7 +143,7 @@ geo_file=trim(file_head)//'_original'//trim(ptail)//'.geo'
 open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
-  call error_stop(errtag)
+  call control_error(errtag)
 endif
 
 write(11,'(a)')'FORMAT'
@@ -165,7 +165,7 @@ real(g_coord),g_num)
 ! create spectral elements
 if(myrank==0)write(stdout,'(a)',advance='no')'creating spectral elements...'
 call hex2spec(ndim,ngnode,nelmt,nnode,ngllx,nglly,ngllz,errcode,errtag)
-if(errcode/=0)call error_stop(errtag)
+if(errcode/=0)call control_error(errtag)
 if(myrank==0)write(stdout,*)'complete!'
 
 tot_nelmt=sumscal(nelmt); tot_nnode=sumscal(nnode)
@@ -198,7 +198,7 @@ case_file=trim(out_path)//trim(file_head)//trim(ptail)//'.case'
 open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
-  call error_stop(errtag)
+  call control_error(errtag)
 endif
 
 write(11,'(a)')'FORMAT'

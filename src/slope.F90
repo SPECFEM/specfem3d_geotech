@@ -96,7 +96,7 @@ if (istat/=0)then
 endif
 gdof=1
 call apply_bc(neq,errcode,errtag)
-if(errcode/=0)call error_stop(errtag)
+if(errcode/=0)call control_error(errtag)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
 
@@ -166,7 +166,7 @@ if(myrank==0)write(stdout,*)'complete!'
 if(istraction)then
   if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
   call apply_traction(hex8_gnode,neq,extload,errcode,errtag)
-  if(errcode/=0)call error_stop(errtag)
+  if(errcode/=0)call control_error(errtag)
   if(myrank==0)write(*,*)'complete!'
 endif
 
@@ -175,7 +175,7 @@ if(iswater)then
   if(myrank==0)write(stdout,'(a)',advance='no')'computing water pressure...'
   allocate(wpressure(nnode),submerged_node(nnode))
   call compute_pressure(wpressure,submerged_node,errcode,errtag)
-  if(errcode/=0)call error_stop(errtag)
+  if(errcode/=0)call control_error(errtag)
   ! write pore pressure file
 
   ! open Ensight Gold data file to store data
@@ -292,7 +292,7 @@ srf_loop: do i_srf=1,nsrf
     !x=zero
     call pcg_solver(neq,nelmt,storekm,x,load,dprecon,gdof_elmt,cg_iter,        &
     errcode,errtag)
-    if(errcode/=0)call error_stop(errtag)
+    if(errcode/=0)call control_error(errtag)
     cg_tot=cg_tot+cg_iter
     x(0)=zero
 
