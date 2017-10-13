@@ -33,10 +33,15 @@ end subroutine sync_process
 !===============================================================================
 
 ! write error and stop
-subroutine control_error(errtag)
+subroutine control_error(errcode,errtag)
 use global,only:myrank,stdout
 implicit none
+integer,intent(in) :: errcode
 character(*),intent(in) :: errtag
+
+if(errcode.eq.0)return
+
+! print error message and stop execution
 if(myrank==0)write(stdout,'(a)')errtag
 stop
 end subroutine control_error

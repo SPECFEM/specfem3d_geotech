@@ -122,7 +122,7 @@ if (istat/=0)then
 endif
 gdof=1
 call apply_bc(neq,errcode,errtag)
-if(errcode/=0)call control_error(errtag)
+call control_error(errcode,errtag)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
 
@@ -199,7 +199,7 @@ if(s0_type==0)then
   if(istraction)then
     if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
     call apply_traction(hex8_gnode,neq,extload,errcode,errtag)
-    if(errcode/=0)call control_error(errtag)
+    call control_error(errcode,errtag)
     if(myrank==0)write(*,*)'complete!'
   endif
 
@@ -209,7 +209,7 @@ if(s0_type==0)then
     allocate(wpressure(nnode),submerged_node(nnode))
     call compute_pressure(wpressure,submerged_node,errcode,   &
     errtag)
-    if(errcode/=0)call control_error(errtag)
+    call control_error(errcode,errtag)
     ! write pore pressure file
 
     ! open Ensight Gold data file to store data
@@ -230,7 +230,7 @@ if(s0_type==0)then
   x=zero
   call pcg_solver(neq,nelmt,storekm,x,extload,     &
   dprecon,gdof_elmt,cg_iter,errcode,errtag)
-  if(errcode/=0)call control_error(errtag)
+  call control_error(errcode,errtag)
   x(0)=zero
 
   call elastic_stress(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,dshape_hex8, &
@@ -524,7 +524,7 @@ excavation_stage: do i_excav=1,nexcav
     !x=zero
     call pcg_solver(neq,nelmt_intact,storekm,x,load,      &
     dprecon,gdof_elmt(:,elmt_intact),cg_iter,errcode,errtag)
-    if(errcode/=0)call control_error(errtag)
+    call control_error(errcode,errtag)
     cg_tot=cg_tot+cg_iter
     x(0)=zero
 

@@ -55,6 +55,9 @@ double precision,dimension(:),allocatable :: xp,yp,zp
 integer,dimension(3) :: ngll_vec ! (/ngllx,nglly,ngllz/) in ascending order
 integer :: i
 character(len=250) :: errtag
+integer :: errcode
+
+errtag=""; errcode=-1
 
 ! find maximum ngll points in a face
 ! this is needed only for memory allocation
@@ -101,7 +104,7 @@ write(fname, fmt=format_str)trim(part_path)//trim(gfile)//'_proc',myrank
 open(unit=11,file=trim(fname),status='old',action='read',iostat = istat)
 if( istat /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
-  call control_error(errtag)
+  call control_error(errcode,errtag)
 endif
 
 read(11,*) ! skip 1 line
@@ -109,7 +112,7 @@ read(11,*)mrank ! master partition ID
 
 if(mrank/=myrank)then
   write(errtag,*)'ERROR: wrong gpart file partition ',mrank,' !'
-  call control_error(errtag)
+  call control_error(errcode,errtag)
 endif
 
 read(11,*) ! skip 1 line
@@ -138,7 +141,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
   itmp_array=-1
   switch_node=.false.
   ncount=0
-  !call control_error(errtag)
+  !call control_error(errcode,errtag)
   do i_elmt=1,ngelmt ! ghost elements loop
     read(11,*)melmt,etype,eid;
 
@@ -162,7 +165,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
     else
       write(errtag,*)'ERROR: wrong etype:',etype,' for ghost partition ',      &
       mrank,'!'
-      call control_error(errtag)
+      call control_error(errcode,errtag)
     endif
 
     do k_g=kg0,kg1
@@ -207,7 +210,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
   deallocate(xp,yp,zp)
   if(ncount/=new_ncount)then
     write(errtag,*)'ERROR: number of ghost nodes mismatched after sorting!'
-    call control_error(errtag)
+    call control_error(errcode,errtag)
   endif
 
   ! find ghost gdof
