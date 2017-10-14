@@ -189,9 +189,13 @@ ngllzx=ngllz*ngllx
 
 maxngll2d=max(ngllxy,ngllyz,ngllzx)
 
-! prepare
+! prepare hex element
 call prepare_hex(errcode,errtag)
+
+! prepare hex element face
 call prepare_hexface(errcode,errtag)
+
+! prepare integration 2D variables
 call prepare_integration2d(errcode,errtag)
 
 
@@ -335,8 +339,10 @@ else
 endif
 !-------------------------------------------------------------------------------
 
-! clean up
+! clean up hex element face
 call cleanup_hexface(errcode,errtag)
+
+! clean up integration 2D variables
 call cleanup_integration2d(errcode,errtag)
 
 ! compute elapsed time
