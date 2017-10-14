@@ -28,7 +28,7 @@ contains
 !-----------------------------------------------------------
 subroutine prepare_ghost()
 use global,only:ndim,nnode,nndof,ngllx,nglly,ngllz,g_num,g_coord,gfile,        &
-part_path,stdout
+part_path
 use math_library, only : iquick_sort
 use math_library_mpi, only : maxvec
 
