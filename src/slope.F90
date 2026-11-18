@@ -31,7 +31,7 @@ use solver_mpi
 use serial_library
 use math_library_serial
 use solver
-#endif
+#end if
 use visual
 use postprocess
 implicit none
@@ -93,10 +93,10 @@ allocate(gdof(nndof,nnode),stat=istat)
 if (istat/=0)then
   write(stdout,*)'ERROR: cannot allocate memory!'
   stop
-endif
+end if
 gdof=1
 call apply_bc(neq,errcode,errtag)
-if(errcode/=0)call error_stop(errtag)
+call control_error(errcode,errtag)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
 
@@ -106,13 +106,13 @@ eload(nedof),nodalu(nndof,nnode),egdof(nedof),stat=istat)
 if (istat/=0)then
   write(stdout,*)'ERROR: cannot allocate memory!'
   stop
-endif
+end if
 
 tot_neq=sumscal(neq); max_neq=maxscal(neq); min_neq=minscal(neq)
 if(myrank==0)then
   write(stdout,*)'degrees of freedoms => total:',tot_neq,' max:',max_neq,      &
   ' min:',min_neq
-endif
+end if
 
 ! get GLL quadrature points and weights
 allocate(xigll(ngllx),wxgll(ngllx),etagll(nglly),wygll(nglly),zetagll(ngllz),  &
@@ -154,7 +154,7 @@ allocate(extload(0:neq),dprecon(0:neq),storekm(nedof,nedof,nelmt),stat=istat)
 if (istat/=0)then
   write(stdout,*)'ERROR: cannot allocate memory!'
   stop
-endif
+end if
 extload=zero; gravity=.true.; pseudoeq=iseqload
 call stiffness_bodyload(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,gam_blk,   &
 nu_blk,ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon,extload,   &
@@ -166,16 +166,16 @@ if(myrank==0)write(stdout,*)'complete!'
 if(istraction)then
   if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
   call apply_traction(hex8_gnode,neq,extload,errcode,errtag)
-  if(errcode/=0)call error_stop(errtag)
+  call control_error(errcode,errtag)
   if(myrank==0)write(*,*)'complete!'
-endif
+end if
 
 ! compute water pressure
 if(iswater)then
   if(myrank==0)write(stdout,'(a)',advance='no')'computing water pressure...'
   allocate(wpressure(nnode),submerged_node(nnode))
   call compute_pressure(wpressure,submerged_node,errcode,errtag)
-  if(errcode/=0)call error_stop(errtag)
+  call control_error(errcode,errtag)
   ! write pore pressure file
 
   ! open Ensight Gold data file to store data
@@ -184,7 +184,7 @@ if(iswater)then
   destag='Pore pressure'
   call write_ensight_pernode(out_fname,destag,npart,1,nnode,real(wpressure))
   if(myrank==0)write(stdout,*)'complete!'
-endif
+end if
 
 if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 
@@ -225,7 +225,7 @@ allocate(bodyload(0:neq),load(0:neq),x(0:neq),oldx(0:neq),stat=istat)
 if (istat/=0)then
   write(stdout,*)'ERROR: cannot allocate memory!'
   stop
-endif
+end if
 
 allocate(cohf_blk(nmatblk),nuf_blk(nmatblk),phif_blk(nmatblk),                 &
 psif_blk(nmatblk),ymf_blk(nmatblk))
@@ -238,7 +238,7 @@ if(myrank==0)then
     write(stdout,'(f7.4,1x)',advance='no')srf(i_srf)
   enddo
   write(stdout,'(/,a)')'--------------------------------------------'
-endif
+end if
 
 ! strength reduction (factor of safety) loop
 srf_loop: do i_srf=1,nsrf
@@ -267,7 +267,7 @@ srf_loop: do i_srf=1,nsrf
     ! assemble from ghost partitions
     call assemble_ghosts(neq,dprecon,dprecon)
     dprecon(1:)=one/dprecon(1:); dprecon(0)=zero
-  endif
+  end if
 
   ! find global dt
   dt=minscal(dt)
@@ -292,7 +292,7 @@ srf_loop: do i_srf=1,nsrf
     !x=zero
     call pcg_solver(neq,nelmt,storekm,x,load,dprecon,gdof_elmt,cg_iter,        &
     errcode,errtag)
-    if(errcode/=0)call error_stop(errtag)
+    call control_error(errcode,errtag)
     cg_tot=cg_tot+cg_iter
     x(0)=zero
 
@@ -301,7 +301,7 @@ srf_loop: do i_srf=1,nsrf
       dshape_hex8,dlagrange_gll,x,stress_elmt)
 
       exit plastic
-    endif
+    end if
 
     ! check plastic convergence
     uerr=maxvec(abs(x-oldx))/maxvec(abs(x))
@@ -337,8 +337,8 @@ srf_loop: do i_srf=1,nsrf
           if(submerged_node(num(i)))then
              ! water pressure is compressive (negative)
             effsigma(1:3)=effsigma(1:3)+wpressure(num(i))
-          endif
-        endif
+          end if
+        end if
 
         !effsigma=effsigma+stress_elmt(:,i,ielmt)
         call stress_invariant(effsigma,sigm,dsbar,lode_theta)
@@ -374,27 +374,27 @@ srf_loop: do i_srf=1,nsrf
           !(-dsbar*(cos(lode_theta)/      &
           !sqrt(r3)-sin(lode_theta)*sin(phif_blkr)/r3))
           !if(sf<scf(num(i)))scf(num(i))=sf
-        endif
-      end do ! i_gll
+        end if
+      enddo ! i_gll
 
       if(nl_isconv .or. nl_iter==nl_maxiter)cycle
       ! compute total body load vector
       bodyload(egdof)=bodyload(egdof)+bload
-    end do ! i_elmt
+    enddo ! i_elmt
     bodyload(0)=zero
     fmax=maxscal(fmax)
     uxmax=maxvec(abs(x))
     if(myrank==0)then
       write(stdout,'(a,i4,a,f12.6,a,f12.6,a,f12.6)') &
       ' nl_iter:',nl_iter,' f_max:',fmax,' uerr:',uerr,' umax:',uxmax
-    endif
+    end if
     if(nl_isconv.or.nl_iter==nl_maxiter)exit
-  end do plastic ! plastic iteration
+  enddo plastic ! plastic iteration
   ! check if the plastic iteration did not converge
   if(nl_iter>=nl_maxiter .and. .not.nl_isconv)then
     write(stdout,*)'WARNING: nonconvergence in nonlinear iterations!'
     write(stdout,*)'desired tolerance:',nl_tol,' achieved tolerance:',uerr
-  endif
+  end if
 
   nl_tot=nl_tot+nl_iter
   ! nodal displacement
@@ -402,7 +402,7 @@ srf_loop: do i_srf=1,nsrf
     do j=1,nnode
       if(gdof(i,j)/=0)then
         nodalu(i,j)=nodalu(i,j)+x(gdof(i,j)) !-elastic(gdof(i,j))
-      endif
+      end if
     enddo
   enddo
   !enddo load_increment ! load increment loop

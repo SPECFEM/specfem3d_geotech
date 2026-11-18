@@ -26,7 +26,7 @@ norm=sqrt(sum(nx**2))
 if(norm<=0.0_kreal)then
   write(*,*)'ERROR: undefined normal!'
   stop
-endif
+end if
 ! unit normal
 nx=nx/norm
 return
@@ -131,8 +131,8 @@ else
         xmat(i,k)=0.0_kreal
         xmat(i,:)=xmat(i,:)-xmat(k,:)*con
       end if
-    end do
-  end do
+    enddo
+  enddo
 end if
 return
 end subroutine invert
@@ -155,7 +155,7 @@ nst=ubound(stress,1)
 if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!'
   stop
-endif
+end if
 
 sq3=sqrt(three)
 s1=stress(1)
@@ -200,9 +200,9 @@ do i = 2, n
   do while (j>=1 .and. x(j)>temp)
     x(j+1) = x(j)
     j = j - 1
-  end do
+  enddo
   x(j+1) = temp
-end do
+enddo
 xnew=x
 end function iquick_sort
 !===============================================================================
@@ -221,9 +221,9 @@ do i = 2, n
   do while (j>=1 .and. x(j)>temp)
     x(j+1) = x(j)
     j = j - 1
-  end do
+  enddo
   x(j+1) = temp
-end do
+enddo
 xnew=x
 end function rquick_sort
 !===============================================================================
@@ -241,9 +241,9 @@ do i = 2, n
   do while (j>=1 .and. x(j)>temp)
     x(j+1) = x(j)
     j = j - 1
-  end do
+  enddo
   x(j+1) = temp
-end do
+enddo
 end subroutine insertion_sort
 !===============================================================================
 

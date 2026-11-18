@@ -33,10 +33,10 @@ do i = 1, len_trim(str)
     if (.not. isdelim)then
       nword = nword + 1
       isdelim = .true.
-    endif
+    end if
   else
     if (isdelim)isdelim = .false.
-  endif
+  end if
 enddo
 
 end function count_word
@@ -50,7 +50,7 @@ read(str,*,iostat=ios)str2int
 if(ios.ne.0)then
   write(*,*)'ERROR: "',trim(adjustl(str)),'" isn''t the valid integer!'
   stop
-endif
+end if
 end function str2int
 !===========================================
 
@@ -62,7 +62,7 @@ read(str,*,iostat=ios)str2real
 if(ios.ne.0)then
   write(*,*)'ERROR: "',trim(adjustl(str)),'" isn''t the valid real!'
   stop
-endif
+end if
 end function str2real
 !===========================================
 
@@ -87,7 +87,7 @@ do i=slen,1,-1
   if(fname(i:i)==".")then
     iext=i
     exit
-  endif
+  end if
 enddo
 
 ! find slash position
@@ -96,7 +96,7 @@ do i=iext,1,-1
   if(fname(i:i)=="/" .or. fname(i:i)=="\")then
     ipath=i
     exit
-  endif
+  end if
 enddo
 
 ! determine path, head, and extension
@@ -155,7 +155,7 @@ do i=1,slen
     token=tmp_str(1:i-1)
     str=tmp_str(i+1:slen)
     exit
-  endif
+  end if
 enddo
 
 return
@@ -183,7 +183,7 @@ do i=1,slen
     ch=str(i:i)
     ind=i
     exit
-  endif
+  end if
 enddo
 return
 end subroutine first_char
@@ -209,7 +209,7 @@ do i=slen,1,-1
     ch=str(i:i)
     ind=i
     exit
-  endif
+  end if
 enddo
 return
 end subroutine last_char
@@ -236,7 +236,7 @@ do i=1,slen
   if(tmp_str(i:i)==delm)then
     narg=narg+1
     ind(narg)=i
-  endif
+  end if
 enddo
 narg=narg+1
 ind(narg)=slen+1
@@ -267,7 +267,7 @@ do i=1,nvar
   if (vname==trim(adjustl(args(1))))then
      read(args(2),*)get_string
      return
-  endif
+  end if
 enddo
 
 write(*,'(/,a)')'ERROR: cannot read the string variable "'//vname//'"!'
@@ -292,7 +292,7 @@ do i=1,nvar
   if (vname==trim(adjustl(args(1))))then
      read(args(2),*)strval
      return
-  endif
+  end if
 enddo
 
 return
@@ -319,7 +319,7 @@ do i=1,nvar
   if (vname==trim(adjustl(args(1))))then
      read(args(2),*)get_string_vect
      return
-  endif
+  end if
 enddo
 
 write(*,'(/,a)')'ERROR: cannot read the integer variable "'//vname//'"!'
@@ -342,7 +342,7 @@ do i=1,nvar
   if (vname==trim(adjustl(args(1))))then
      read(args(2),*)get_integer
      return
-  endif
+  end if
 enddo
 
 write(*,'(/,a)')'ERROR: cannot read the integer variable "'//vname//'"!'
@@ -368,7 +368,7 @@ do i=1,nvar
      read(args(2),*)ival
      istat=0
      return
-  endif
+  end if
 enddo
 
 !write(*,'(/,a)')'ERROR: cannot read the integer variable "'//vname//'"!'
@@ -396,7 +396,7 @@ do i=1,nvar
      read(args(2),*,iostat=ios)get_integer_vect(1:n)
      if(ios/=0)exit
      return
-  endif
+  end if
 enddo
 
 write(*,'(/,a)')'ERROR: cannot read the integer variable "'//vname//'"!'
@@ -427,7 +427,7 @@ do i=1,nvar
      if(ios/=0)exit
      istat=0
      return
-  endif
+  end if
 enddo
 
 return
@@ -449,7 +449,7 @@ do i=1,nvar
   if (vname==trim(adjustl(args(1))))then
      read(args(2),*)get_real
      return
-  endif
+  end if
 enddo
 
 write(*,'(/,a)')'ERROR: cannot read the real variable "'//vname//'"!'
@@ -476,7 +476,7 @@ do i=1,nvar
      read(args(2),*)rval
      istat=0
      return
-  endif
+  end if
 enddo
 
 return
@@ -498,7 +498,7 @@ do i=1,nvar
   if (vname==trim(adjustl(args(1))))then
      read(args(2),*)get_double
      return
-  endif
+  end if
 enddo
 
 write(*,'(/,a)')'ERROR: cannot read the double variable "'//vname//'"!'
@@ -526,7 +526,7 @@ do i=1,nvar
      read(args(2),*,iostat=ios)get_real_vect(1:n)
      if(ios/=0)exit
      return
-  endif
+  end if
 enddo
 
 write(*,'(/,a)')'ERROR: cannot read the real vector variable "'//vname//'"!'
@@ -557,7 +557,7 @@ do i=1,nvar
      if(ios/=0)exit
      istat=0
      return
-  endif
+  end if
 enddo
 
 !write(*,'(/,a)')'ERROR: cannot read the real vector variable "'//vname//'"!'
@@ -602,9 +602,9 @@ do i=1,slen
     if(.not.(65 <= itemp .and. itemp <= 90))then
       if(.not.(97 <= itemp .and. itemp <= 122))then
         return
-      endif
-    endif
-  endif
+      end if
+    end if
+  end if
 enddo
 ind = .true.
 end function isalphabet

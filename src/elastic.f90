@@ -25,7 +25,7 @@ nst=ubound(cmat,1)
 if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!'
   stop
-endif
+end if
 
 cmat=zero
 
@@ -59,7 +59,7 @@ nst=ubound(cmat,1)
 if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!'
   stop
-endif
+end if
 
 cmat=zero
 v1=one-v
@@ -69,10 +69,10 @@ v2=v/(one-v)
 vv=(one-two*v)/(one-v)*pt5
 do i=1,3
   cmat(i,i)=one
-end do
+enddo
 do i=4,6
   cmat(i,i)=vv
-end do
+enddo
 cmat(1,2)=v2
 cmat(2,1)=v2
 cmat(1,3)=v2
@@ -97,7 +97,7 @@ nst=ubound(cmat,1)
 if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!'
   stop
-endif
+end if
 
 twomuthird=2.0_kreal*shearmod/3.0_kreal
 
@@ -197,7 +197,7 @@ end subroutine compute_cmat_elastic
 !
 !    if(islast)then
 !      strain_elas(:,i,ielmt)=epst
-!    endif
+!    end if
 !
 !    eload=matmul(sigma,bmat)
 !    bload=bload+eload*detjac*gll_weights(i)
@@ -230,8 +230,8 @@ end subroutine compute_cmat_elastic
 !    stress_elmt(3,i,i_elmt)=szz
 !    stress_elmt(1,i,i_elmt)=k0*szz
 !    stress_elmt(2,i,i_elmt)=k0*szz
-!  end do ! i GLL
-!end do ! i_elmt
+!  enddo ! i GLL
+!enddo ! i_elmt
 !return
 !end subroutine overburden_stress
 !!===========================================
@@ -275,8 +275,8 @@ end subroutine compute_cmat_elastic
 !    eps=matmul(bmat,eld)
 !    sigma=matmul(cmat,eps)
 !    stress_elmt(:,i,i_elmt)=sigma
-!  end do ! i GLL
-!end do ! i_elmt
+!  enddo ! i GLL
+!enddo ! i_elmt
 !return
 !end subroutine elastic_stress
 !!===========================================
@@ -326,9 +326,9 @@ end subroutine compute_cmat_elastic
 !    !      print*,'e',eld
 !    !      !print*,'ev',evpt
 !    !     stop
-!    !    endif
-!  end do ! i GLL
-!end do ! i_elmt
+!    !    end if
+!  enddo ! i GLL
+!enddo ! i_elmt
 !!print*,size(stress_elmt)
 !return
 !end subroutine elastic_stress_intact

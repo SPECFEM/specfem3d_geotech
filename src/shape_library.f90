@@ -41,7 +41,7 @@ real(kind=kreal), parameter :: one_eighth = 0.125d0
 if(ngnod /= 8)then
   write(*,*)'ERROR: elements must have 8 geometrical nodes!'
   stop
-endif
+end if
 
 ! compute shape functions
 ! case of a 3d 8-node element (dhatt-touzot p. 115)
@@ -90,7 +90,7 @@ do k=1,ngllz
       if(abs(sum_shape-one) >  zerotol)then
         write(*,*)'ERROR: error shape functions!'
         stop
-      endif
+      end if
     enddo
   enddo
 enddo
@@ -132,7 +132,7 @@ real(kind=kreal), parameter :: one_eighth = 0.125_kreal
 if(ngnod /= 8)then
   write(*,*)'ERROR: elements must have 8 geometrical nodes!'
   stop
-endif
+end if
 
 ngll=ngllx*nglly*ngllz
 
@@ -202,15 +202,15 @@ do i=1,ngll
       if(abs(sum_dshapexi) >  zerotol)then
         write(*,*)'ERROR: derivative xi shape functions!'
         stop
-      endif
+      end if
       if(abs(sum_dshapeeta) >  zerotol)then
         write(*,*)'ERROR: derivative eta shape functions!'
         stop
-      endif
+      end if
       if(abs(sum_dshapezeta) >  zerotol)then
         write(*,*)'ERROR: derivative gamma shape functions!'
         stop
-      endif
+      end if
 enddo
 
 end subroutine dshape_function_hex8
@@ -248,7 +248,7 @@ real(kind=kreal), parameter :: one_fourth = 0.25_kreal
 if(ngnod2d /= 4)then
   write(*,*)'ERROR: element faces must have 4 geometrical nodes!'
   stop
-endif
+end if
 
 ngll=ngllx*nglly
 
@@ -296,11 +296,11 @@ do j=1,nglly
     if(abs(sum_dshapexi) >  zerotol)then
       write(*,*)'ERROR: derivative xi shape functions!'
       stop
-    endif
+    end if
     if(abs(sum_dshapeeta) >  zerotol)then
       write(*,*)'ERROR: derivative eta shape functions!'
       stop
-    endif
+    end if
   enddo
 
 end subroutine dshape_function_quad4

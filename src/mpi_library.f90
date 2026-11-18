@@ -57,18 +57,23 @@ end subroutine sync_process
 !===============================================================================
 
 ! write error and stop
-subroutine error_stop(errtag)
+subroutine control_error(errcode,errtag)
 use global,only:myrank,stdout
 implicit none
+integer,intent(in) :: errcode
 character(*),intent(in) :: errtag
-integer :: errcode,ierr
+integer :: ierr
+
+if(errcode.eq.0)return
+
+! print error message and stop execution
 if(myrank==0)write(stdout,'(a)')errtag
 call close_process
 ! stop all the MPI processes, and exit
 write(stdout,'(a)')'aborting MPI...'
 call MPI_ABORT(MPI_COMM_WORLD,errcode,ierr)
 stop
-end subroutine error_stop
+end subroutine control_error
 !===============================================================================
 
 ! get processor tag

@@ -27,8 +27,8 @@ do i_elmt=1,nelmt
     stress_elmt(3,i,i_elmt)=szz
     stress_elmt(1,i,i_elmt)=k0*szz
     stress_elmt(2,i,i_elmt)=k0*szz
-  end do ! i GLL
-end do ! i_elmt
+  enddo ! i GLL
+enddo ! i_elmt
 return
 end subroutine overburden_stress
 !===============================================================================
@@ -73,8 +73,8 @@ do i_elmt=1,nelmt
     eps=matmul(bmat,eld)
     sigma=matmul(cmat,eps)
     stress_elmt(:,i,i_elmt)=sigma
-  end do ! i GLL
-end do ! i_elmt
+  enddo ! i GLL
+enddo ! i_elmt
 return
 end subroutine elastic_stress
 !===============================================================================
@@ -117,8 +117,8 @@ do i_elmt=1,nelmt_intact
     eps=matmul(bmat,eld)
     sigma=matmul(cmat,eps)
     stress_intact(:,i,ielmt)=stress_intact(:,i,ielmt)+sigma
-  end do ! i GLL
-end do ! i_elmt
+  enddo ! i GLL
+enddo ! i_elmt
 return
 end subroutine elastic_stress_intact
 !===============================================================================
@@ -153,7 +153,7 @@ if(savedata%psigma.or.savedata%nsigma.or.savedata%maxtau)then
     ! put in ascending order (compresson (-) as a major principal stress!)
     psigma(:,i_node)=rquick_sort(psigma(:,i_node),3)
   enddo
-endif
+end if
 ! store initial principal stresses
 !if(istep==0)psigma0=psigma
 ! compute major principal stress factor
@@ -164,7 +164,7 @@ endif
 !  elsewhere
 !      scf=psigma(1,:)/psigma0(1,:)
 !  end where
-!endif
+!end if
 
 if(savedata%maxtau)then
   ! compute maximum shear stress
@@ -172,7 +172,7 @@ if(savedata%maxtau)then
   do i_node=1,nnode
     taumax(i_node)=half*abs(psigma(1,i_node)-psigma(3,i_node))
   enddo
-endif
+end if
 
 if(savedata%nsigma)then
   ! compute normal stress
@@ -180,7 +180,7 @@ if(savedata%nsigma)then
   do i_node=1,nnode
     nsigma(i_node)=half*(psigma(1,i_node)+psigma(3,i_node))
   enddo
-endif
+end if
 
 if(savedata%disp)then
   ! write displacement vector
@@ -189,7 +189,7 @@ if(savedata%disp)then
   npart=1;
   destag='Displacement field'
   call write_ensight_pernodeVECAS(out_fname,destag,npart,3,nnode,real(nodalu))
-endif
+end if
 
 if(savedata%stress)then
   ! write stress tensor
@@ -199,7 +199,7 @@ if(savedata%stress)then
   destag='Effective stress tensor'
   call write_ensight_pernodeVECAS(out_fname,destag,npart,6,nnode,              &
   real(stress_global))
-endif
+end if
 
 if(savedata%psigma)then
   ! write principal stress
@@ -208,7 +208,7 @@ if(savedata%psigma)then
   npart=1;
   destag='principal stresses'
   call write_ensight_pernodeVECAS(out_fname,destag,npart,3,nnode,real(psigma))
-endif
+end if
 
 if(savedata%scf)then
   ! write stress concentration factor
@@ -217,7 +217,7 @@ if(savedata%scf)then
   npart=1;
   destag='principal stress concentration factor'
   call write_ensight_pernodeSCALAS(out_fname,destag,npart,nnode,real(scf))
-endif
+end if
 
 if(savedata%maxtau)then
   ! write maximum shear stress
@@ -226,7 +226,7 @@ if(savedata%maxtau)then
   npart=1;
   destag='maximum shear stress'
   call write_ensight_pernodeSCALAS(out_fname,destag,npart,nnode,real(taumax))
-endif
+end if
 
 if(savedata%nsigma)then
   ! write normal stress on maximum-shear-stress plane
@@ -235,7 +235,7 @@ if(savedata%nsigma)then
   npart=1;
   destag='normal stress'
   call write_ensight_pernodeSCALAS(out_fname,destag,npart,nnode,real(nsigma))
-endif
+end if
 
 if(savedata%vmeps)then
   ! write accumulated effective plastic strain
@@ -244,7 +244,7 @@ if(savedata%vmeps)then
   npart=1;
   destag='von Mises effective plastic strain'
   call write_ensight_pernodeSCALAS(out_fname,destag,npart,nnode,real(vmeps))
-endif
+end if
 end subroutine save_data
 !===============================================================================
 end module postprocess

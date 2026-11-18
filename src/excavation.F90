@@ -34,7 +34,7 @@ use solver_mpi
 use serial_library
 use math_library_serial
 use solver
-#endif
+#end if
 use visual
 use postprocess
 
@@ -119,10 +119,10 @@ allocate(gdof(nndof,nnode),stat=istat)
 if (istat/=0)then
   write(stdout,*)'ERROR: cannot allocate memory!'
   stop
-endif
+end if
 gdof=1
 call apply_bc(neq,errcode,errtag)
-if(errcode/=0)call error_stop(errtag)
+call control_error(errcode,errtag)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
 
@@ -132,13 +132,13 @@ bload(nedof),eload(nedof),nodalu(nndof,nnode),egdof(nedof),stat=istat)
 if (istat/=0)then
   write(stdout,*)'ERROR: cannot allocate memory!'
   stop
-endif
+end if
 
 tot_neq=sumscal(neq); max_neq=maxscal(neq); min_neq=minscal(neq)
 if(myrank==0)then
   write(stdout,*)'degrees of freedoms => total:',tot_neq,' max:',max_neq,      &
   ' min:',min_neq
-endif
+end if
 
 ! get gll points and weights
 allocate(xigll(ngllx),wxgll(ngllx),etagll(nglly),wygll(nglly),zetagll(ngllz),  &
@@ -187,7 +187,7 @@ if(s0_type==0)then
   if (istat/=0)then
     write(stdout,*)'ERROR: cannot allocate memory!'
     stop
-  endif
+  end if
   extload=zero; gravity=.true.; pseudoeq=.false.
   call stiffness_bodyload(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,gam_blk, &
   nu_blk,ym_blk,dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon,extload, &
@@ -199,9 +199,9 @@ if(s0_type==0)then
   if(istraction)then
     if(myrank==0)write(*,'(a)',advance='no')'applying traction...'
     call apply_traction(hex8_gnode,neq,extload,errcode,errtag)
-    if(errcode/=0)call error_stop(errtag)
+    call control_error(errcode,errtag)
     if(myrank==0)write(*,*)'complete!'
-  endif
+  end if
 
   ! compute water pressure
   if(iswater)then
@@ -209,7 +209,7 @@ if(s0_type==0)then
     allocate(wpressure(nnode),submerged_node(nnode))
     call compute_pressure(wpressure,submerged_node,errcode,   &
     errtag)
-    if(errcode/=0)call error_stop(errtag)
+    call control_error(errcode,errtag)
     ! write pore pressure file
 
     ! open Ensight Gold data file to store data
@@ -218,7 +218,7 @@ if(s0_type==0)then
     destag='Pore pressure'
     call write_ensight_pernode(out_fname,destag,npart,1,nnode,real(wpressure))
     if(myrank==0)write(stdout,*)'complete!'
-  endif
+  end if
 
   if(myrank==0)write(stdout,'(a)')'--------------------------------------------'
 
@@ -230,7 +230,7 @@ if(s0_type==0)then
   x=zero
   call pcg_solver(neq,nelmt,storekm,x,extload,     &
   dprecon,gdof_elmt,cg_iter,errcode,errtag)
-  if(errcode/=0)call error_stop(errtag)
+  call control_error(errcode,errtag)
   x(0)=zero
 
   call elastic_stress(nelmt,neq,hex8_gnode,g_num,gdof_elmt,mat_id,dshape_hex8, &
@@ -242,7 +242,7 @@ elseif(s0_type==1)then
 else
   write(stdout,*)'ERROR: s0_type:',s0_type,' not supported!'
   stop
-endif
+end if
 
 allocate(stress_global(nst,nnode),vmeps(nnode))
 allocate(scf(nnode))
@@ -279,7 +279,7 @@ if(myrank==0)then
   write(stdout,*)
   write(stdout,'(a,i3)')'nexcav:',nexcav
   write(stdout,'(/,a)')'--------------------------------------------'
-endif
+end if
 
 SRF_LOOP: DO i_srf=1,nsrf
 !-------------------------------------------------------------------------------
@@ -317,7 +317,7 @@ if(maxval(abs(stress_elmt)).gt.zero)then
     stress_global(:,inode)=stress_global(:,inode)/real(node_valency(inode),    &
     kreal)
   enddo
-endif
+end if
 ! allocate and set intact plotting variables
 i_excav=0
 call save_data(format_str,i_excav,nnode,nodalu,scf,vmeps,stress_global)
@@ -350,7 +350,7 @@ excavation_stage: do i_excav=1,nexcav
   if(nelmt_intact<=0)then
     write(stdout,'(/,a)')'WARNING: no intact elements left!'
     exit excavation_stage
-  endif
+  end if
   allocate(elmt_intact(nelmt_intact),elmt_void(nelmt_void))
   ! find intact and void elements after excavation
   call intact_void_elmt(nexcavid(i_excav),excavid(id0:id1),ismat,nelmt_intact, &
@@ -372,7 +372,7 @@ excavation_stage: do i_excav=1,nexcav
     max_nelmt,' min:',min_nelmt
     write(stdout,*)'intact nodes    => total:',tot_nnode,' max:',&
     max_nnode,' min:',min_nnode
-  endif
+  end if
 
   ! correct node valency subtracting dead element-nodes
   call correct_nvalency(node_valency,nelmt_void,g_num(:,elmt_void))
@@ -384,7 +384,7 @@ excavation_stage: do i_excav=1,nexcav
   if(myrank==0)then
     write(stdout,*)'degrees of freedoms => total:',tot_neq,' max:',&
     max_neq,' min:',min_neq
-  endif
+  end if
 
   ! store elemental global degrees of freedoms from nodal gdof
   ! this removes the repeated use of reshape later but it has larger
@@ -441,7 +441,7 @@ excavation_stage: do i_excav=1,nexcav
   if (istat/=0)then
     write(stdout,*)'ERROR: cannot allocate memory!'
     stop
-  endif
+  end if
 
   ! modify ghost partitions after excavation
   call modify_ghost()
@@ -478,7 +478,7 @@ excavation_stage: do i_excav=1,nexcav
 !      extload(igdof)=extload(igdof)+excavload(i,j)
 !    enddo
 !  enddo
-!#endif
+!#end if
   !extload=extload1
   extload(0)=zero; !extload1(0)=zero
 
@@ -524,7 +524,7 @@ excavation_stage: do i_excav=1,nexcav
     !x=zero
     call pcg_solver(neq,nelmt_intact,storekm,x,load,      &
     dprecon,gdof_elmt(:,elmt_intact),cg_iter,errcode,errtag)
-    if(errcode/=0)call error_stop(errtag)
+    call control_error(errcode,errtag)
     cg_tot=cg_tot+cg_iter
     x(0)=zero
 
@@ -535,7 +535,7 @@ excavation_stage: do i_excav=1,nexcav
 
       stress_elmt(:,:,elmt_intact)=stress_intact
       exit plastic
-    endif
+    end if
 
     ! check plastic convergence
     uerr=maxvec(abs(x-oldx))/maxvec(abs(x))
@@ -570,8 +570,8 @@ excavation_stage: do i_excav=1,nexcav
           if(submerged_node(num(i)))then
             ! water pressure is compressive (negative)
             effsigma(1:3)=effsigma(1:3)+wpressure(num(i))
-          endif
-        endif
+          end if
+        end if
 
         effsigma=effsigma+stress_elmt(:,i,ielmt)
         call stress_invariant(effsigma,sigm,dsbar,lode_theta)
@@ -607,13 +607,13 @@ excavation_stage: do i_excav=1,nexcav
              (-dsbar*(cos(lode_theta)/sqrt(r3)-sin(lode_theta)*   &
              sin(phif_blkr)/r3))
           if(sf<scf(num(i)))scf(num(i))=sf
-        endif
-      end do ! i_gll
+        end if
+      enddo ! i_gll
 
       if(nl_isconv .or. nl_iter==nl_maxiter)cycle
       ! compute total body load vector
       bodyload(egdof)=bodyload(egdof)+bload
-    end do ! i_elmt
+    enddo ! i_elmt
     bodyload(0)=zero
     fmax=maxscal(fmax)
     uxmax=maxvec(abs(x))
@@ -621,21 +621,21 @@ excavation_stage: do i_excav=1,nexcav
       write(stdout,'(a,i4,a,i4,a,f12.6,a,f12.6,a,f12.6)')    &
       ' ninc:',i_inc,' nl_iter:',nl_iter,' f_max:',fmax,' uerr:',uerr,' umax:',&
       uxmax
-    endif
+    end if
 
     if(nl_isconv.or.nl_iter==nl_maxiter)exit
-  end do plastic ! plastic iteration
+  enddo plastic ! plastic iteration
   if(nl_iter>=nl_maxiter .and. .not.nl_isconv)then
     write(stdout,*)'WARNING: nonconvergence in nonlinear iterations!'
     write(stdout,*)'desired tolerance:',nl_tol,' achieved tolerance:',uerr
-  endif
+  end if
   nl_tot=nl_tot+nl_iter
   ! nodal displacement
   do i=1,nndof
     do j=1,nnode
       if(gdof(i,j)/=0)then
         nodalu(i,j)=nodalu(i,j)+x(gdof(i,j)) !-elastic(gdof(i,j))
-      endif
+      end if
     enddo
   enddo
   enddo load_increment ! load increment loop
@@ -643,7 +643,7 @@ excavation_stage: do i_excav=1,nexcav
   if (istat/=0)then
     write(stdout,*)'ERROR: cannot deallocate memory!'
     stop
-  endif
+  end if
 
   ! write summary
   uxmax=maxvec(abs(reshape(nodalu(:,node_intact),(/nndof*nnode_intact/))))

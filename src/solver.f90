@@ -41,9 +41,9 @@ if(maxval(abs(u)).gt.zero)then
     egdof=gdof_elmt(:,i_elmt)
     km=k(:,:,i_elmt)
     kp(egdof)=kp(egdof)+matmul(km,u(egdof))
-  end do
+  enddo
   kp(0)=zero
-endif
+end if
 r=f-kp
 z=dprecon*r
 
@@ -55,7 +55,7 @@ pcg: do cg_iter=1,cg_maxiter
     egdof=gdof_elmt(:,i_elmt)
     km=k(:,:,i_elmt)
     kp(egdof)=kp(egdof)+matmul(km,p(egdof))
-  end do
+  enddo
   kp(0)=zero
 
   rz=dot_product(r,z)
@@ -65,7 +65,7 @@ pcg: do cg_iter=1,cg_maxiter
   if(abs(alpha)*maxval(abs(p))/maxval(abs(u)).le.cg_tol)then
     errcode=0
     return
-  endif
+  end if
 
   r=r-alpha*kp
   z=dprecon*r
@@ -73,7 +73,7 @@ pcg: do cg_iter=1,cg_maxiter
   p=z+beta*p
   !write(*,'(i3,f25.18,f25.18,f25.18)')cg_iter,alpha,beta,rz
 
-end do pcg
+enddo pcg
 write(errtag,'(a)')'ERROR: PCG solver doesn''t converge!'
 return
 end subroutine pcg_solver

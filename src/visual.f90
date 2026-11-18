@@ -30,7 +30,7 @@ myname='=>write_ensight_geocoord'
 if(ubound(coord,1).ne.3 .or. ubound(coord,2).ne.nnode)then
   write(*,*)'ERROR: wrong coord dimensions!'
   stop
-endif
+end if
 
 funit=11
 open(unit=funit,file=trim(out_fname),access='stream',form='unformatted',       &
@@ -38,7 +38,7 @@ status='replace',action='write',iostat=ios)
 if (ios /= 0)then
   write(*,'(/,a)')'ERROR: output file "'//out_fname//'" cannot be opened!'
   stop
-endif
+end if
 
 buffer='C Binary'
 write(funit)buffer
@@ -92,18 +92,18 @@ myname='=>write_ensight_geo'
 if(ubound(coord,1).ne.3 .or. ubound(coord,2).ne.nnode)then
   write(*,*)'ERROR: wrong "coord" dimensions!'//trim(myname),ubound(coord)
   stop
-endif
+end if
 if(ubound(connect,1).ne.8 .or. ubound(connect,2).ne.nelmt)then
   write(*,*)'ERROR: wrong "connect" dimensions!'
   stop
-endif
+end if
 
 open(unit=11,file=trim(out_fname),access='stream',form='unformatted',          &
 status='replace',action='write',iostat=ios)
 if (ios /= 0)then
   write(*,'(/,a)')'ERROR: output file "'//out_fname//'" cannot be opened!'
   stop
-endif
+end if
 
 buffer='C Binary'
 write(11)buffer
@@ -160,14 +160,14 @@ if(ncomp/=1 .and. ncomp/=3 .and. ncomp/=6)then
   write(*,'(/,a)')'ERROR: invalid ncomp for ensight per_node variable!'
   print*,ncomp
   stop
-endif
+end if
 ! open Ensight Gold data file to store data
 open(unit=11,file=trim(out_fname),access='stream',form='unformatted',          &
 status='replace',action='write',iostat=ios)
 if (ios /= 0)then
   write(*,'(/,a)')'ERROR: output file "'//out_fname//'" cannot be opened!'
   stop
-endif
+end if
 
 buffer=destag
 write(11)buffer
@@ -201,18 +201,18 @@ if(ncomp/=1 .and. ncomp/=3 .and. ncomp/=6)then
   write(*,'(/,a)')'ERROR: invalid ncomp for ensight per_node variable!'
   print*,ncomp
   stop
-endif
+end if
 if(ubound(var,1).ne.ncomp .or. ubound(var,2).ne.n)then
   write(*,'(/,a)')'ERROR: wrong bounds of "var"!'
   stop
-endif
+end if
 ! open Ensight Gold data file to store data
 open(unit=11,file=trim(out_fname),access='stream',form='unformatted',          &
 status='replace',action='write',iostat=ios)
 if (ios /= 0)then
   write(*,'(/,a)')'ERROR: output file "'//out_fname//'" cannot be opened!'
   stop
-endif
+end if
 
 buffer=destag
 write(11)buffer
@@ -245,14 +245,14 @@ integer :: ios
 if(size(var).ne.n)then
   write(*,'(/,a)')'ERROR: wrong bounds of "var"!'
   stop
-endif
+end if
 ! open Ensight Gold data file to store data
 open(unit=11,file=trim(out_fname),access='stream',form='unformatted',          &
 status='replace',action='write',iostat=ios)
 if (ios /= 0)then
   write(*,'(/,a)')'ERROR: output file "'//out_fname//'" cannot be opened!'
   stop
-endif
+end if
 
 buffer=destag
 write(11)buffer

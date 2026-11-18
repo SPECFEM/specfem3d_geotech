@@ -229,7 +229,7 @@ do i=1,nenod
       dterm(k)=1.0_kreal/(xii(i)-xii(j)) ! derivative of the term wrt xi
 
       phi(i)=phi(i)*(xi-xii(j))/(xii(i)-xii(j))
-    endif
+    end if
   enddo
 
   sum_term=1.0_kreal
@@ -239,7 +239,7 @@ do i=1,nenod
         sum_term(j)=sum_term(j)*dterm(k)
       else
         sum_term(j)=sum_term(j)*term(k)
-      endif
+      end if
     enddo
   enddo
   dphi_dxi(i)=0.0_kreal
@@ -276,7 +276,7 @@ do i=1,nenod
       dterm(k)=1.0_kreal/(xii(i)-xii(j)) ! derivative of the term wrt xi
 
       phi(i)=phi(i)*(xi-xii(j))/(xii(i)-xii(j))
-    endif
+    end if
   enddo
 
   sum_term=1.0_kreal
@@ -286,7 +286,7 @@ do i=1,nenod
         sum_term(j)=sum_term(j)*dterm(k)
       else
         sum_term(j)=sum_term(j)*term(k)
-      endif
+      end if
     enddo
   enddo
   dphi_dxi(i)=0.0_kreal
@@ -322,13 +322,13 @@ apb   = alpha+beta
 if (n == 0) then
   endw1 = zero
   return
-endif
+end if
 f1   = gammaf(alpha+two)*gammaf(beta+one)/gammaf(apb+three)
 f1   = f1*(apb+two)*two**(apb+two)/two
 if (n == 1) then
   endw1 = f1
   return
-endif
+end if
 fint1 = gammaf(alpha+two)*gammaf(beta+one)/gammaf(apb+three)
 fint1 = fint1*two**(apb+two)
 fint2 = gammaf(alpha+two)*gammaf(beta+two)/gammaf(apb+four)
@@ -337,7 +337,7 @@ f2    = (-two*(beta+two)*fint1 + (apb+four)*fint2) * (apb+three)/four
 if (n == 2) then
   endw1 = f2
   return
-endif
+end if
 do i=3,n
   di   = dble(i-1)
   abn  = alpha+beta+di
@@ -372,13 +372,13 @@ f3 = zero
 if (n == 0) then
   endw2 = zero
   return
-endif
+end if
 f1   = gammaf(alpha+one)*gammaf(beta+two)/gammaf(apb+three)
 f1   = f1*(apb+two)*two**(apb+two)/two
 if (n == 1) then
   endw2 = f1
   return
-endif
+end if
 fint1 = gammaf(alpha+one)*gammaf(beta+two)/gammaf(apb+three)
 fint1 = fint1*two**(apb+two)
 fint2 = gammaf(alpha+two)*gammaf(beta+two)/gammaf(apb+four)
@@ -387,7 +387,7 @@ f2    = (two*(alpha+two)*fint1 - (apb+four)*fint2) * (apb+three)/four
 if (n == 2) then
   endw2 = f2
   return
-endif
+end if
 do i=3,n
   di   = dble(i-1)
   abn  = alpha+beta+di
@@ -467,7 +467,7 @@ do j=1,np
     x1 = cos((2._kreal*(dble(j)-1._kreal)+1._kreal)*dth)
     x2 = xlast
     x  = (x1+x2)/2._kreal
-  endif
+  end if
   do k=1,K_MAX_ITER
     call jacobf (p,pd,pm1,pdm1,pm2,pdm2,np,alpha,beta,x)
     recsum = 0._kreal
@@ -489,13 +489,13 @@ do i=1,np
     if(xjac(j) < xmin) then
         xmin = xjac(j)
         jmin = j
-    endif
+    end if
   enddo
   if(jmin /= i) then
     swap = xjac(i)
     xjac(i) = xjac(jmin)
     xjac(jmin) = swap
-  endif
+  end if
 enddo
 
 end subroutine jacg
@@ -631,7 +631,7 @@ if (n <= 1) then
   prod   = prod/(gammaf(dn)*gammaf(dn+alpha+beta))
   pnormj = prod * two**const/(two*dn+const)
   return
-endif
+end if
 
 prod  = gammaf(alpha+one)*gammaf(beta+one)
 prod  = prod/(two*(one+const)*gammaf(const+one))
@@ -682,18 +682,18 @@ pdm1 = zero
 if(np <= 0)then
   write(*,*)'ERROR: number of Gauss points < 1!'
   stop
-endif
+end if
 
 if((alpha <= -one) .or. (beta <= -one))then
   write(*,*)'ERROR: alpha and beta must be greater than -1!'
   stop
-endif
+end if
 
 if (np == 1) then
   z(1) = (beta-alpha)/(apb+two)
   w(1) = gammaf(alpha+one)*gammaf(beta+one)/gammaf(apb+two) * two**(apb+one)
   return
-endif
+end if
 
 call jacg(z,np,alpha,beta)
 
@@ -748,25 +748,25 @@ pd  = zero
 if(np <= 1)then
   write(*,*)'ERROR: number of Gauss-Lobatto points < 2!'
   stop
-endif
+end if
 
 ! with spectral elements, use at least 3 points
 if(np < 3)then
   write(*,*)'WARNING: number of Gauss-Lobatto points < 3!'
   !stop
-endif
+end if
 !if (np <= 2) stop 'minimum number of Gauss-Lobatto points for the SEM is 3'
 
 if((alpha <= -one) .or. (beta <= -one))then
   write(*,*)'ERROR: alpha and beta must be greater than -1!'
   stop
-endif
+end if
 
 if (nm1 > 0) then
   alpg  = alpha+one
   betg  = beta+one
   call zwgjd(z(2),w(2),nm1,alpg,betg)
-endif
+end if
 
 z(1)  = - one
 z(np) =  one

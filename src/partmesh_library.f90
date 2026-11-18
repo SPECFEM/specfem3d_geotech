@@ -107,7 +107,7 @@ nb_edges = 0
 do i = 0, esize*nelmt-1
     nodeselmt(g_num(i)*nsize+nnodeelmt(g_num(i))) = i/esize
     nnodeelmt(g_num(i)) = nnodeelmt(g_num(i)) + 1
-end do
+enddo
 
 ! checking which elements are neighbours ('ncommonnode' criteria)
 do j = 0, nnode-1
@@ -123,8 +123,8 @@ do j = 0, nnode-1
                 if ( nodeselmt(m+num_node*nsize) == elem_target ) then
                   connectivity = connectivity + 1
                 end if
-            end do
-          end do
+            enddo
+          enddo
 
           if ( connectivity >=  ncommonnode) then
 
@@ -137,7 +137,7 @@ do j = 0, nnode-1
 
                   end if
                 end if
-            end do
+            enddo
             if ( .not.is_neighbour ) then
                 adjncy(nodeselmt(k+j*nsize)*sup_neighbour+xadj(nodeselmt(k+j*nsize))) = nodeselmt(l+j*nsize)
 
@@ -150,9 +150,9 @@ do j = 0, nnode-1
                 if (xadj(nodeselmt(l+j*nsize))>sup_neighbour) stop 'ERROR : too much neighbours per element, modify the mesh.'
             end if
           end if
-      end do
-    end do
-end do
+      enddo
+    enddo
+enddo
 
 max_neighbour = maxval(xadj)
 
@@ -163,8 +163,8 @@ do i = 0, nelmt-1
     do j = 0, k-1
       adjncy(nb_edges) = adjncy(i*sup_neighbour+j)
       nb_edges = nb_edges + 1
-    end do
-end do
+    enddo
+enddo
 
 xadj(nelmt) = nb_edges
 end subroutine mesh2dual_ncommonnode
@@ -191,7 +191,7 @@ allocate(glob2loc_elmt(0:nelmt-1))
 ! initializes number of local points per partition
 do num_part = 0, npart-1
     num_loc(num_part) = 0
-end do
+enddo
 !print*,minval(part),maxval(part)
 ! local numbering
 do num_glob = 0, nelmt-1
@@ -201,7 +201,7 @@ do num_glob = 0, nelmt-1
     ! increments local numbering of elements (starting with 0,1,2,...)
     glob2loc_elmt(num_glob) = num_loc(num_part)
     num_loc(num_part) = num_loc(num_part) + 1
-end do
+enddo
 
 end subroutine Construct_glob2loc_elmt
 !=======================================================
@@ -242,7 +242,7 @@ do num_node = 0, nnode-1
     do el = 0, nnodeelmt(num_node)-1
       parts_node(part(nodeselmt(el+nsize*num_node))) = 1
 
-    end do
+    enddo
 
     do num_part = 0, npart-1
       if ( parts_node(num_part) == 1 ) then
@@ -250,9 +250,9 @@ do num_node = 0, nnode-1
           parts_node(num_part) = 0
 
       end if
-    end do
+    enddo
 
-end do
+enddo
 
 glob2loc_nodes_npart(nnode) = size_glob2loc_nodes
 
@@ -270,7 +270,7 @@ do num_node = 0, nnode-1
     do el = 0, nnodeelmt(num_node)-1
       parts_node(part(nodeselmt(el+nsize*num_node))) = 1
 
-    end do
+    enddo
     do num_part = 0, npart-1
 
       if ( parts_node(num_part) == 1 ) then
@@ -281,8 +281,8 @@ do num_node = 0, nnode-1
           parts_node(num_part) = 0
       end if
 
-    end do
-end do
+    enddo
+enddo
 end subroutine Construct_glob2loc_nodes
 !=======================================================
 
@@ -315,14 +315,14 @@ end subroutine Construct_glob2loc_nodes
 !if(istat/=0) then
 !  print*,'error file open:',trim(bcfile)
 !  stop
-!endif
+!end if
 !read(16,*)bc_nelmt
 !allocate(bc_elmt(2,bc_nelmt))
 !if(bc_nelmt>0)read(16,*,iostat=istat)bc_elmt
 !if(istat/=0)then
 !  write(*,*)'ERROR: cannot read BC information!'
 !  stop
-!endif
+!end if
 !close(16)
 !! find number of BC elements in each partitions
 !mpart_nelmt=0
@@ -358,7 +358,7 @@ end subroutine Construct_glob2loc_nodes
 !  if(istat/=0) then
 !    print*,'ERROR: cannot open file "'//trim(out_fname)//'!'
 !    stop
-!  endif
+!  end if
 !  write(16,*)mpart_nelmt(i_part)
 !  if(mpart_nelmt(i_part)>0)write(16,format_str1)bc_elmt(:,mpart(i_part)%iloc)
 !  close(16)
@@ -402,7 +402,7 @@ open(unit=16,file=trim(inp_path)//trim(bcfile),status='old',action='read',iostat
 if(istat/=0) then
   print*,'error file open:',trim(bcfile)
   stop
-endif
+end if
 
 ! format string for file name
 write(format_str,*)ceiling(log10(real(npart)+1.))
@@ -420,9 +420,9 @@ bc: do ! ibc=1,nbc
         open(unit=17,file=trim(out_fname),status='replace',action='write',iostat=istat)
         close(17)
       enddo ! i_part
-    endif
+    end if
     exit bc
-  endif
+  end if
   ibc=ibc+1
   if(bctype==0)then ! point
     write(*,*)'ERROR: point displacement BC is not unsupported!'
@@ -437,7 +437,7 @@ bc: do ! ibc=1,nbc
   else
     write(*,*)'ERROR: unsupported BC type:',bctype
     stop
-  endif
+  end if
   read(16,*)bc_nelmt
   if(bc_nelmt>0)then
     allocate(bc_elmt(2,bc_nelmt))
@@ -445,8 +445,8 @@ bc: do ! ibc=1,nbc
     if(istat/=0)then
       write(*,*)'ERROR: cannot read BC information!'
       stop
-    endif
-  endif
+    end if
+  end if
   ! find number of BC elements in each partitions
   mpart_nelmt=0
   do i_elmt=1,bc_nelmt
@@ -457,7 +457,7 @@ bc: do ! ibc=1,nbc
   do i_part=1,npart
     if(mpart_nelmt(i_part)>0)then
       ispart(i_part)=.true.
-    endif
+    end if
     allocate(mpart(i_part)%iloc(mpart_nelmt(i_part)))
   enddo
   mpart_icount=0
@@ -482,11 +482,11 @@ bc: do ! ibc=1,nbc
       open(unit=17,file=trim(out_fname),status='replace',action='write',iostat=istat)
     else
       open(unit=17,file=trim(out_fname),status='old',action='write',position='append',iostat=istat)
-    endif
+    end if
     if(istat/=0) then
       print*,'ERROR: cannot open file "'//trim(out_fname)//'!'
       stop
-    endif
+    end if
     if(ispart(i_part))then
       write(17,*)bctype,bcval
       if(bctype==0)then ! point
@@ -497,13 +497,13 @@ bc: do ! ibc=1,nbc
 
       elseif(bctype==6)then ! fault
 
-      endif
+      end if
       write(17,*)mpart_nelmt(i_part)
       allocate(temp_mat(2,mpart_nelmt(i_part)))
       temp_mat=bc_elmt(:,mpart(i_part)%iloc)
       write(17,format_str1)temp_mat!bc_elmt(:,mpart(i_part)%iloc)
       deallocate(temp_mat)
-    endif
+    end if
     close(17)
   enddo ! i_part
   deallocate(bc_elmt)
@@ -550,7 +550,7 @@ open(unit=16,file=trim(inp_path)//trim(trfile),status='old',action='read',iostat
 if(istat/=0) then
   print*,'error file open:',trim(trfile)
   stop
-endif
+end if
 !read(16,*)ntrac
 itrac=0
 do ! itrac=1,ntrac
@@ -568,7 +568,7 @@ elseif(tractype==6)then ! disc load
 else
   write(*,*)'ERROR: unsupported traction type:',tractype
   stop
-endif
+end if
 read(16,*)tr_nelmt
 !print*,tr_nelmt,rho,t0,alpha,hmax,thetamax
 if(tr_nelmt>0)then
@@ -577,8 +577,8 @@ if(tr_nelmt>0)then
   if(istat/=0)then
     write(*,*)'ERROR: cannot read traction information!'
     stop
-  endif
-endif
+  end if
+end if
 !print*,'traction:',tr_elmt(1,1),tr_elmt(2,1)
 !print*,'traction:',tr_elmt(1,tr_nelmt),tr_elmt(2,tr_nelmt)
 ! find number of traction elements in each partitions
@@ -591,7 +591,7 @@ ispart=.false.
 do i_part=1,npart
   if(mpart_nelmt(i_part)>0)then
     ispart(i_part)=.true.
-  endif
+  end if
   allocate(mpart(i_part)%iloc(mpart_nelmt(i_part)))
 enddo
 mpart_icount=0
@@ -620,11 +620,11 @@ do i_part=1,npart
     open(unit=17,file=trim(out_fname),status='replace',action='write',iostat=istat)
   else
     open(unit=17,file=trim(out_fname),status='old',action='write',position='append',iostat=istat)
-  endif
+  end if
   if(istat/=0) then
     print*,'ERROR: cannot open file "'//trim(out_fname)//'!'
     stop
-  endif
+  end if
   if(ispart(i_part))then
     write(17,*)tractype
     if(tractype==0)then
@@ -635,13 +635,13 @@ do i_part=1,npart
       write(17,'(i1,1x,2(f12.6,1x),6(f12.6,1x))')iaxis,x1,x2,q0,q1
     elseif(tractype==6)then ! disc load
       write(17,'(5(f12.6,1x))')rho,t0,alpha,hmax,thetamax
-    endif
+    end if
     write(17,*)mpart_nelmt(i_part)
     allocate(temp_mat(2,mpart_nelmt(i_part)))
     temp_mat=tr_elmt(:,mpart(i_part)%iloc)
     write(17,format_str1)temp_mat!tr_elmt(:,mpart(i_part)%iloc)
     deallocate(temp_mat)
-  endif
+  end if
   close(17)
 enddo ! i_part
 deallocate(tr_elmt)
@@ -696,7 +696,7 @@ do i=1,nnode
     if(node_part(i,j))then
       icount=icount+1
       node(i)%part(icount)=j
-    endif
+    end if
   enddo
 enddo
 !print*,'hello:',npart,icount,maxval(node_npart)
@@ -713,7 +713,7 @@ print*,'total elements on the interface: ',nelmt_interface
 if(nelmt_interface.le.0)then
   write(*,*)'ERROR: invalid number of elements on the interface!'
   stop
-endif
+end if
 !stop
 
 ! number of neighboring element for the interface elements
@@ -725,7 +725,7 @@ do i=1,nelmt
     icount=icount+1
     !nelmt_share(icount)=maxval(node_npart(connect(:,i)))-1
     elmt_interface(icount)=i
-  endif
+  end if
 enddo
 allocate(connect_interface(esize,nelmt_interface))
 connect_interface=connect(:,elmt_interface)
@@ -853,7 +853,7 @@ edge_face(6,1)=9; edge_face(6,2)=10; edge_face(6,3)=11; edge_face(6,4)=12;
 !      if(node_part(i,j))then
 !        icount=icount+1
 !        node(i)%part(icount)=j
-!      endif
+!      end if
 !    enddo
 !  enddo
 
@@ -887,7 +887,7 @@ edge_face(6,1)=9; edge_face(6,2)=10; edge_face(6,3)=11; edge_face(6,4)=12;
 !      icount=icount+1
 !  !    nelmt_share(icount)=maxval(node_npart(connect(:,i)))-1
 !      elmt_interface(icount)=i
-!    endif
+!    end if
 !  enddo
 
 ! find the adjacent elements and sharing ID
@@ -898,7 +898,7 @@ adj_id1(nelmt_interface,max_neighbour),adj_id2(nelmt_interface,max_neighbour),st
 if(istat/=0)then
   print*,'ERROR: insufficient memory!'
   stop
-endif
+end if
 !adj_elmt=0
 indadj=0 ! adjacency indicator, an element value = 2 indicates the adjacency
 adj_nelmt=0; adj_elmt=0
@@ -1020,7 +1020,7 @@ do i=1,nelmt_interface-1
     else
       write(*,*)'ERROR: wrong number of common nodes!',ncom,elmt_interface(i),elmt_interface(j)
       stop
-    endif
+    end if
   enddo
   !print*,i,nelmt_interface
 enddo
@@ -1097,7 +1097,7 @@ deallocate(part_interface)
 if(.not.all(mpart(1:npart)%ielmt==mpart(1:npart)%nelmt))then
   print*,'ERROR: total number of interfacial elements mismatched!'
   stop
-endif
+end if
 ! allocate type variable gpart
 do i_part=1,npart
   allocate(mpart(i_part)%gpart(mpart(i_part)%ngpart))
@@ -1123,7 +1123,7 @@ enddo !i_part
 if(istat/=0)then
   print*,'ERROR: out of memory!'
   stop
-endif
+end if
 
 ! write master and ghost partitions
 write(format_str,*)ceiling(log10(real(npart)+1.))
@@ -1167,7 +1167,7 @@ ipart_loop: do i_part=1,npart-1
       !if(all(eadjid(ginterface(1:ngelmt))/=gadjid(1:ngelmt)))then
       !print*,'hello0',eadjid(ginterface(1:ngelmt))
       !print*,'hello1',gadjid(1:ngelmt)
-      !endif
+      !end if
       !stop
       ! count faces/edges/nodes
       adj_nface=0; adj_nedge=0; adj_nnode=0
@@ -1181,7 +1181,7 @@ ipart_loop: do i_part=1,npart-1
         elseif(gadjid(ia)==1)then
           adj_nnode=adj_nnode+1
           adj_inode(adj_nnode)=ia
-        endif
+        end if
       enddo
       ! list jpart elements
       ! print*,'hi',adj_nface,adj_nedge,adj_nnode
@@ -1206,7 +1206,7 @@ ipart_loop: do i_part=1,npart-1
         else
           write(*,*)'ERROR: wrong adjacency for face!'
           stop
-        endif
+        end if
         if(elmt_face(ie))cycle
         call set_partition(i_part,j_part,ielmt,jelmt,ecomp,ie,je) !,inorder,jnorder)
         !elmt_face(ie)=.true.
@@ -1238,7 +1238,7 @@ ipart_loop: do i_part=1,npart-1
         else
           write(*,*)'ERROR: wrong adjacency for edge!'
           stop
-        endif
+        end if
         if(elmt_edge(ie))cycle
         call set_partition(i_part,j_part,ielmt,jelmt,ecomp,ie,je) !,inorder,jnorder)
         !elmt_face(ie)=.true.
@@ -1269,7 +1269,7 @@ ipart_loop: do i_part=1,npart-1
         else
           write(*,*)'ERROR: wrong adjacency for node!'
           stop
-        endif
+        end if
         if(elmt_node(ie))cycle
         call set_partition(i_part,j_part,ielmt,jelmt,ecomp,ie,je) !,inorder,jnorder)
 
@@ -1290,7 +1290,7 @@ if(.not.all(mpart(1:npart)%igpart==mpart(1:npart)%ngpart))then
   print*,'Counted number of ghost partitions'
   print*,mpart(1:npart)%igpart
   stop
-endif
+end if
 deallocate(adj_elmt,adj_id1,adj_id2,adj_ind,adj_nelmt,eadjid)
 deallocate(elmt_interface)
 
@@ -1308,7 +1308,7 @@ do i_part=1,npart
   if(istat/=0) then
     print*,'error file open:',trim(out_fname)
     stop
-  endif
+  end if
   write(16,*)'this partition'
   write(16,*)i_part-1
   write(16,*)'number of ghost partitions, max ngpart, max number of elements'
@@ -1319,7 +1319,7 @@ do i_part=1,npart
     if(myindex(1)==0)then
       print*,'ERROR: master partition not found in its ghost partition!'
       stop
-    endif
+    end if
     write(16,*)'ghost partition ',j_part,' , my index there'
     write(16,*)mpart(i_part)%gpartid(j_part)-1,myindex(1)
     write(16,*)'number of ghost elements in this ghost partition'
@@ -1369,7 +1369,7 @@ do i=1,nlen
   if(isnode(i))then
     ind=i
     return
-  endif
+  end if
 enddo
 end function find
 !--------------------------------------------------
@@ -1384,7 +1384,7 @@ do i=1,nenode
   if(isnode(i))then
     id=i
     return
-  endif
+  end if
 enddo
 write(*,*)'ERROR: no common node for node ID!'
 stop
@@ -1403,7 +1403,7 @@ do i=1,nedge
   if(all(isnode(node_edge(i,:))))then
     id=i
     return
-  endif
+  end if
 enddo
 write(*,*)'ERROR: no common node for edge ID!'
 stop
@@ -1434,10 +1434,10 @@ i_loop: do i=1,nedge
           edgeids2(nj)=j
           if(nj.eq.2)return
           cycle i_loop
-        endif
-      endif
+        end if
+      end if
     enddo j_loop
-  endif
+  end if
 enddo i_loop
 write(*,*)'ERROR: no common node for matching edge IDs!'
 stop
@@ -1456,7 +1456,7 @@ do i=1,nface
   if(all(isnode(node_face(i,:))))then
     id=i
     return
-  endif
+  end if
 enddo
 write(*,*)'ERROR: no common node for face ID!'
 stop
@@ -1492,15 +1492,15 @@ else
     ind_gpart=maxloc(list_gpart,mask=mask_array)
   else
     ind_gpart=0
-  endif
+  end if
 
   if(ind_gpart(1)==0)then
     ! not found, i.e., this is a new gpart
     mpart(master)%igpart=mpart(master)%igpart+1
     ind_gpart(1)=mpart(master)%igpart
     mpart(master)%gpartid(ind_gpart(1))=ghost
-  endif
-endif
+  end if
+end if
 
 ! count ghost elements in the ghost partition
 
@@ -1560,8 +1560,8 @@ ninterfaces = 0
 do  i = 0, npart-1
     do j = i+1, npart-1
       ninterfaces = ninterfaces + 1
-    end do
-end do
+    enddo
+enddo
 
 !print*,npart,ninterfaces,sup_neighbour,nelmt,ubound(adjncy)
 
@@ -1584,16 +1584,16 @@ do num_part = 0, npart-1
                   num_edge = num_edge + 1
                 end if
 
-            end do
+            enddo
           end if
-      end do
+      enddo
       ! stores number of elements at interface
       tab_size_interfaces(num_interface+1) = tab_size_interfaces(num_interface) + num_edge
       num_edge = 0
       num_interface = num_interface + 1
 
-    end do
-end do
+    enddo
+enddo
 
 
 ! stores element indices for elements from above search at each interface
@@ -1620,8 +1620,8 @@ do num_part = 0, npart-1
                                 = g_num(el*esize+num_node)
                             ncommon_nodes = ncommon_nodes + 1
                         end if
-                      end do
-                  end do
+                      enddo
+                  enddo
                   if ( ncommon_nodes > 0 ) then
                       tab_interfaces(tab_size_interfaces(num_interface)*7+num_edge*7+2) = ncommon_nodes
                   else
@@ -1629,14 +1629,14 @@ do num_part = 0, npart-1
                   end if
                   num_edge = num_edge + 1
                 end if
-            end do
+            enddo
           end if
 
-      end do
+      enddo
       num_edge = 0
       num_interface = num_interface + 1
-    end do
-end do
+    enddo
+enddo
 
 end subroutine Construct_interfaces
 !=======================================================
@@ -1680,8 +1680,8 @@ ninterfaces = 0
 do  i = 0, npart-1
     do j = i+1, npart-1
       ninterfaces = ninterfaces + 1
-    end do
-end do
+    enddo
+enddo
 
 allocate(tab_size_interfaces(0:ninterfaces))
 tab_size_interfaces(:) = 0
@@ -1721,16 +1721,16 @@ do num_part = 0, npart-1
                 if ( (part(adjncy(el_adj)) == num_part_bis) .and. (is_acoustic_el .eqv. is_acoustic_el_adj) ) then
                   num_edge = num_edge + 1
                 end if
-            end do
+            enddo
           end if
-      end do
+      enddo
       ! stores number of elements at interface
       tab_size_interfaces(num_interface+1) = tab_size_interfaces(num_interface) + num_edge
       num_edge = 0
       num_interface = num_interface + 1
 
-    end do
-end do
+    enddo
+enddo
 
 
 ! stores element indices for elements from above search at each interface
@@ -1774,8 +1774,8 @@ do num_part = 0, npart-1
                                 = g_num(el*esize+num_node)
                             ncommon_nodes = ncommon_nodes + 1
                         end if
-                      end do
-                  end do
+                      enddo
+                  enddo
                   if ( ncommon_nodes > 0 ) then
                       tab_interfaces(tab_size_interfaces(num_interface)*7+num_edge*7+2) = ncommon_nodes
                   else
@@ -1783,14 +1783,14 @@ do num_part = 0, npart-1
                   end if
                   num_edge = num_edge + 1
                 end if
-            end do
+            enddo
           end if
 
-      end do
+      enddo
       num_edge = 0
       num_interface = num_interface + 1
-    end do
-end do
+    enddo
+enddo
 end subroutine Construct_interfaces_no_ac_el_sep
 !=======================================================
 
@@ -1829,7 +1829,7 @@ open(unit=16,file=trim(out_fname),&
 if( istat /= 0 ) then
   print*,'error file open1:',trim(out_fname)
   stop
-endif
+end if
 
 ! open output file
 write(out_fname, fmt=format_str)trim(out_path)//trim(coordfile(2))//'_proc',iproc
@@ -1838,7 +1838,7 @@ open(unit=17,file=trim(out_fname),&
 if( istat /= 0 ) then
   print*,'error file open:',trim(out_fname)
   stop
-endif
+end if
 
 ! open output file
 write(out_fname, fmt=format_str)trim(out_path)//trim(coordfile(3))//'_proc',iproc
@@ -1847,7 +1847,7 @@ open(unit=18,file=trim(out_fname),&
 if( istat /= 0 ) then
   print*,'error file open:',trim(out_fname)
   stop
-endif
+end if
 
 !if ( num_phase == 1 ) then
 ! counts number of points in partition
@@ -1859,8 +1859,8 @@ endif
 
           end if
 
-      end do
-    end do
+      enddo
+    enddo
 write(16,*)npgeo
 write(17,*)npgeo
 write(18,*)npgeo
@@ -1871,7 +1871,7 @@ write(18,*)npgeo
 !if( istat /= 0 ) then
 !  print*,'error file open:',trim(out_fname)
 !  stop
-!endif
+!end if
 !write(19,*)npgeo
 !else
 ! writes out point coordinates
@@ -1883,8 +1883,8 @@ write(18,*)npgeo
             write(18,'(i10,f25.15)') glob2loc_nodes(j)+1, g_coord(3,i+1)
 !            write(19,'(i10)')i+1
           end if
-      end do
-    end do
+      enddo
+    enddo
 !end if
 close(16)
 close(17)
@@ -1927,7 +1927,7 @@ open(unit=16,file=trim(out_fname),&
 if( istat /= 0 ) then
   print*,'error file open:',trim(out_fname)
   stop
-endif
+end if
 
 write(16,*)'# material properties (domain,id,gamma,ym,nu,phi,coh,psi)'
 write(16,*)  count_def_mat !,count_undef_mat
@@ -1946,13 +1946,13 @@ do i = 1, count_def_mat
   else
     write(*,*)'ERROR: unsupported type_blk:',type_blk(i)
     stop
-  endif
-end do
+  end if
+enddo
 !do i = 1, count_undef_mat
 !   write(IIN_database,*) undef_mat_domain(i),trim(undef_mat_prop(1,i)),trim(undef_mat_prop(2,i)), &
 !                        trim(undef_mat_prop(3,i)),trim(undef_mat_prop(4,i)), &
 !                        trim(undef_mat_prop(5,i)),trim(undef_mat_prop(6,i)),trim(undef_mat_prop(7,i))
-!end do
+!enddo
 
 ! write viscoelastic properties if any
 do i=1,nvisco
@@ -1966,7 +1966,7 @@ if(nwmat.gt.0)then
     !print*,nwmat,i,waterid(i)
     write(16,*)waterid(i)
   enddo
-endif
+end if
 close(16)
 
 end subroutine  write_material_properties_database
@@ -2014,7 +2014,7 @@ open(unit=16,file=trim(out_fname),&
 if( istat /= 0 ) then
   print*,'error file open:',trim(out_fname)
   stop
-endif
+end if
 
 ! counts number of elements for boundary at xmin, xmax, ymin, ymax, bottom, top in this partition
 loc_nelmt2D_xmin = 0
@@ -2022,7 +2022,7 @@ do i=1,nelmt2D_xmin
     if(part(ibelm_xmin(i)) == iproc) then
       loc_nelmt2D_xmin = loc_nelmt2D_xmin + 1
     end if
-end do
+enddo
 write(16,*)loc_nelmt2D_xmin
 
 ! outputs element index and element node indices
@@ -2034,7 +2034,7 @@ do i=1,nelmt2D_xmin
     if(part(ibelm_xmin(i)) == iproc) then
       write(16,*) glob2loc_elmt(ibelm_xmin(i)-1)+1, nodes_ibelm_xmin(i)
     end if
-end do
+enddo
 close(16)
 
 ! open output file
@@ -2044,21 +2044,21 @@ open(unit=16,file=trim(out_fname),&
 if( istat /= 0 ) then
   print*,'error file open:',trim(out_fname)
   stop
-endif
+end if
 
 loc_nelmt2D_xmax = 0
 do i=1,nelmt2D_xmax
     if(part(ibelm_xmax(i)) == iproc) then
       loc_nelmt2D_xmax = loc_nelmt2D_xmax + 1
     end if
-end do
+enddo
 write(16,*)loc_nelmt2D_xmax
 
 do i=1,nelmt2D_xmax
     if(part(ibelm_xmax(i)) == iproc) then
       write(16,*) glob2loc_elmt(ibelm_xmax(i)-1)+1, nodes_ibelm_xmax(i)
     end if
-end do
+enddo
 close(16)
 
 ! open output file
@@ -2068,20 +2068,20 @@ open(unit=16,file=trim(out_fname),&
 if( istat /= 0 ) then
   print*,'error file open:',trim(out_fname)
   stop
-endif
+end if
 loc_nelmt2D_ymin = 0
 do i=1,nelmt2D_ymin
     if(part(ibelm_ymin(i)) == iproc) then
       loc_nelmt2D_ymin = loc_nelmt2D_ymin + 1
     end if
-end do
+enddo
 write(16,*)loc_nelmt2D_ymin
 
 do i=1,nelmt2D_ymin
     if(part(ibelm_ymin(i)) == iproc) then
       write(16,*) glob2loc_elmt(ibelm_ymin(i)-1)+1, nodes_ibelm_ymin(i)
     end if
-end do
+enddo
 close(16)
 
 end subroutine write_boundaries_database
@@ -2127,7 +2127,7 @@ open(unit=16,file=trim(out_fname),&
 if( istat /= 0 ) then
   print*,'error file open:',trim(out_fname)
   stop
-endif
+end if
 
 ! open output file
 write(out_fname, fmt=format_str)trim(out_path)//trim(idfile)//'_proc',iproc
@@ -2136,7 +2136,7 @@ open(unit=17,file=trim(out_fname),&
 if( istat /= 0 ) then
   print*,'error file open:',trim(out_fname)
   stop
-endif
+end if
 
 
 
@@ -2147,7 +2147,7 @@ endif
       if ( part(i) == iproc ) then
           nelmt_local = nelmt_local + 1
       end if
-    end do
+    enddo
     write(16,*)nelmt_local
     write(17,*)nelmt_local
 
@@ -2157,7 +2157,7 @@ endif
     ! if( istat /= 0 ) then
     !   print*,'error file open:',trim(out_fname)
     !   stop
-    ! endif
+    ! end if
     ! write(19,*)nelmt_local
 
 !else
@@ -2171,9 +2171,9 @@ endif
                 if ( glob2loc_nodes_parts(k) == iproc ) then
                   loc_nodes(j) = glob2loc_nodes(k)
                 end if
-            end do
+            enddo
 
-          end do
+          enddo
 
           ! format:
           ! # ispec_local # material_index_1 # material_index_2 # corner_id1 # corner_id2 # ... # corner_id8
@@ -2182,7 +2182,7 @@ endif
           write(17,*) glob2loc_elmt(i)+1, mat_id(i+1)
           !write(19,'(i10)')i+1
       end if
-    end do
+    enddo
 !end if
 close(16)
 close(17)
@@ -2238,7 +2238,7 @@ open(unit=16,file=trim(out_fname),&
 if( istat /= 0 ) then
   print*,'error file open:',trim(out_fname)
   stop
-endif
+end if
 
 num_interface = 0
 
@@ -2259,8 +2259,8 @@ num_interface = 0
             my_nb_interfaces(num_interface) = tab_size_interfaces(num_interface+1) - tab_size_interfaces(num_interface)
           end if
           num_interface = num_interface + 1
-      end do
-    end do
+      enddo
+    enddo
     my_ninterface = sum(my_interfaces(:))
 
     ! writes out MPI interfaces elements
@@ -2300,7 +2300,7 @@ num_interface = 0
 !!$                        if ( glob2loc_nodes_parts(l) == iproc ) then
 !!$                           local_nodes(1) = glob2loc_nodes(l)+1
 !!$                        end if
-!!$                     end do
+!!$                     enddo
 !!$
 !!$                     write(16,*) local_elmnt, tab_interfaces(k*7+2), local_nodes(1), -1
 !!$                  else
@@ -2310,13 +2310,13 @@ num_interface = 0
 !!$                           if ( glob2loc_nodes_parts(l) == iproc ) then
 !!$                              local_nodes(1) = glob2loc_nodes(l)+1
 !!$                           end if
-!!$                        end do
+!!$                        enddo
 !!$                        do l = glob2loc_nodes_npart(tab_interfaces(k*7+4)), &
 !!$                           glob2loc_nodes_npart(tab_interfaces(k*7+4)+1)-1
 !!$                           if ( glob2loc_nodes_parts(l) == iproc ) then
 !!$                              local_nodes(2) = glob2loc_nodes(l)+1
 !!$                           end if
-!!$                        end do
+!!$                        enddo
 !!$                        write(16,*) local_elmnt, tab_interfaces(k*7+2), local_nodes(1), local_nodes(2)
 !!$                     else
 !!$                        write(16,*) "erreur_write_interface_", tab_interfaces(k*7+2)
@@ -2331,7 +2331,7 @@ num_interface = 0
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(1) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   write(16,*) local_elmnt, tab_interfaces(k*7+2), local_nodes(1), -1, -1, -1
               case (2)
                   ! edge element
@@ -2340,13 +2340,13 @@ num_interface = 0
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(1) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   do l = glob2loc_nodes_npart(tab_interfaces(k*7+4)), &
                       glob2loc_nodes_npart(tab_interfaces(k*7+4)+1)-1
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(2) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   write(16,*) local_elmnt, tab_interfaces(k*7+2), local_nodes(1), local_nodes(2), -1, -1
               case (4)
                   ! face element
@@ -2357,31 +2357,31 @@ num_interface = 0
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(1) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   do l = glob2loc_nodes_npart(tab_interfaces(k*7+4)), &
                       glob2loc_nodes_npart(tab_interfaces(k*7+4)+1)-1
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(2) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   do l = glob2loc_nodes_npart(tab_interfaces(k*7+5)), &
                       glob2loc_nodes_npart(tab_interfaces(k*7+5)+1)-1
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(3) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   do l = glob2loc_nodes_npart(tab_interfaces(k*7+6)), &
                       glob2loc_nodes_npart(tab_interfaces(k*7+6)+1)-1
                     if ( glob2loc_nodes_parts(l) == iproc ) then
                         local_nodes(4) = glob2loc_nodes(l)+1
                     end if
-                  end do
+                  enddo
                   write(16,*) local_elmnt, tab_interfaces(k*7+2), &
                       local_nodes(1), local_nodes(2),local_nodes(3), local_nodes(4)
               case default
                   print *, "error in write_interfaces_database!", tab_interfaces(k*7+2), iproc
               end select
-            end do
+            enddo
 
             ! outputs infos
             !print*,'  partition MPI interface:',iproc,num_interface
@@ -2390,8 +2390,8 @@ num_interface = 0
         end if
 
         num_interface = num_interface + 1
-      end do
-  end do
+      enddo
+  enddo
 
 !end if
 close(16)
@@ -2433,7 +2433,7 @@ do i=1,nelmt2D_moho
     if(part(ibelm_moho(i)) == iproc) then
       loc_nelmt2D_moho = loc_nelmt2D_moho + 1
     end if
-end do
+enddo
 ! checks if anything to do
 if( loc_nelmt2D_moho == 0 ) return
 
@@ -2453,26 +2453,26 @@ do i=1,nelmt2D_moho
           if (glob2loc_nodes_parts(j) == iproc ) then
             loc_node1 = glob2loc_nodes(j)+1
           end if
-      end do
+      enddo
       do j = glob2loc_nodes_npart(nodes_ibelm_moho(2,i)-1), glob2loc_nodes_npart(nodes_ibelm_moho(2,i))-1
           if (glob2loc_nodes_parts(j) == iproc ) then
             loc_node2 = glob2loc_nodes(j)+1
           end if
-      end do
+      enddo
       do j = glob2loc_nodes_npart(nodes_ibelm_moho(3,i)-1), glob2loc_nodes_npart(nodes_ibelm_moho(3,i))-1
           if (glob2loc_nodes_parts(j) == iproc ) then
             loc_node3 = glob2loc_nodes(j)+1
           end if
-      end do
+      enddo
       do j = glob2loc_nodes_npart(nodes_ibelm_moho(4,i)-1), glob2loc_nodes_npart(nodes_ibelm_moho(4,i))-1
           if (glob2loc_nodes_parts(j) == iproc ) then
             loc_node4 = glob2loc_nodes(j)+1
           end if
-      end do
+      enddo
       write(IIN_database,*) glob2loc_elmt(ibelm_moho(i)-1)+1, loc_node1, loc_node2, loc_node3, loc_node4
     end if
 
-end do
+enddo
 end subroutine write_moho_surface_database
 !=======================================================
 
@@ -2508,19 +2508,19 @@ do i = 1, nb_materials
     ! elastic material has idomain_id 1
     if (mat_domain(i) == ELASTIC_DOMAIN) then
       is_elastic(i) = .true.
-    endif
+    end if
     ! acoustic material has idomain_id 2
     if (mat_domain(i) == ACOUSTIC_DOMAIN) then
       is_acoustic(i) = .true.
-    endif
+    end if
     ! transition infinite space has material domain_id 100
     if (mat_domain(i) == TRINFINITE_DOMAIN) then
       is_trinfinite(i) = .true.
-    endif
+    end if
     ! infinite space has material domain_id 100
     if (mat_domain(i) == INFINITE_DOMAIN) then
       is_infinite(i) = .true.
-    endif
+    end if
 enddo
 print*,'domains:',is_elastic
 print*,'domains:',is_acoustic
@@ -2531,19 +2531,19 @@ do el = 0, nelmt-1
   ! elastic element (expensive)
   if ( is_elastic(num_material(el+1)) ) then
     elmt_weight(el+1) = elmt_weight(el+1)*ELASTIC_WEIGHT
-  endif
+  end if
   ! acoustic element (cheap)
   if ( is_acoustic(num_material(el+1)) ) then
     elmt_weight(el+1) = elmt_weight(el+1)*ACOUSTIC_WEIGHT
-  endif
+  end if
   ! transition infinite element (cheapest)
   if ( is_trinfinite(num_material(el+1)) ) then
     elmt_weight(el+1) = elmt_weight(el+1)*TRINFINITE_WEIGHT
-  endif
+  end if
   ! infinite element (cheapest)
   if ( is_infinite(num_material(el+1)) ) then
     elmt_weight(el+1) = elmt_weight(el+1)*INFINITE_WEIGHT
-  endif
+  end if
 enddo
 end subroutine acoustic_elastic_load
 !=======================================================
@@ -2593,10 +2593,10 @@ is_elastic(:) = .false.
 do i = 1, nb_materials
     if (int(mat_prop(6,i)) == 1 ) then
       is_acoustic(i) = .true.
-    endif
+    end if
     if (int(mat_prop(6,i)) == 2 ) then
       is_elastic(i) = .true.
-    endif
+    end if
 enddo
 
 ! gets neighbors by 4 common nodes (face)
@@ -2616,9 +2616,9 @@ do el = 0, nelmt-1
       do el_adj = xadj(el), xadj(el+1) - 1
           if ( is_elastic(num_material(adjncy(el_adj)+1)) ) then
             nfaces_coupled = nfaces_coupled + 1
-          endif
+          end if
       enddo
-    endif
+    end if
 enddo
 
 ! coupled elements
@@ -2633,9 +2633,9 @@ do el = 0, nelmt-1
             nfaces_coupled = nfaces_coupled + 1
             faces_coupled(1,nfaces_coupled) = el
             faces_coupled(2,nfaces_coupled) = adjncy(el_adj)
-          endif
+          end if
       enddo
-    endif
+    end if
 enddo
 
 ! puts coupled elements into same partition
@@ -2647,13 +2647,13 @@ do i = 1, nfaces_coupled*nproc
             part(faces_coupled(2,iface)) = part(faces_coupled(1,iface))
           else
             part(faces_coupled(1,iface)) = part(faces_coupled(2,iface))
-          endif
+          end if
           is_repartitioned = .true.
-      endif
+      end if
     enddo
     if ( .not. is_repartitioned ) then
       exit
-    endif
+    end if
 enddo
 end subroutine acoustic_elastic_repartitioning
 !=======================================================
@@ -2766,7 +2766,7 @@ do el = 0, nelmt-1
         ! increments counter if it contains face
         if( is_moho(adjncy(el_adj)) ) nfaces_coupled = nfaces_coupled + 1
       enddo
-    endif
+    end if
 enddo
 
 ! coupled elements
@@ -2781,9 +2781,9 @@ do el = 0, nelmt-1
             nfaces_coupled = nfaces_coupled + 1
             faces_coupled(1,nfaces_coupled) = el
             faces_coupled(2,nfaces_coupled) = adjncy(el_adj)
-          endif
+          end if
       enddo
-    endif
+    end if
 enddo
 
 ! puts coupled elements into same partition
@@ -2796,13 +2796,13 @@ do i = 1, nfaces_coupled*nproc
             part(faces_coupled(2,iface)) = part(faces_coupled(1,iface))
           else
             part(faces_coupled(1,iface)) = part(faces_coupled(2,iface))
-          endif
+          end if
           is_repartitioned = .true.
-      endif
+      end if
     enddo
     if ( .not. is_repartitioned ) then
       exit
-    endif
+    end if
 enddo
 end subroutine moho_surface_repartitioning
 !=======================================================
@@ -2821,9 +2821,9 @@ temp = x(i)
 do while (j>=1 .and. x(j)>temp)
   x(j+1) = x(j)
   j = j - 1
-end do
+enddo
 x(j+1) = temp
-end do
+enddo
 xnew=x
 inum=1
 irank(1)=1
@@ -2849,9 +2849,9 @@ temp = x(i)
 do while (j>=1 .and. x(j)>temp)
   x(j+1) = x(j)
   j = j - 1
-end do
+enddo
 x(j+1) = temp
-end do
+enddo
 xnew=x
 end function sort
 !=======================================================
@@ -2869,9 +2869,9 @@ temp = x(i)
 do while (j>=1 .and. x(j)>temp)
   x(j+1) = x(j)
   j = j - 1
-end do
+enddo
 x(j+1) = temp
-end do
+enddo
 end subroutine insertion_sort
 !=======================================================
 
@@ -2886,7 +2886,7 @@ do i = 1,n
 if(x1(i)/=x2(i))then
   flag=.false.
   return
-endif
+end if
 enddo
 return
 end function is_equal

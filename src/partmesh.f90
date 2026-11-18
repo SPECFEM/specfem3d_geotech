@@ -30,7 +30,7 @@ ismpi=.false.
 if (command_argument_count() <= 0) then
   write(*,*)'ERROR: no input file!'
   stop
-endif
+end if
 
 ! get input file name
 call get_command_argument(1, inp_fname)
@@ -42,9 +42,9 @@ open(unit=11,file=trim(inp_fname),status='old', action='read',iostat=istat)
 if (istat /= 0)then
   write(*,*)'ERROR: input file "'//trim(inp_fname)//'" cannot be opened!'
   stop
-endif
+end if
 call read_input(inp_fname,errcode,errtag,.true.)
-if(errcode/=0)call error_stop(errtag)
+call control_error(errcode,errtag)
 
 npart=nproc
 !bc_stat=-1
@@ -71,7 +71,7 @@ out_phead=trim(out_path)//trim(file_head)//'_'
 !    tag=trim(line(1:ind-1))
 !    read(11,'(a)',iostat=ios)line ! This will read a line and proceed to next line
 !    tag=trim(tag)//trim(line)
-!  endif
+!  end if
 !  call first_token(tag,token)
 !
 !  ! read pre information
@@ -82,7 +82,7 @@ out_phead=trim(out_path)//trim(file_head)//'_'
 !    if(npart<=1)then
 !      write(*,*)'ERROR: number of processors should be greater than 1!'
 !      stop
-!    endif
+!    end if
 !    call seek_string('inp_path',strval,args,narg)
 !    if (.not. isblank(strval))inp_path=trim(strval)
 !    slen=len_trim(inp_path)
@@ -95,7 +95,7 @@ out_phead=trim(out_path)//trim(file_head)//'_'
 !
 !    preinfo_stat=0
 !    cycle
-!  endif
+!  end if
 !  ! read mesh information
 !  if (trim(token)=='mesh:')then
 !    call split_string(tag,',',args,narg)
@@ -107,7 +107,7 @@ out_phead=trim(out_path)//trim(file_head)//'_'
 !
 !    mesh_stat=0
 !    cycle
-!  endif
+!  end if
 !
 !  ! read bc information
 !  if (trim(token)=='bc:')then
@@ -118,7 +118,7 @@ out_phead=trim(out_path)//trim(file_head)//'_'
 !
 !    bc_stat=0
 !    cycle
-!  endif
+!  end if
 !
 !  ! read traction information
 !  if (trim(token)=='traction:')then
@@ -128,7 +128,7 @@ out_phead=trim(out_path)//trim(file_head)//'_'
 !    istraction=.true.
 !    !print*,trfile
 !    cycle
-!  endif
+!  end if
 !
 !  ! read material list
 !  if (trim(token)=='material:')then
@@ -138,7 +138,7 @@ out_phead=trim(out_path)//trim(file_head)//'_'
 !
 !    material_stat=0
 !    cycle
-!  endif
+!  end if
 !enddo ! do
 !close(11)
 !
@@ -146,31 +146,31 @@ out_phead=trim(out_path)//trim(file_head)//'_'
 !!if (mat_count/=nmatblk)then
 !!        write(*,'(/,a)')'ERROR: number of materials doesn''t match with total number!'
 !!  stop
-!!endif
+!!end if
 !
 !! check input status
 !if (preinfo_stat /= 0)then
 !  write(*,'(a)')'ERROR: cannot read pre information! make sure the line with "preinfo:" token is correct.'
 !  stop
-!endif
+!end if
 !
 !! check input status
 !if (mesh_stat /= 0)then
 !  write(*,'(a)')'ERROR: cannot read mesh information! make sure the line with "mesh:" token is correct.'
 !  stop
-!endif
+!end if
 !
 !! check output status
 !if (bc_stat /= 0)then
 !  write(*,'(a)')'ERROR: cannot read BC information! make sure the line with "bc:" token is correct.'
 !  stop
-!endif
+!end if
 !
 !! check material status
 !if (material_stat /= 0)then
 !  write(*,'(a)')'ERROR: cannot read material information! make sure the line with "material:" token is correct.'
 !  stop
-!endif
+!end if
 !
 !write(*,*)'complete!'
 write(*,*)'partition directory: ',trim(out_path)
@@ -221,7 +221,7 @@ do i=slen,1,-1
   if(fname(i:i)==".")then
     iext=i
     exit
-  endif
+  end if
 enddo
 
 ! find slash position
@@ -230,7 +230,7 @@ do i=iext,1,-1
   if(fname(i:i)=="/" .or. fname(i:i)=="\")then
     ipath=i
     exit
-  endif
+  end if
 enddo
 
 ! determine path, head, and extension
