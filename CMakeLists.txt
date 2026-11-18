@@ -6,7 +6,7 @@
 #   HNG, Apr,2017; HNG, Sep 06,2011;
 
 # required cmake version
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 # define project
 PROJECT(semgeotech Fortran C)

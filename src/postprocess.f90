@@ -8,15 +8,15 @@ contains
 
 !-------------------------------------------------------------------------------
 subroutine overburden_stress(nelmt,g_num,mat_id,z0,p0,k0,stress_elmt)
-use global,only:nenod,ngll,nst,g_coord,gam_blk
+use global,only:nenode,ngll,nst,g_coord,gam_blk
 implicit none
 integer,intent(in) :: nelmt
-integer,intent(in) :: g_num(nenod,nelmt),mat_id(nelmt)
+integer,intent(in) :: g_num(nenode,nelmt),mat_id(nelmt)
 real(kind=kreal),intent(in) :: z0,p0,k0
 real(kind=kreal),intent(inout) :: stress_elmt(nst,ngll,nelmt)
 
 real(kind=kreal) :: z,szz
-integer :: i,i_elmt,num(nenod)
+integer :: i,i_elmt,num(nenode)
 
 do i_elmt=1,nelmt
   num=g_num(:,i_elmt)
@@ -39,21 +39,21 @@ end subroutine overburden_stress
 ! this subroutine computes elastic stress from the known displacement
 subroutine elastic_stress(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,dshape_hex8,   &
 dlagrange_gll,x,stress_elmt)
-use global,only:ndim,nedof,nenod,ngnode,ngll,nst,g_coord,ym_blk,nu_blk
+use global,only:ndim,nedof,nenode,ngnode,ngll,nst,g_coord,ym_blk,nu_blk
 use elastic,only:compute_cmat
 use preprocess,only:compute_bmat
 use math_library,only:determinant,invert
 implicit none
 integer,intent(in) :: nelmt,neq,gnod(8)
-integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)
+integer,intent(in) :: g_num(nenode,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)
 real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnode,ngll),                   &
 dlagrange_gll(ndim,ngll,ngll),x(0:neq)
 real(kind=kreal),intent(inout) :: stress_elmt(nst,ngll,nelmt)
 
 real(kind=kreal) :: detjac
 real(kind=kreal) :: cmat(nst,nst),coord(ngnode,ndim),jac(ndim,ndim),            &
-deriv(ndim,nenod),bmat(nst,nedof),eld(nedof),eps(nst),sigma(nst)
-integer :: egdof(nedof),num(nenod)
+deriv(ndim,nenode),bmat(nst,nedof),eld(nedof),eps(nst),sigma(nst)
+integer :: egdof(nedof),num(nenode)
 integer :: i,i_elmt
 
 do i_elmt=1,nelmt
@@ -81,13 +81,13 @@ end subroutine elastic_stress
 
 subroutine elastic_stress_intact(nelmt_intact,neq,gnod,elmt_intact,g_num,      &
 gdof_elmt,mat_id,dshape_hex8,dlagrange_gll,x,stress_intact)
-use global,only:ndim,nedof,nenod,ngnode,ngll,nst,g_coord,ym_blk,nu_blk
+use global,only:ndim,nedof,nenode,ngnode,ngll,nst,g_coord,ym_blk,nu_blk
 use elastic,only:compute_cmat
 use preprocess,only:compute_bmat
 use math_library,only:determinant,invert
 implicit none
 integer,intent(in) :: nelmt_intact,neq,gnod(8)
-!integer,intent(in) :: elmt_intact(nelmt_intact),g_num(nenod,nelmt_intact), &
+!integer,intent(in) :: elmt_intact(nelmt_intact),g_num(nenode,nelmt_intact), &
 !gdof_elmt(nedof,nelmt_intact),mat_id(nelmt_intact)
 integer,intent(in) :: elmt_intact(:),g_num(:,:),gdof_elmt(:,:),mat_id(:)
 real(kind=kreal),intent(in) :: dshape_hex8(ndim,ngnode,ngll),                  &
@@ -96,8 +96,8 @@ real(kind=kreal),intent(inout) :: stress_intact(nst,ngll,nelmt_intact)
 
 real(kind=kreal) :: detjac
 real(kind=kreal) :: cmat(nst,nst),coord(ngnode,ndim),jac(ndim,ndim),           &
-deriv(ndim,nenod),bmat(nst,nedof),eld(nedof),eps(nst),sigma(nst)
-integer :: egdof(nedof),num(nenod)
+deriv(ndim,nenode),bmat(nst,nedof),eld(nedof),eps(nst),sigma(nst)
+integer :: egdof(nedof),num(nenode)
 integer :: i,i_elmt,ielmt
 
 do i_elmt=1,nelmt_intact

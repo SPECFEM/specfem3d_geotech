@@ -20,7 +20,7 @@ character(len=250),intent(out) :: errtag
 integer :: ngdof(ndim)
 integer :: i_face,i_gll,ios,iaxis
 integer :: ielmt,iface,nface,inode
-integer :: num(nenod)
+integer :: num(nenode)
 integer :: nfdof,nfgll
 integer,allocatable :: fgdof(:) ! face global degrees of freedom
 integer :: tractype,count_trac

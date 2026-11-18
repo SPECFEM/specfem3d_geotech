@@ -10,7 +10,7 @@ contains
 !   HNG, Jul 07,2011; HNG, Apr 09,2010
 ! TODO:
 !   - prompt warning or error for unknown argument/s
-subroutine read_input(inp_fname,errcode,errtag,ispartmesh)
+subroutine read_input(inp_fname,errcode,errtag,is_partmesh)
 use global
 use math_constants,only:inftol,zero,zerotol,ONE,HALF,TWO,THREE
 use string_library
@@ -20,7 +20,8 @@ integer :: i
 character(len=*),intent(in) :: inp_fname
 integer,intent(out) :: errcode
 character(len=250),intent(out) :: errtag
-logical,optional,intent(in) :: ispartmesh
+logical,optional,intent(in) :: is_partmesh
+
 character(len=250) :: line
 character(len=60) :: lineword(9)
 character(len=800) ::tag
@@ -29,6 +30,7 @@ character(len=1) :: tmp_char
 character(len=250),dimension(50) :: args
 !character(len=250) :: confile,idfile,matfile
 !character(len=250),dimension(3) :: coordfile
+logical :: ispartmesh
 integer :: id,ind,ios,narg,slen
 
 integer :: bc_stat,preinfo_stat,mesh_stat,material_stat,control_stat,         &
@@ -95,10 +97,13 @@ else
 end if
 out_path='./output/'
 
-if(present(ispartmesh))then
-  if(ispartmesh)then
-    part_path='./partition/'
-  end if
+ispartmesh=.false.
+if(present(is_partmesh))then
+  ispartmesh=is_partmesh
+end if
+
+if(ispartmesh)then
+  part_path='./partition/'
 end if
 
 eqkx=0.0_kreal
@@ -150,9 +155,9 @@ do
     end if
     preinfo_stat=-1;
     call split_string(tag,',',args,narg)
-    if(ismpi.or. (present(ispartmesh).and.ispartmesh))then
+    if(ismpi.or.ispartmesh)then
       nproc_inp=get_integer('nproc',args,narg);
-      if(present(ispartmesh).and.ispartmesh)nproc=nproc_inp
+      if(ispartmesh)nproc=nproc_inp
       if(nproc_inp/=nproc)then
         write(errtag,*)'ERROR: number of processors and images must be equal!'
         return
@@ -167,14 +172,14 @@ do
       ngllz=get_integer('ngllz',args,narg);
       ngll=ngllx*nglly*ngllz ! total GLL points
     end if
-    nenod=get_integer('nenod',args,narg);
+    nenode=get_integer('nenode',args,narg);
     ! number of elemental degrees of freedom
-    ! nedof=nndof*nenod
+    ! nedof=nndof*nenode
     if (method=='sem')then
       ! number of geometrical nodes
       ngnode=get_integer('ngnode',args,narg);
     elseif(method=='fem')then
-      ngnode=nenod ! default number of geometrical nodes
+      ngnode=nenode ! default number of geometrical nodes
     else
       write(errtag,*)'ERROR: wrong value for method!'
       return
@@ -183,7 +188,7 @@ do
     if (.not. isblank(strval))inp_path=trim(strval)
     slen=len_trim(inp_path)
     if(inp_path(slen:slen)/='/')inp_path=trim(inp_path)//'/'
-    if(ismpi .or. (present(ispartmesh).and.ispartmesh))then
+    if(ismpi.or.ispartmesh)then
       call seek_string('part_path',strval,args,narg)
       if (.not. isblank(strval))part_path=trim(strval)
       slen=len_trim(part_path)
@@ -492,7 +497,7 @@ if( ios /= 0 ) then
   return
 end if
 read(11,*)nelmt
-allocate(g_num(nenod,nelmt))
+allocate(g_num(nenode,nelmt))
 if(ismpi)then
   do i=1,nelmt
     read(11,*)ielmt,g_num(:,ielmt)
@@ -529,7 +534,7 @@ end if
 close(11)
 
 ! for partmesh library following information is read in the library itself
-if(.not.present(ispartmesh).or. .not.ispartmesh)then
+if(.not.ispartmesh)then
   ! read material lists
   if(ismatpart==0)then ! material file not partitioned
     fname=trim(mat_path)//trim(matfile)

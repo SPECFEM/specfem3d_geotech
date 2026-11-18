@@ -31,7 +31,7 @@ use solver_mpi
 use serial_library
 use math_library_serial
 use solver
-#end if
+#endif
 use visual
 use postprocess
 implicit none
@@ -100,8 +100,8 @@ call control_error(errcode,errtag)
 if(myrank==0)write(stdout,*)'complete!'
 !-------------------------------------
 
-allocate(num(nenod),evpt(nst,ngll,nelmt),coord(ngnode,ndim),jac(ndim,ndim),    &
-der(ndim,ngnode),deriv(ndim,nenod),bmat(nst,nedof),eld(nedof),bload(nedof),    &
+allocate(num(nenode),evpt(nst,ngll,nelmt),coord(ngnode,ndim),jac(ndim,ndim),    &
+der(ndim,ngnode),deriv(ndim,nenode),bmat(nst,nedof),eld(nedof),bload(nedof),    &
 eload(nedof),nodalu(nndof,nnode),egdof(nedof),stat=istat)
 if (istat/=0)then
   write(stdout,*)'ERROR: cannot allocate memory!'

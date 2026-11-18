@@ -61,9 +61,9 @@ integer,parameter :: ng=8 ! number of gauss points for FEM
 ! rank or ID of this processor (starts from 0), number of processors
 integer :: myrank,nproc
 
-integer :: nenod, nedof ! number of elemental nodes, number of elemental
-!degree of freedoms -> nedof=nndof*nenod
-integer :: ngnode ! number of geometrical nodes. usually, for FEM ngnod=nenod
+integer :: nenode, nedof ! number of elemental nodes, number of elemental
+!degree of freedoms -> nedof=nndof*nenode
+integer :: ngnode ! number of geometrical nodes. usually, for FEM ngnod=nenode
 integer :: nnode,nelmt
 integer,allocatable :: mat_id(:)
 
