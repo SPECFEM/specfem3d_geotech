@@ -74,13 +74,13 @@ end subroutine compute_bmat
 subroutine stiffness_bodyload(nelmt,neq,gnod,g_num,gdof_elmt,mat_id,gam,nu,ym, &
 dshape_hex8,dlagrange_gll,gll_weights,storekm,dprecon,extload,gravity,pseudoeq)
 use set_precision
-use global,only:ndim,nst,ngll,nedof,nenod,ngnode,g_coord,eqkx,eqky,eqkz,nmatblk
+use global,only:ndim,nst,ngll,nedof,nenode,ngnode,g_coord,eqkx,eqky,eqkz,nmatblk
 use math_library,only:determinant,invert
 use elastic,only:compute_cmat
 implicit none
 integer,intent(in) :: nelmt,neq,gnod(8)
 !nelmt (only intact elements)
-!integer,intent(in) :: g_num(nenod,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)
+!integer,intent(in) :: g_num(nenode,nelmt),gdof_elmt(nedof,nelmt),mat_id(nelmt)
 ! only intact elements
 integer,intent(in) :: g_num(:,:),gdof_elmt(:,:),mat_id(:)
 ! only intact elements
@@ -93,8 +93,8 @@ logical,intent(in),optional :: gravity,pseudoeq
 
 real(kind=kreal) :: detjac,zero=0.0_kreal
 real(kind=kreal) :: cmat(nst,nst),coord(ngnode,ndim),jac(ndim,ndim),           &
-deriv(ndim,nenod),bmat(nst,nedof),eld(nedof),eqload(nedof),km(nedof,nedof)
-integer :: egdof(nedof),num(nenod)
+deriv(ndim,nenode),bmat(nst,nedof),eld(nedof),eqload(nedof),km(nedof,nedof)
+integer :: egdof(nedof),num(nenode)
 integer :: i,idof,i_elmt,k
 
 if(present(extload).and.(.not.present(gravity) .or. .not.present(pseudoeq)))then

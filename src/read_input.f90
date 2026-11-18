@@ -167,14 +167,14 @@ do
       ngllz=get_integer('ngllz',args,narg);
       ngll=ngllx*nglly*ngllz ! total GLL points
     endif
-    nenod=get_integer('nenod',args,narg);
+    nenode=get_integer('nenode',args,narg);
     ! number of elemental degrees of freedom
-    ! nedof=nndof*nenod
+    ! nedof=nndof*nenode
     if (method=='sem')then
       ! number of geometrical nodes
       ngnode=get_integer('ngnode',args,narg);
     elseif(method=='fem')then
-      ngnode=nenod ! default number of geometrical nodes
+      ngnode=nenode ! default number of geometrical nodes
     else
       write(errtag,*)'ERROR: wrong value for method!'
       return
@@ -492,7 +492,7 @@ if( ios /= 0 ) then
   return
 endif
 read(11,*)nelmt
-allocate(g_num(nenod,nelmt))
+allocate(g_num(nenode,nelmt))
 if(ismpi)then
   do i=1,nelmt
     read(11,*)ielmt,g_num(:,ielmt)

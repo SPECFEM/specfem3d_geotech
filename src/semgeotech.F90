@@ -179,9 +179,9 @@ write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',       &
 min_nnode
 endif
 
-nenod=ngll !(ngllx*nglly*ngllz) ! number of elemental nodes (nodes per element)
+nenode=ngll !(ngllx*nglly*ngllz) ! number of elemental nodes (nodes per element)
 ! number of elemental degrees of freedom
-nedof=nndof*nenod
+nedof=nndof*nenode
 
 ngllxy=ngllx*nglly
 ngllyz=nglly*ngllz
