@@ -67,7 +67,7 @@ if(srf/=one)then
     psif(i_mat)=atan(tnpsi/srf)*rad2deg
     cohf(i_mat)=coh(i_mat)/srf
   enddo
-endif
+end if
 
 if(.not.phinu)return
 ! correction for phi-nu inequality sin(phi)>=1-2*nu
@@ -82,7 +82,7 @@ do i_mat=1,nmat
     if(beta_nuphi<one)beta_nuphi=one+zerotol
     nuf(i_mat)=half*(one-snphif/beta_nuphi)
     istat=1 ! material properties has changed
-  endif
+  end if
 enddo
 return
 end subroutine strength_reduction
@@ -159,7 +159,7 @@ nst=ubound(stress,1)
 if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!'
   stop
-endif
+end if
 
 sx=stress(1);  sy=stress(2);  sz=stress(3)
 txy=stress(4); tyz=stress(5); tzx=stress(6)

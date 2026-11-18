@@ -48,7 +48,7 @@ if(maxval(abs(u_g)).gt.zero)then
     kp(egdof)=kp(egdof)+matmul(km,u_g(egdof))
   enddo
   kp(0)=zero
-endif
+end if
 r=f-kp
 z=dprecon_g*r
 
@@ -73,7 +73,7 @@ pcg: do cg_iter=1,cg_maxiter
   if(abs(alpha)*maxvec(abs(p_g))/maxvec(abs(u_g)).le.cg_tol)then
     errcode=0
     return
-  endif
+  end if
   !if(myrank==0)print*,abs(alpha)*maxvec(abs(p_g))/maxvec(abs(u_g))
   r=r-alpha*kp
   z=dprecon_g*r

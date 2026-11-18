@@ -17,7 +17,7 @@ use math_library_mpi
 #else
 use serial_library
 use math_library_serial
-#endif
+#end if
 use visual
 ! main drive routines
 use slope
@@ -54,7 +54,7 @@ call get_command_argument(0, prog)
 if (command_argument_count() <= 0) then
   errtag='ERROR: no input file!'
   call control_error(errcode,errtag)
-endif
+end if
 
 call get_command_argument(1, arg1)
 if(trim(arg1)==('--help'))then
@@ -71,9 +71,9 @@ if(trim(arg1)==('--help'))then
     elseif(trim(prog).eq.'./bin/psemgeotech')then
       write(stdout,'(a)')'For a parallel run:'
       write(stdout,'(a)')'  mpirun -n [NP] p'//trim(prog)//' [input_file]'
-    endif
+    end if
     write(stdout,'(a)')'See doc/manual_SPECFEM3D_GEOTECH.pdf for details.'
-  endif
+  end if
   !call sync_process
   call close_process()
 elseif(trim(arg1)==('--version'))then
@@ -82,10 +82,10 @@ elseif(trim(arg1)==('--version'))then
     write(stdout,'(a)')'This is free software; see the source for copying '
     write(stdout,'(a)')'conditions.  There is NO warranty; not even for '
     write(stdout,'(a)')'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.'
-  endif
+  end if
   !call sync_process
   call close_process()
-endif
+end if
 
 ! starting timer
 call cpu_time(cpu_tstart)
@@ -101,9 +101,9 @@ inquire(file=trim(inp_fname),exist=isfile)
 if(.not.isfile)then
  if(myrank==0)then
    write(stdout,*)'Input file: "',trim(inp_fname),'" doesn''t exist!'
- endif
+ end if
  call close_process()
-endif
+end if
 ! read input data
 call read_input(inp_fname,errcode,errtag)
 call control_error(errcode,errtag)
@@ -116,12 +116,12 @@ write(stdout,*)'elements => total:',tot_nelmt,' max:',&
 max_nelmt,' min:',min_nelmt
 write(stdout,*)'nodes    => total:',tot_nnode,' max:',&
 max_nnode,' min:',min_nnode
-endif
+end if
 
 if (trim(method)/='sem')then
   write(errtag,'(a)')'ERROR: wrong input for sem3d!'
   call control_error(errcode,errtag)
-endif
+end if
 
 call parse_file(inp_fname,path,file_head,ext)
 
@@ -133,7 +133,7 @@ if(nexcav==0)then
 else
   nt=nexcav+1 ! include 0 excavation stage (i.e., initial)
   tstart=0
-endif
+end if
 twidth=ceiling(log10(real(nt)+1.))
 
 ! write original meshes
@@ -145,7 +145,7 @@ open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
   call control_error(errcode,errtag)
-endif
+end if
 
 write(11,'(a)')'FORMAT'
 write(11,'(a,/)')'type:  ensight gold'
@@ -177,7 +177,7 @@ write(stdout,*)'elements => total:',tot_nelmt,' max:',max_nelmt,' min:',       &
 min_nelmt
 write(stdout,*)'nodes    => total:',tot_nnode,' max:',max_nnode,' min:',       &
 min_nnode
-endif
+end if
 
 nenod=ngll !(ngllx*nglly*ngllz) ! number of elemental nodes (nodes per element)
 ! number of elemental degrees of freedom
@@ -204,7 +204,7 @@ open(unit=11,file=trim(case_file),status='replace',action='write',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(case_file)//'" cannot be opened!'
   call control_error(errcode,errtag)
-endif
+end if
 
 write(11,'(a)')'FORMAT'
 write(11,'(a,/)')'type:  ensight gold'
@@ -215,43 +215,43 @@ if(nexcav==0)then
 else
   write(11,'(a,i10,a,a/)')'model:    ',ts,' ',trim(file_head)//'_step'//      &
   wild_char(1:twidth)//trim(ptail)//'.geo'
-endif
+end if
 
 write(11,'(a)')'VARIABLE'
 
 if(savedata%disp)then
   write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','displacement',' ', &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.dis'
-endif
+end if
 if(savedata%stress)then
   write(11,'(a,i10,a,a,a,a,/)')'tensor symm per node: ',ts,' ','stress',' ',  &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.sig'
-endif
+end if
 if(savedata%psigma)then
   write(11,'(a,i10,a,a,a,a,/)')'vector per node: ',ts,' ','principal_stress',  &
   ' ',trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.psig'
-endif
+end if
 if(savedata%porep)then
    write(11,'(a,a,a,a,a,/)')'scalar per node: ',' ','pore_pressure',' ', &
    trim(file_head)//trim(ptail)//'.por'
-endif
+end if
 if(savedata%vmeps)then
   write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','plastic_strain',' ', &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.eps'
-endif
+end if
 if(savedata%scf)then
   write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ',                     &
   'stress_concentration_factor',' ',trim(file_head)//'_step'//                 &
   wild_char(1:twidth)//trim(ptail)//'.scf'
-endif
+end if
 if(savedata%maxtau)then
   write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','max_shear_stress',  &
   ' ',trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.mtau'
-endif
+end if
 if(savedata%nsigma)then
   write(11,'(a,i10,a,a,a,a,/)')'scalar per node: ',ts,' ','normal_stress',' ', &
   trim(file_head)//'_step'//wild_char(1:twidth)//trim(ptail)//'.nsig'
-endif
+end if
 write(11,'(a)')'TIME'
 write(11,'(a,i10)')'time set:',ts
 write(11,'(a,i10)')'number of steps:',nt
@@ -267,7 +267,7 @@ else
   do i=0,nt-1
     write(11,'(e12.5)',advance='yes')real(i)
   enddo
-endif
+end if
 close(11)
 
 ! Format string
@@ -283,7 +283,7 @@ if(nexcav==0)then
 else
   write(geo_file,fmt=format_str)trim(out_path)//trim(file_head)//'_step',0,    &
   trim(ptail)//'.geo'
-endif
+end if
 npart=1
 destag='unstructured meshes'
 call write_ensight_geocoord(geo_file,destag,npart,nnode,real(g_coord),funit)
@@ -336,7 +336,7 @@ if(nexcav==0)then
 else
   ! excavation
   call excavation3d(sum_file,format_str)
-endif
+end if
 !-------------------------------------------------------------------------------
 
 ! clean up hex element face
@@ -364,7 +364,7 @@ if(myrank==0)then
   write(stdout,'(a)')'--------------------------------------------'
   inquire(stdout,opened=isopen)
   if(isopen)close(stdout)
-endif
+end if
 
 call sync_process
 call close_process()

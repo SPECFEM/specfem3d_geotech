@@ -57,7 +57,7 @@ allocate(xstore(npoint),ystore(npoint),zstore(npoint),stat=istat)
 if(istat/=0)then
   write(errtag,'(a)')'ERROR: cannot allocate memory!'
   return
-endif
+end if
 !xigll=0.0d0
 ! get gll points and weights
 call zwgljd(xigll,wxgll,ngllx,jacobi_alpha,jacobi_beta)
@@ -129,7 +129,7 @@ do i_elmt=1,nelmt
         g_coord(1,inode)=xstore(ipoint)
         g_coord(2,inode)=ystore(ipoint)
         g_coord(3,inode)=zstore(ipoint)
-        !endif
+        !end if
       enddo
     enddo
   enddo
@@ -186,7 +186,7 @@ allocate(ind(npoint),ninseg(npoint),iwork(npoint),work(npoint),stat=ier)
 if( ier /= 0 )then
   write(*,*)'ERROR: error allocating arrays!'
   stop
-endif
+end if
 
 ! establish initial pointers
 do i=1,npoint
@@ -210,7 +210,7 @@ do j=1,ndim
       call rank(yp(ioff),ind,ninseg(iseg))
     else
       call rank(zp(ioff),ind,ninseg(iseg))
-    endif
+    end if
     call swap_all(iloc(ioff),xp(ioff),yp(ioff),zp(ioff),iwork,work,ind,      &
     ninseg(iseg))
     ioff=ioff+ninseg(iseg)
@@ -230,7 +230,7 @@ do j=1,ndim
     do i=2,npoint
       if(abs(zp(i)-zp(i-1)) > smalltol) ifseg(i)=.true.
     enddo
-  endif
+  end if
 
   ! count up number of different segments
   nseg=0
@@ -240,7 +240,7 @@ do j=1,ndim
       ninseg(nseg)=1
     else
       ninseg(nseg)=ninseg(nseg)+1
-    endif
+    end if
   enddo
 enddo ! j=1,ndim
 
@@ -295,24 +295,24 @@ ir=n
     if (ir == 1) then
        ind(1)=indx
        return
-    endif
- endif
+    end if
+ end if
  i=l
  j=l+l
 200    continue
  if (j <= ir) then
     if (j<ir) then
        if ( a(ind(j))<a(ind(j+1)) ) j=j+1
-    endif
+    end if
     if (q<a(ind(j))) then
        ind(i)=ind(j)
        i=j
        j=j+j
     else
        j=ir+1
-    endif
+    end if
  goto 200
- endif
+ end if
  ind(i)=indx
 goto 100
 
@@ -380,7 +380,7 @@ do i_point=1,npoint
   else
     ! use an existing point created previously
     ibool(i_point) = mask_ibool(copy_ibool_ori(i_point))
-  endif
+  end if
 enddo
 return
 end subroutine get_global_indirect_addressing

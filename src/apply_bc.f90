@@ -25,21 +25,21 @@ if(ismpi)then
   data_path=trim(part_path)
 else
   data_path=trim(inp_path)
-endif
+end if
 
 fname=trim(data_path)//trim(uxfile)//trim(ptail)
 open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
   return
-endif
+end if
 bcux: do
   read(11,*,iostat=ios)bctype,val
   if(ios/=0)exit
   if(val/=zero)then
     write(errtag,*)'ERROR: nonzero displacement BC not implemented!'
     return
-  endif
+  end if
   if(bctype==0)then ! point
     write(errtag,*)'ERROR: nodal displacement BC not implemented!'
     return
@@ -55,7 +55,7 @@ bcux: do
   else
     write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype
     return
-  endif
+  end if
 enddo bcux
 close(11)
 
@@ -64,7 +64,7 @@ open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
   return
-endif
+end if
 
 bcuy: do
   read(11,*,iostat=ios)bctype,val
@@ -72,7 +72,7 @@ bcuy: do
   if(val/=zero)then
     write(errtag,*)'ERROR: nonzero displacement BC not implemented!'
     return
-  endif
+  end if
   if(bctype==0)then ! point
     write(errtag,*)'ERROR: nodal displacement BC not implemented!'
     return
@@ -88,7 +88,7 @@ bcuy: do
   else
     write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype
     return
-  endif
+  end if
 enddo bcuy
 close(11)
 
@@ -97,7 +97,7 @@ open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
   return
-endif
+end if
 
 bcuz: do
   read(11,*,iostat=ios)bctype,val
@@ -105,7 +105,7 @@ bcuz: do
   if(val/=zero)then
     write(errtag,*)'ERROR: nonzero displacement BC not implemented!'
     return
-  endif
+  end if
   if(bctype==0)then ! point
     write(errtag,*)'ERROR: nodal displacement BC not implemented!'
     return
@@ -121,7 +121,7 @@ bcuz: do
   else
     write(errtag,*)'ERROR: undefined displacement BC type ux!',bctype
     return
-  endif
+  end if
 enddo bcuz
 close(11)
 
@@ -132,7 +132,7 @@ do j=1,ubound(gdof,2)
     if(gdof(i,j)/=0)then
       neq=neq+1
       gdof(i,j)=neq
-    endif
+    end if
   enddo
 enddo
 

@@ -37,12 +37,12 @@ do i_elmt=1,nelmt
   elseif(ismat(mat_id(i_elmt)))then
     ielmt_intact=ielmt_intact+1
     elmt_intact(ielmt_intact)=i_elmt
-  endif
+  end if
 enddo
 if(ielmt_void/=nelmt_void .or. ielmt_intact/=nelmt_intact)then
   write(*,'(/,a)')'ERROR: counted intact/void elements mismatch!'
   stop
-endif
+end if
 
 ! find intact and void nodes
 isnode_intact=.false.
@@ -75,12 +75,12 @@ do i_node=1,nnode
   else
     inode_void=inode_void+1
     node_void(inode_void)=i_node
-  endif
+  end if
 enddo
 if(inode_intact/=nnode_intact .and. inode_void/=nnode_void)then
   write(*,'(/,a)')'ERROR: counted intact/void nodes mismatch!'
   stop
-endif
+end if
 return
 end subroutine intact_void_node
 !===============================================================================
@@ -104,7 +104,7 @@ do j=1,nnode
     if(gdof(i,j)/=0)then
       neq=neq+1
       gdof(i,j)=neq
-    endif
+    end if
   enddo
 enddo
 return

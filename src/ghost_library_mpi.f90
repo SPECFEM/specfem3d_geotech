@@ -105,7 +105,7 @@ open(unit=11,file=trim(fname),status='old',action='read',iostat = istat)
 if( istat /= 0 ) then
   write(errtag,*)'ERROR: file "'//trim(fname)//'" cannot be opened!'
   call control_error(errcode,errtag)
-endif
+end if
 
 read(11,*) ! skip 1 line
 read(11,*)mrank ! master partition ID
@@ -113,7 +113,7 @@ read(11,*)mrank ! master partition ID
 if(mrank/=myrank)then
   write(errtag,*)'ERROR: wrong gpart file partition ',mrank,' !'
   call control_error(errcode,errtag)
-endif
+end if
 
 read(11,*) ! skip 1 line
 read(11,*)ngpart,maxngpart,maxngelmt; !print*,'ngpart',ngpart
@@ -166,7 +166,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
       write(errtag,*)'ERROR: wrong etype:',etype,' for ghost partition ',      &
       mrank,'!'
       call control_error(errcode,errtag)
-    endif
+    end if
 
     do k_g=kg0,kg1
       do j_g=jg0,jg1
@@ -177,7 +177,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
             ncount=ncount+1
             itmp_array(ncount)=inode
             switch_node(inode)=.true.
-          endif
+          end if
         enddo
       enddo
     enddo
@@ -211,7 +211,7 @@ do i_gpart=1,ngpart ! ghost partitions loop
   if(ncount/=new_ncount)then
     write(errtag,*)'ERROR: number of ghost nodes mismatched after sorting!'
     call control_error(errcode,errtag)
-  endif
+  end if
 
   ! find ghost gdof
   !gpart(i_gpart)%gdof=reshape(gdof(:,gpart(i_gpart)%node),(/ncount*nndof/))
@@ -423,7 +423,7 @@ do i_gpart=1,ngpart
         ! undo
         bcnodalu(i_dof,ignode)=zero
         gdof(i_dof,gpart(i_gpart)%node(i_node))=1
-      endif
+      end if
     enddo
   enddo
 enddo
@@ -530,7 +530,7 @@ do i_gpart=1,ngpart
       ! this node is dead
       garray(:,j)=zero !stop 'strange!'
       cycle
-    endif
+    end if
     do i=1,nndof
       if(gdof(i,ignode)/=0)then
         ! do not distribute if the load is already used in the partition
@@ -542,7 +542,7 @@ do i_gpart=1,ngpart
         !if(ngpart_node(ignode)==0)stop 'strange!'
         garray(i,j)=garray(i,j)/real(ngpart_node(ignode),kreal)
         tarray(i,ignode)=zero
-      endif
+      end if
     enddo
   enddo
   send_array(1:ncount,i_gpart)=reshape(garray(:,1:ngnode),(/ncount/))
@@ -657,7 +657,7 @@ do j=1,NDIM
       call heap_sort_multi(ninseg(iseg),z(ioff),x(ioff),y(ioff),ibool(ioff),   &
       iloc(ioff))
 
-    endif
+    end if
 
     ioff=ioff+ninseg(iseg)
   enddo
@@ -675,7 +675,7 @@ do j=1,NDIM
     do i=2,npoint
       if(dabs(z(i)-z(i-1)) > xtol) ifseg(i)=.true.
     enddo
-  endif
+  end if
 
   ! count up number of different segments
   nseg=0
@@ -685,7 +685,7 @@ do j=1,NDIM
       ninseg(nseg)=1
     else
       ninseg(nseg)=ninseg(nseg)+1
-    endif
+    end if
   enddo
 enddo
 
@@ -785,7 +785,7 @@ do while (j <= bottom)
   ! chooses larger value first in this section
   if (j < bottom) then
     if (dx(j) <= dx(j+1)) j = j + 1
-  endif
+  end if
 
   ! checks if section already smaller than initial value
   if (dx(j) < xtmp) exit
@@ -847,7 +847,7 @@ ir=n
     if (ir == 1) then
        ind(1)=indx
        return
-    endif
+    end if
  ENDIF
  i=l
  j=l+l

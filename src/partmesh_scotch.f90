@@ -111,7 +111,7 @@ ngnode = esize
 !if( istat /= 0 ) then
 !  print*,'could not open file:',trim(inp_fname)
 !  stop
-!endif
+!end if
 !read(98,*)nnode
 !allocate(g_coord(3,nnode))
 !read(98,*)g_coord(1,:)
@@ -126,7 +126,7 @@ ngnode = esize
 !if( istat /= 0 ) then
 !  print*,'could not open file:',trim(inp_fname)
 !  stop
-!endif
+!end if
 !read(98,*) nnode
 !read(98,*)g_coord(2,:)
 !close(98)
@@ -138,7 +138,7 @@ ngnode = esize
 !if( istat /= 0 ) then
 !  print*,'could not open file:',trim(inp_fname)
 !  stop
-!endif
+!end if
 !read(98,*) nnode
 !read(98,*)g_coord(3,:)
 !close(98)
@@ -156,7 +156,7 @@ ngnode = esize
 !if( istat /= 0 ) then
 !  print*,'could not open file:',trim(inp_fname)
 !  stop
-!endif
+!end if
 !
 !read(98,*) nelmt
 !allocate(g_num(esize,nelmt))
@@ -199,7 +199,7 @@ ngnode = esize
 !if( istat /= 0 ) then
 !  print*,'could not open file:',trim(inp_fname)
 !  stop
-!endif
+!end if
 !
 !read(98,*) nelmt
 !!print*,nelmt; stop
@@ -235,7 +235,7 @@ open(unit=98, file=trim(inp_fname),&
 if( istat /= 0 ) then
   print*,'could not open file:',trim(inp_fname)
   stop
-endif
+end if
 
 ! note: format #material_domain_id #material_id #...
 !read(98,*) ! skip line
@@ -261,7 +261,7 @@ if( count_def_mat > 0 .and. maxval(mat_id) > count_def_mat ) then
   print*,'  materials associated in materials_file:',maxval(mat_id)
   print*,'  bigger than defined materials in nummaterial_velocity_file:',count_def_mat
   stop 'error materials'
-endif
+end if
 allocate(mfile(count_def_mat))
 mfile=""
 allocate(mat_prop(6,count_def_mat),mat_domain(count_def_mat),type_blk(count_def_mat))
@@ -308,12 +308,12 @@ do imat=1,count_def_mat
     else
       print*,'ERROR: type_blk:',type_blk(num_mat),' is unsupported!'
       stop
-    endif
+    end if
 
     if(num_mat < 0 .or. num_mat > count_def_mat)then
       print*,"ERROR: Invalid nummaterial_velocity_file file."
       stop
-    endif
+    end if
 
 enddo
 ! reads in undefined material properties
@@ -348,13 +348,13 @@ close(98)
 !if( istat /= 0 ) then
 !  print*,'WARNING: could not open file:',trim(inp_fname)
 !  !stop
-!endif
+!end if
 !
 !if( istat /= 0 ) then
 !  nelmt2D_xmin = 0
 !else
 !  read(98,*) nelmt2D_xmin
-!endif
+!end if
 !allocate(ibelm_xmin(nelmt2D_xmin))
 !allocate(nodes_ibelm_xmin(nelmt2D_xmin))
 !do ispec2D = 1,nelmt2D_xmin
@@ -388,13 +388,13 @@ close(98)
 !if( istat /= 0 ) then
 !  print*,'WARNING: could not open file:',trim(inp_fname)
 !  !stop
-!endif
+!end if
 !
 !if( istat /= 0 ) then
 !  nelmt2D_xmax = 0
 !else
 !  read(98,*) nelmt2D_xmax
-!endif
+!end if
 !allocate(ibelm_xmax(nelmt2D_xmax))
 !allocate(nodes_ibelm_xmax(nelmt2D_xmax))
 !do ispec2D = 1,nelmt2D_xmax
@@ -411,13 +411,13 @@ close(98)
 !if( istat /= 0 ) then
 !  print*,'WARNING: could not open file:',trim(inp_fname)
 !  !stop
-!endif
+!end if
 !
 !if( istat /= 0 ) then
 !  nelmt2D_ymin = 0
 !else
 !  read(98,*) nelmt2D_ymin
-!endif
+!end if
 !allocate(ibelm_ymin(nelmt2D_ymin))
 !allocate(nodes_ibelm_ymin(nelmt2D_ymin))
 !do ispec2D = 1,nelmt2D_ymin
@@ -451,7 +451,7 @@ print *, '  min = ',minval(used_nodeselmt(:)),'max = ', maxval(used_nodeselmt(:)
 do inode = 1, nnode
   if (.not. mask_nodeselmt(inode)) then
     stop 'ERROR : nodes not used.'
-  endif
+  end if
 enddo
 nsize = maxval(used_nodeselmt(:)) ! max number of element sharing a node
 sup_neighbour = ngnode * nsize - (ngnode + (ngnode/2 - 1)*nfaces)
@@ -500,18 +500,18 @@ call acoustic_elastic_load(elmt_weight,nelmt,count_def_mat,mat_id,mat_domain)
 call scotchfstratinit (scotchstrat(1), istat)
   if (istat /= 0) then
     stop 'ERROR : MAIN : Cannot initialize strat'
-endif
+end if
 
 ! no need to use this for default strategy
 !call scotchfstratgraphmap (scotchstrat(1), trim(scotch_strategy), istat)
 !  if (istat /= 0) then
 !    stop 'ERROR : MAIN : Cannot build strat'
-!endif
+!end if
 
 call scotchfgraphinit (scotchgraph(1), istat)
 if (istat /= 0) then
     stop 'ERROR : MAIN : Cannot initialize graph'
-endif
+end if
 
 ! fills graph structure : see user manual (scotch_user5.1.pdf, page 72/73)
 ! arguments: #(1) graph_structure       #(2) baseval(either 0/1)    #(3) number_of_vertices
@@ -535,27 +535,27 @@ call scotchfgraphbuild (scotchgraph(1), 0, nelmt, &
 
 if (istat /= 0) then
     stop 'ERROR : MAIN : Cannot build graph'
-endif
+end if
 
 call scotchfgraphcheck (scotchgraph (1), istat)
 if (istat /= 0) then
     stop 'ERROR : MAIN : Invalid check'
-endif
+end if
 
 call scotchfgraphpart (scotchgraph (1), npart, scotchstrat(1),part(1),istat)
 if (istat /= 0) then
     stop 'ERROR : MAIN : Cannot part graph'
-endif
+end if
 
 call scotchfgraphexit (scotchgraph (1), istat)
 if (istat /= 0) then
     stop 'ERROR : MAIN : Cannot destroy graph'
-endif
+end if
 
 call scotchfstratexit (scotchstrat(1), istat)
 if (istat /= 0) then
     stop 'ERROR : MAIN : Cannot destroy strat'
-endif
+end if
 
 
 ! re-partitioning puts acoustic-elastic coupled elements into same partition
@@ -615,7 +615,7 @@ do ipart = 0, npart-1
   !if( istat /= 0 ) then
   ! print*,'error file open:',trim(out_fname)
   ! stop
-  !endif
+  !end if
 
   ! gets number of nodes
   call write_glob2loc_nodes_database(out_path,coordfile,ipart,         &
@@ -679,7 +679,7 @@ if(istraction)then
   write(*,'(a)',advance='no')'writing traction files...'
   call write_traction(out_path,inp_path,trfile,part+1,npart,glob2loc_elmt(0:nelmt-1)+1)
   write(*,'(a)')'complete!'
-endif
+end if
 deallocate(glob2loc_nodes_npart,glob2loc_nodes_parts,glob2loc_nodes)
 
 !deallocate(ibelm_xmin,nodes_ibelm_xmin)

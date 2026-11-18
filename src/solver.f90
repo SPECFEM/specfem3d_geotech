@@ -43,7 +43,7 @@ if(maxval(abs(u)).gt.zero)then
     kp(egdof)=kp(egdof)+matmul(km,u(egdof))
   enddo
   kp(0)=zero
-endif
+end if
 r=f-kp
 z=dprecon*r
 
@@ -65,7 +65,7 @@ pcg: do cg_iter=1,cg_maxiter
   if(abs(alpha)*maxval(abs(p))/maxval(abs(u)).le.cg_tol)then
     errcode=0
     return
-  endif
+  end if
 
   r=r-alpha*kp
   z=dprecon*r
