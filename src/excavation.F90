@@ -34,7 +34,7 @@ use solver_mpi
 use serial_library
 use math_library_serial
 use solver
-#end if
+#endif
 use visual
 use postprocess
 
@@ -478,7 +478,7 @@ excavation_stage: do i_excav=1,nexcav
 !      extload(igdof)=extload(igdof)+excavload(i,j)
 !    enddo
 !  enddo
-!#end if
+!#endif
   !extload=extload1
   extload(0)=zero; !extload1(0)=zero
 

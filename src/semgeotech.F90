@@ -17,7 +17,7 @@ use math_library_mpi
 #else
 use serial_library
 use math_library_serial
-#end if
+#endif
 use visual
 ! main drive routines
 use slope
