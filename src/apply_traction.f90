@@ -44,14 +44,14 @@ if(ismpi)then
   data_path=trim(part_path)
 else
   data_path=trim(inp_path)
-endif
+end if
 
 fname=trim(data_path)//trim(trfile)//trim(ptail)
 open(unit=11,file=trim(fname),status='old',action='read',iostat=ios)
 if (ios /= 0)then
   write(errtag,'(a)')'ERROR: input file "',trim(fname),'" cannot be opened!'
   return
-endif
+end if
 
 !read(11,*)ntrac
 trac_stat=.true. ! necessary for empty trfile
@@ -95,7 +95,7 @@ traction: do ! i_trac=1,ntrac
       else
         write(errtag,'(a)')'ERROR: wrong face ID for traction!'
         exit traction
-      endif
+      end if
       nfdof=nfgll*ndim
 
       num=g_num(:,ielmt)
@@ -156,7 +156,7 @@ traction: do ! i_trac=1,ntrac
       else
         write(errtag,'(a)')'ERROR: wrong face ID for traction!'
         exit traction
-      endif
+      end if
       nfdof=nfgll*ndim
 
       num=g_num(:,ielmt)
@@ -196,7 +196,7 @@ traction: do ! i_trac=1,ntrac
   else
     write(errtag,'(a)')'ERROR: traction type ',tractype,' not supported!'
     exit traction
-  endif
+  end if
 
 enddo traction
 close(11)
@@ -206,7 +206,7 @@ deallocate(gll_weights,lagrange_gll,dlagrange_gll)
 if(.not.trac_stat)then
   write(errtag,'(a)')'ERROR: all tractions cannot be read!'
   return
-endif
+end if
 
 errcode=0
 

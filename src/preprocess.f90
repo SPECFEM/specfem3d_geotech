@@ -22,7 +22,7 @@ nst=ubound(bmat,1)
 if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!',nst
   stop
-endif
+end if
 nod=ubound(deriv,2)
 
 !bmat=0.0_kreal
@@ -101,7 +101,7 @@ if(present(extload).and.(.not.present(gravity) .or. .not.present(pseudoeq)))then
   write(*,'(/,a)')'ERROR: both "gravity" and "pseudoeq" must be defined for &
   &"extload"!'
   stop
-endif
+end if
 
 ! compute stiffness matrices
 storekm=zero; dprecon=zero
@@ -140,7 +140,7 @@ do i_elmt=1,nelmt
     eqload(2:nedof:3)=eqky*eld(3:nedof:3)
     eqload(3:nedof:3)=eqkz*eld(3:nedof:3)
     extload(egdof)=extload(egdof)+eqload*gam(mat_id(i_elmt)) ! KN
-  endif
+  end if
 enddo ! i_elmt=1,nelmt
 !write(*,*)'complete!'
 dprecon(0)=zero

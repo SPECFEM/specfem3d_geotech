@@ -25,7 +25,7 @@ nst=ubound(cmat,1)
 if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!'
   stop
-endif
+end if
 
 cmat=zero
 
@@ -59,7 +59,7 @@ nst=ubound(cmat,1)
 if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!'
   stop
-endif
+end if
 
 cmat=zero
 v1=one-v
@@ -97,7 +97,7 @@ nst=ubound(cmat,1)
 if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!'
   stop
-endif
+end if
 
 twomuthird=2.0_kreal*shearmod/3.0_kreal
 
@@ -197,7 +197,7 @@ end subroutine compute_cmat_elastic
 !
 !    if(islast)then
 !      strain_elas(:,i,ielmt)=epst
-!    endif
+!    end if
 !
 !    eload=matmul(sigma,bmat)
 !    bload=bload+eload*detjac*gll_weights(i)
@@ -326,7 +326,7 @@ end subroutine compute_cmat_elastic
 !    !      print*,'e',eld
 !    !      !print*,'ev',evpt
 !    !     stop
-!    !    endif
+!    !    end if
 !  enddo ! i GLL
 !enddo ! i_elmt
 !!print*,size(stress_elmt)

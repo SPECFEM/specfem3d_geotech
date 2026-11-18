@@ -26,7 +26,7 @@ norm=sqrt(sum(nx**2))
 if(norm<=0.0_kreal)then
   write(*,*)'ERROR: undefined normal!'
   stop
-endif
+end if
 ! unit normal
 nx=nx/norm
 return
@@ -155,7 +155,7 @@ nst=ubound(stress,1)
 if(nst.ne.6)then
   write(*,*)'ERROR: wrong size of the stress tensor!'
   stop
-endif
+end if
 
 sq3=sqrt(three)
 s1=stress(1)

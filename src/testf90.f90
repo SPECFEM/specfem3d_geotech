@@ -16,7 +16,7 @@ call get_command_argument(0, prog)
 !----input and initialisation----
 if (command_argument_count() <= 0) then
   write(*,*)'ERROR: no input file!'
-endif
+end if
 
 allocate(derived(10))
 do i=1,10

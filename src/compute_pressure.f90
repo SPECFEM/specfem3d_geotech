@@ -52,7 +52,7 @@ submerged_node=.false.
 do i_elmt=1,nelmt
   if(water(mat_id(i_elmt)))then
     submerged_node(g_num(:,i_elmt))=.true.
-  endif
+  end if
 enddo
 
 fname=trim(data_path)//trim(wsfile)
@@ -60,7 +60,7 @@ open(unit=11,file=trim(fname),status='old',action='read',iostat=ios)
 if (ios /= 0)then
   write(errtag,'(a)')'ERROR: input file "'//trim(fname)//'" cannot be opened!'
   return
-endif
+end if
 read(11,*)nwsurf
 allocate(wsurf(nwsurf))
 do i_wsurf=1,nwsurf
@@ -82,7 +82,7 @@ do i_wsurf=1,nwsurf
     do i_face=1,wsurf(i_wsurf)%nface
       read(11,*)wsurf(i_wsurf)%ielmt(i_face),wsurf(i_wsurf)%iface(i_face)
     enddo
-  endif
+  end if
 enddo
 close(11)
 
@@ -104,9 +104,9 @@ nodal: do i_node=1,nnode
           ! compute pressure
           if(z>xp(3))then
             wpressure(i_node)=gamw*(z-xp(3))
-          endif
+          end if
           cycle nodal
-        endif
+        end if
       elseif(wsurf(i_wsurf)%stype==1)then
       ! sweep inclined line all across (z=linear)
         rdir=wsurf(i_wsurf)%rdir
@@ -123,9 +123,9 @@ nodal: do i_node=1,nnode
           ! compute pressure
           if(z>xp(3))then
             wpressure(i_node)=gamw*(z-xp(3))
-          endif
+          end if
           cycle nodal
-        endif
+        end if
       elseif(wsurf(i_wsurf)%stype==2)then ! meshed surface in the model
 
         do i_face=1,wsurf(i_wsurf)%nface
@@ -154,29 +154,29 @@ nodal: do i_node=1,nnode
               z=maxval(xf(3,:))
             else
               z=-(A*xp(1)+B*xp(2)+D)/C
-            endif
+            end if
             if (z>maxval(xf(3,:)) .or. z<minval(xf(3,:)))then
               write(errtag,'(a)')'ERROR: free surface cannot be determined!'
               return
-            endif
+            end if
 
             ! compute pressure
             if(z>xp(3))then
               wpressure(i_node)=gamw*(z-xp(3))
-            endif
+            end if
             cycle nodal
-          endif
+          end if
         enddo
-      endif
+      end if
     enddo
-  endif
+  end if
 enddo nodal
 ! deallocate variables
 if(wsurf_mesh)then
   do i=1,nwsurf
     deallocate(wsurf(i)%ielmt,wsurf(i)%iface)
   enddo
-endif
+end if
 deallocate(wsurf)
 
 errcode=0

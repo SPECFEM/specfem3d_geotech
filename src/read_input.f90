@@ -1,5 +1,5 @@
 module input
-
+implicit none
 contains
 
 !-------------------------------------------------------------------------------
@@ -92,14 +92,14 @@ if(ismpi)then
 else
   inp_path='./input/'
   mat_path='./input/'
-endif
+end if
 out_path='./output/'
 
 if(present(ispartmesh))then
   if(ispartmesh)then
     part_path='./partition/'
-  endif
-endif
+  end if
+end if
 
 eqkx=0.0_kreal
 eqky=0.0_kreal
@@ -119,7 +119,7 @@ if (ios /= 0)then
   write(errtag,'(a)')'ERROR: input file "'//trim(inp_fname)//                 &
   '" cannot be opened!'
   return
-endif
+end if
 do
   ! This will read a line and proceed to next line
   read(11,'(a)',iostat=ios)line
@@ -138,7 +138,7 @@ do
     if(ios /= 0)then
       write(errtag,'(a)')'ERROR: line continuation incomplete!'
       return
-    endif
+    end if
   enddo
   call first_token(tag,token)
 
@@ -147,7 +147,7 @@ do
     if(preinfo_stat==1)then
       write(errtag,*)'ERROR: copy of line type preinfo: not permitted!'
       return
-    endif
+    end if
     preinfo_stat=-1;
     call split_string(tag,',',args,narg)
     if(ismpi.or. (present(ispartmesh).and.ispartmesh))then
@@ -156,8 +156,8 @@ do
       if(nproc_inp/=nproc)then
         write(errtag,*)'ERROR: number of processors and images must be equal!'
         return
-      endif
-    endif
+      end if
+    end if
     call seek_string('method',strval,args,narg)
     if (.not. isblank(strval))method=trim(strval)
     !method=get_string('method',args,narg)
@@ -166,8 +166,8 @@ do
       nglly=get_integer('nglly',args,narg);
       ngllz=get_integer('ngllz',args,narg);
       ngll=ngllx*nglly*ngllz ! total GLL points
-    endif
-    nenode=get_integer('nenode',args,narg);
+    end if
+    nenod=get_integer('nenode',args,narg);
     ! number of elemental degrees of freedom
     ! nedof=nndof*nenode
     if (method=='sem')then
@@ -178,7 +178,7 @@ do
     else
       write(errtag,*)'ERROR: wrong value for method!'
       return
-    endif
+    end if
     call seek_string('inp_path',strval,args,narg)
     if (.not. isblank(strval))inp_path=trim(strval)
     slen=len_trim(inp_path)
@@ -188,7 +188,7 @@ do
       if (.not. isblank(strval))part_path=trim(strval)
       slen=len_trim(part_path)
       if(part_path(slen:slen)/='/')part_path=trim(part_path)//'/'
-    endif
+    end if
     call seek_string('out_path',strval,args,narg)
     if (.not. isblank(strval))out_path=trim(strval)
     slen=len_trim(out_path)
@@ -196,13 +196,13 @@ do
 
     preinfo_stat=1
     cycle
-  endif
+  end if
   ! read mesh information
   if (trim(token)=='mesh:')then
     if(mesh_stat==1)then
       write(errtag,*)'ERROR: copy of line type mesh: not permitted!'
       return
-    endif
+    end if
     call split_string(tag,',',args,narg)
     coordfile(1)=get_string('xfile',args,narg)
     coordfile(2)=get_string('yfile',args,narg)
@@ -213,14 +213,14 @@ do
 
     mesh_stat=1
     cycle
-  endif
+  end if
 
   ! read bc information
   if (trim(token)=='bc:')then
     if(bc_stat==1)then
       write(errtag,*)'ERROR: copy of line type bc: not permitted!'
       return
-    endif
+    end if
     call split_string(tag,',',args,narg)
     uxfile=get_string('uxfile',args,narg)
     uyfile=get_string('uyfile',args,narg)
@@ -228,14 +228,14 @@ do
 
     bc_stat=1
     cycle
-  endif
+  end if
 
   ! read initial stress information
   if (trim(token)=='stress0:')then
     if(stress0_stat==1)then
       write(errtag,*)'ERROR: copy of line type stress0: not permitted!'
       return
-    endif
+    end if
     call split_string(tag,',',args,narg)
     isstress0=.true.
     call seek_integer('type',ival,args,narg,istat)
@@ -243,34 +243,34 @@ do
     if(s0_type==1)then
       z_datum=get_real('z0',args,narg)
       s0_datum=get_real('s0',args,narg)
-    endif
+    end if
     call seek_real('k0',rval,args,narg,istat)
     if(istat==0)epk0=rval
     call seek_integer('usek0',ival,args,narg,istat)
     if(istat==0)usek0=.true.
     stress0_stat=1
     cycle
-  endif
+  end if
 
   ! read traction information
   if (trim(token)=='traction:')then
     if(traction_stat==1)then
       write(errtag,*)'ERROR: copy of line type traction: not permitted!'
       return
-    endif
+    end if
     call split_string(tag,',',args,narg)
     trfile=get_string('trfile',args,narg)
     traction_stat=1
     istraction=.true.
     cycle
-  endif
+  end if
 
   ! read material list
   if (trim(token)=='material:')then
     if(material_stat==1)then
       write(errtag,*)'ERROR: copy of line type material: not permitted!'
       return
-    endif
+    end if
     material_stat=-1
     call split_string(tag,',',args,narg)
     call seek_integer('ispart',ival,args,narg,istat)
@@ -287,14 +287,14 @@ do
 
     material_stat=1
     cycle
-  endif
+  end if
 
   ! read earthquake loading information
   if (trim(token)=='eqload:')then
     if(eqload_stat==1)then
       write(errtag,*)'ERROR: copy of line type eqload: not permitted!'
       return
-    endif
+    end if
     call split_string(tag,',',args,narg)
     eqkx=get_real('eqkx',args,narg)
     eqky=get_real('eqky',args,narg)
@@ -302,27 +302,27 @@ do
     eqload_stat=1
     iseqload=.true.
     cycle
-  endif
+  end if
 
   ! read water surface information
   if (trim(token)=='water:')then
     if(water_stat==1)then
       write(errtag,*)'ERROR: copy of line type water: not permitted!'
       return
-    endif
+    end if
     call split_string(tag,',',args,narg)
     wsfile=get_string('wsfile',args,narg)
     water_stat=1
     iswater=.true.
     cycle
-  endif
+  end if
 
   ! read control information
   if (trim(token)=='control:')then
     if(control_stat==1)then
       write(errtag,*)'ERROR: copy of line type control: not permitted!'
       return
-    endif
+    end if
     call split_string(tag,',',args,narg)
     call seek_real('cg_tol',rval,args,narg,istat)
     if(istat==0)cg_tol=rval
@@ -341,13 +341,13 @@ do
       write(errtag,'(a)')'ERROR: argument "srf" not found or insufficient list&
       & for "srf"!'
       return
-    endif
+    end if
     if(istat==0)srf=rvect
     deallocate(rvect)
     if(minval(srf)<=zero)then
       write(errtag,'(a)')'ERROR: "srf" must be positive!'
       return
-    endif
+    end if
     ! excavation
     call seek_integer('nexcav',ival,args,narg,istat)
     if(istat==0)nexcav=ival
@@ -361,12 +361,12 @@ do
       nexcavid_all=sum(nexcavid)
       allocate(excavid(nexcavid_all))
       excavid=get_integer_vect('excavid',nexcavid_all,args,narg)
-    endif
+    end if
     if(nsrf>1 .and. nexcav>1)then
       write(errtag,'(a)')'ERROR: cannot run slope stabiliy and excavation&
       & simultaneously!'
       return
-    endif
+    end if
     !---------------------------
 
     call seek_integer('ninc',ival,args,narg,istat)
@@ -375,14 +375,14 @@ do
     if(istat==0.and.ival==1)phinu=.true.
     control_stat=1
     cycle
-  endif
+  end if
 
   ! read save options
   if (trim(token)=='save:')then
     if(save_stat==1)then
       write(errtag,*)'ERROR: copy of line type save: not permitted!'
       return
-    endif
+    end if
     save_stat=-1
     call split_string(tag,',',args,narg)
     call seek_integer('disp',issave,args,narg,istat)
@@ -402,7 +402,7 @@ do
 
     save_stat=1
     cycle
-  endif
+  end if
 
   write(errtag,'(a)')'ERROR: invalid line type: "'//trim(token)//'"!'
   return
@@ -416,35 +416,35 @@ if (preinfo_stat /= 1)then
   write(errtag,'(a)')'ERROR: cannot read pre information! make sure the line&
   & with "preinfo:" token is correct.'
   return
-endif
+end if
 
 ! check input status
 if (mesh_stat /= 1)then
   write(errtag,'(a)')'ERROR: cannot read mesh information! make sure the line&
   & with "mesh:" token is correct.'
   return
-endif
+end if
 
 ! check output status
 if (bc_stat /= 1)then
   write(errtag,'(a)')'ERROR: cannot read BC information! make sure the line&
   & with "bc:" token is correct.'
   return
-endif
+end if
 
 ! check material status
 if (material_stat /= 1)then
   write(errtag,'(a)')'ERROR: cannot read material information! make sure the&
   & line with "material:" token is correct.'
   return
-endif
+end if
 
 ! check control status
 if (control_stat /= 1)then
   write(errtag,'(a)')'ERROR: cannot read control information! make sure the&
   & line with "control:" token is correct.'
   return
-endif
+end if
 if(myrank==0)write(*,*)'complete!'
 !-------------------------------------------------------------------------------
 
@@ -453,7 +453,7 @@ if(ismpi)then
   data_path=trim(part_path)
 else
   data_path=trim(inp_path)
-endif
+end if
 
 if(myrank==0)write(*,'(a)',advance='no')'reading mesh & material properties...'
 ! read coordinates information
@@ -463,16 +463,16 @@ do i=1,ndim
   if( ios /= 0 ) then
     write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
     return
-  endif
+  end if
   read(11,*)tmp_nnode
   if(i==1)then
     nnode=tmp_nnode
     allocate(g_coord(ndim,nnode))
-  endif
+  end if
   if(tmp_nnode/=nnode)then
     write(errtag,'(a)')'ERROR: total number of nodes mismatch!'
     return
-  endif
+  end if
   if(ismpi)then
     do i_node=1,nnode
       read(11,*)inode,g_coord(i,inode)
@@ -481,7 +481,7 @@ do i=1,ndim
     do i_node=1,nnode
       read(11,*)g_coord(i,i_node)
     enddo
-  endif
+  end if
 enddo
 close(11)
 ! read connectivity
@@ -490,7 +490,7 @@ open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
   return
-endif
+end if
 read(11,*)nelmt
 allocate(g_num(nenode,nelmt))
 if(ismpi)then
@@ -501,7 +501,7 @@ else
   do i=1,nelmt
     read(11,*)g_num(:,i)
   enddo
-endif
+end if
 close(11)
 
 ! read material id
@@ -510,12 +510,12 @@ open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
 if( ios /= 0 ) then
   write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
   return
-endif
+end if
 read(11,*)tmp_nelmt
 if(tmp_nelmt/=nelmt)then
   write(errtag,'(a)')'ERROR: total number of elements mismatch!'
   return
-endif
+end if
 allocate(mat_id(nelmt))
 if(ismpi)then
   do i=1,nelmt
@@ -525,7 +525,7 @@ else
   do i=1,nelmt
     read(11,*)mat_id(i)
   enddo
-endif
+end if
 close(11)
 
 ! for partmesh library following information is read in the library itself
@@ -538,12 +538,12 @@ if(.not.present(ispartmesh).or. .not.ispartmesh)then
   else
     write(errtag,'(a)')'ERROR: illegal ismatpart value!'
     return
-  endif
+  end if
   open(unit=11,file=trim(fname),status='old',action='read',iostat = ios)
   if( ios /= 0 ) then
     write(errtag,'(a)')'ERROR: file "'//trim(fname)//'" cannot be opened!'
     return
-  endif
+  end if
   read(11,*)
   read(11,*)nmatblk
   allocate(mat_domain(nmatblk),type_blk(nmatblk),gam_blk(nmatblk),             &
@@ -590,28 +590,28 @@ if(.not.present(ispartmesh).or. .not.ispartmesh)then
       write(errtag,'(a,1x,i2,1x,a)')'ERROR: type_blk:',type_blk(i),' is &
       &unsupported!'
       return
-    endif
+    end if
 
   enddo
   if(minval(mat_id)<1 .or. maxval(mat_id)>nmatblk)then
     write(errtag,'(a)')'ERROR: material IDs must be consistent with the defined&
     & material regions!'
     return
-  endif
+  end if
   water=.false.
   if(iswater)then
     read(11,*,iostat=ios)nwmat
     if( ios /= 0 ) then
       write(errtag,'(a)')'ERROR: water IDs cannot be read from material list!'
       return
-    endif
+    end if
     do i=1,nwmat
       read(11,*)id
       water(id)=.true.
     enddo
-  endif
+  end if
   rho_blk=gam_blk/9.81_kreal ! Kg/m3
-endif
+end if
 ! read bc
 errcode=0
 if(myrank==0)write(*,*)'complete!'

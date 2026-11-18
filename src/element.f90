@@ -74,32 +74,32 @@ do k=1,ngllz
         ! face 4
         i4=i4+1
         hexface(4)%node(i4)=inode
-      endif
+      end if
       if (i==ngllx)then
         ! face 2
         i2=i2+1
         hexface(2)%node(i2)=inode
-      endif
+      end if
       if (j==1)then
         ! face 1
         i1=i1+1
         hexface(1)%node(i1)=inode
-      endif
+      end if
       if (j==nglly)then
         ! face 3
         i3=i3+1
         hexface(3)%node(i3)=inode
-      endif
+      end if
       if (k==1)then
         ! face 5
         i5=i5+1
         hexface(5)%node(i5)=inode
-      endif
+      end if
       if (k==ngllz)then
         ! face 6
         i6=i6+1
         hexface(6)%node(i6)=inode
-      endif
+      end if
     enddo
   enddo
 enddo
@@ -124,7 +124,7 @@ do i_face=1,6 ! there are 6 faces in a hexahedron
   else
     write(errtag,'(a)')'ERROR: wrong face ID for traction!'
     return
-  endif
+  end if
 enddo
 
 ! orientation of the normals
